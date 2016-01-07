@@ -1,4 +1,4 @@
-# FuhSen-reactive
+# FuhSen-reactive [![Build Status](https://travis-ci.org/LiDaKrA/FuhSen-reactive.svg?branch=master)](https://travis-ci.org/LiDaKrA/FuhSen-reactive)
 ================
 
 * Copyright (C) 2015-2016 EIS Uni-Bonn
