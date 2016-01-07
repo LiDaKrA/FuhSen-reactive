@@ -1,7 +1,9 @@
 language: scala
+scala: 
+  - 2.11.2
 env:
   - PLAY_VERSION=2.4.6 # Latest
 before_script: 
-  - wget http://download.playframework.org/releases/play-${PLAY_VERSION}.zip
+  - wget https://downloads.typesafe.com/typesafe-activator/1.3.7/typesafe-activator-1.3.7-minimal.zip
   - unzip -q play-${PLAY_VERSION}.zip 
 script: play-${PLAY_VERSION}/play test
