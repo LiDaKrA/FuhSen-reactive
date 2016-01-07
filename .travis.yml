@@ -1,6 +1,6 @@
 language: scala
 env:
-  - PLAY_VERSION=2.1-RC2 # Latest 2.1.x
+  - PLAY_VERSION=2.4.6 # Latest
 before_script: 
   - wget http://download.playframework.org/releases/play-${PLAY_VERSION}.zip
   - unzip -q play-${PLAY_VERSION}.zip 
