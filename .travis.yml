@@ -1,0 +1,9 @@
+language: scala
+scala: "-2.11.6"
+deploy:
+  provider: releases
+  api_key:
+    secure: RXHBtch9S8JaqPhSt37pdhv1IZ1RqA8X9iEOXUrXzYkhC4iVij4NUSLZ8nGVaROo0UgkY9mxhO6bzFiQDhv5N6Z+4F5MycCjpFJ/gx4rBQYC/diGY+O1gqMcpwoIXSZA5oqXm2sWz/QuJXpO6qajqAYDlWnEzMVwOkENOV0GaVMAM0ShM2SjYnagPKFR6ZskpcT6D7lIZn4yX0BjckZgTLlX9/PcO8X5CoIFLqfAM9LMGRi/ktPjXH0eMnG0FIrARVdTIXTGZZrQA1gMJ81Cp9LvR2BEakTKbAEZsZgcyDmBYgH8EHXtIju9qa/VpKitLe8EB60n25ljkuR8VW0BZsebme92t9/rgo9xx3hmLCS/WwNC5ZNpo+m8MWhFxVb8W/ZDYJ8mmBysoAOtVzyPaDBd731dU36KJeqjNQSFgTjE1eu+AW9f4IwsIQsaoYLNXmtVf3WsfRHrLNogzghEmCTjEnMY5/oQ7qgKknR0AkDKcKpPHpQqYwAT6IR9GF+m9AnY9pw8qkomJxuX8kdeWK09l6IVQvJabw1ktL3sdv4wG52TI4nkF4U77g3D+w/9KzbAk5ZURC/uXvSqR31yizDvmui9NKby0S1CqnAp3BCwlhegCCSMU+B7z+GvJXhaXqwK6GjditAeDEKC1Amhn5uUB/lYhM46s8I6QaDoBPU=
+  file: ''
+  on:
+    repo: LiDaKrA/FuhSen-reactive
