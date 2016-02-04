@@ -17,10 +17,6 @@ package controllers.de.fuhsen.engine;
 
 import play.*;
 import play.mvc.*;
-import views.html.*;
-
-//FuhSen Engine
-//import de.fuhsen.engine.*;
 
 //Json
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,9 +30,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.query.*;
 
-import play.mvc.*;
 import play.libs.ws.*;
-import play.libs.F.Function;
 import play.libs.F.Promise;
 
 import java.io.ByteArrayInputStream;

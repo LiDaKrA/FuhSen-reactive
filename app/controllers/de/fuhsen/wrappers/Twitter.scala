@@ -34,7 +34,7 @@ class Twitter @Inject() (ws: WSClient) extends Controller {
     val KEY = ConsumerKey(ConfigFactory.load.getString("twitter.consumer.key"), ConfigFactory.load.getString("twitter.consumer.secret"))
     //TODO Read access token key from config file. The problem is this value is returned as Object not String from the configuration file
     //val accessToken = ConfigFactory.load.getValue("twitter.access.token")
-    val accessToken = "399064019-7i86JOLjsUfNRQQvn4siajRibVUpSS1jE9FXJ4Fh"
+    val accessToken = ""
     val TOKEN: RequestToken = new RequestToken(accessToken, ConfigFactory.load.getString("twitter.access.token.secret"))
 
     var query_string: String = query
