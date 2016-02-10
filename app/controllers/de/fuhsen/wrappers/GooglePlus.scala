@@ -13,37 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package controllers.de.fuhsen.wrappers
 
 import javax.inject.Inject
+
 import com.typesafe.config.ConfigFactory
 import play.Logger
-import play.api.mvc._
-import play.api.libs.ws._
+import play.api.mvc.{Action, Controller}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.concurrent.Future
+import play.api.libs.ws._
 
 import scala.xml.Elem
 
-class GoogleKnowledgeGraph @Inject() (ws: WSClient) extends Controller {
+class GooglePlus @Inject() (ws: WSClient) extends Controller {
 
   def search (query: String) = Action.async {
 
-    Logger.info("Starting Google Knowledge Graph Search with query: " + query)
+    Logger.info("Starting Google Plus Search with query: " + query)
 
-    val KEY = ConfigFactory.load.getString("gkb.app.key")
-
-    val url = ConfigFactory.load.getString("gkb.url")
-    val apiRequest: WSRequest = ws.url(url)
-      .withQueryString("query" -> query)
-      .withQueryString("key" -> KEY)
-      .withQueryString("types" -> "Person")
+    //Preparing Google+ API call
+    val KEY = ConfigFactory.load.getString("gplus.app.key")
+    val URL = ConfigFactory.load.getString("gplus.user.url")
+    val apiRequest: WSRequest = ws.url(URL)
+                                  .withQueryString("query" -> query)
+                                  .withQueryString("key" -> KEY)
 
     //Preparing Transformation task call
-    val TRANSFORMTASKURL = ConfigFactory.load.getString("silk.server.url") + ConfigFactory.load.getString("gkb.transform.url")
+    val TRANSFORMTASKURL = ConfigFactory.load.getString("silk.server.url") + ConfigFactory.load.getString("gplus.transform.url")
     val transformRequest: WSRequest = ws.url(TRANSFORMTASKURL)
-      .withHeaders("Content-Type" -> "application/xml")
-      .withHeaders("Accept" -> "application/ld+json")
+                                        .withHeaders("Content-Type" -> "application/xml")
+                                        .withHeaders("Accept" -> "application/ld+json")
 
     for {
       responseApi <- apiRequest.get()
@@ -53,7 +54,7 @@ class GoogleKnowledgeGraph @Inject() (ws: WSClient) extends Controller {
       Ok(responseTransformation.body)
     }
 
-    /*request.get().map { response =>
+    /*apiRequest.get().map { response =>
       Ok(response.body)
     }*/
 
@@ -62,15 +63,15 @@ class GoogleKnowledgeGraph @Inject() (ws: WSClient) extends Controller {
   private def dataTranformationBody (cotent: String) : Elem = {
     val data = <Transform>
       <DataSources>
-        <Dataset id="GoogleKB_Entities">
+        <Dataset id="TwitterPerson">
           <DatasetPlugin type="json">
-            <Param name="file" value="gkb"/>
-            <Param name="basePath" value="itemListElement"/>
-            <Param name="uriPattern" value="http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gkb/{id}"/>
+            <Param name="file" value="gplus"/>
+            <Param name="basePath" value="items"/>
+            <Param name="uriPattern" value="http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gplus/{id}"/>
           </DatasetPlugin>
         </Dataset>
       </DataSources>
-      <resource name="gkb">{cotent}
+      <resource name="gplus">{cotent}
       </resource>
     </Transform>
     data

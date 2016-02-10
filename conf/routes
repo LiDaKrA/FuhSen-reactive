@@ -11,6 +11,7 @@ GET     /engine/v1/search           controllers.de.fuhsen.engine.SearchEngine.in
 # Wrappers API routes
 # Social Networks
 GET     /ldw/v1/twitter/search      controllers.de.fuhsen.wrappers.Twitter.search(query: String)
+GET     /ldw/v1/gplus/search      controllers.de.fuhsen.wrappers.GooglePlus.search(query: String)
 
 # Knowledge bases
 GET     /ldw/v1/gkb/search       controllers.de.fuhsen.wrappers.GoogleKnowledgeGraph.search(query: String)
