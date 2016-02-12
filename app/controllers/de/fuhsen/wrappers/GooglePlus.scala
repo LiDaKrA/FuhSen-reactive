@@ -60,7 +60,7 @@ class GooglePlus @Inject() (ws: WSClient) extends Controller {
 
   }
 
-  private def dataTranformationBody (cotent: String) : Elem = {
+  private def dataTranformationBody (content: String) : Elem = {
     val data = <Transform>
       <DataSources>
         <Dataset id="TwitterPerson">
@@ -71,7 +71,7 @@ class GooglePlus @Inject() (ws: WSClient) extends Controller {
           </DatasetPlugin>
         </Dataset>
       </DataSources>
-      <resource name="gplus">{cotent}
+      <resource name="gplus">{content}
       </resource>
     </Transform>
     data

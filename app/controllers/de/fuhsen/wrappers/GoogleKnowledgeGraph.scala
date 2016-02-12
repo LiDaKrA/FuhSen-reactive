@@ -59,7 +59,7 @@ class GoogleKnowledgeGraph @Inject() (ws: WSClient) extends Controller {
 
   }
 
-  private def dataTranformationBody (cotent: String) : Elem = {
+  private def dataTranformationBody (content: String) : Elem = {
     val data = <Transform>
       <DataSources>
         <Dataset id="GoogleKB_Entities">
@@ -70,7 +70,7 @@ class GoogleKnowledgeGraph @Inject() (ws: WSClient) extends Controller {
           </DatasetPlugin>
         </Dataset>
       </DataSources>
-      <resource name="gkb">{cotent}
+      <resource name="gkb">{content}
       </resource>
     </Transform>
     data
