@@ -12,6 +12,7 @@ Reactive version of the Federated RDF-Based Hybrid Search Engine.
 
 ###Software requirements
 FuhSen reactive project depends on the following software
+
 * JDK 1.8
 * Play Web Framework 2.4.6 "Damiya" and Activator 1.3.7
 

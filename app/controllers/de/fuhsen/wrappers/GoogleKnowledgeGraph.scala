@@ -40,14 +40,14 @@ class GoogleKnowledgeGraph @Inject() (ws: WSClient) extends Controller {
       .withQueryString("types" -> "Person")
 
     //Preparing Transformation task call
-    val TRANSFORMTASKURL = ConfigFactory.load.getString("silk.server.url") + ConfigFactory.load.getString("gkb.transform.url")
-    val transformRequest: WSRequest = ws.url(TRANSFORMTASKURL)
+    val transformTaskUrl = ConfigFactory.load.getString("silk.server.url") + ConfigFactory.load.getString("gkb.transform.url")
+    val transformRequest: WSRequest = ws.url(transformTaskUrl)
       .withHeaders("Content-Type" -> "application/xml")
       .withHeaders("Accept" -> "application/ld+json")
 
     for {
       responseApi <- apiRequest.get()
-      data = dataTranformationBody(responseApi.body)
+      data = dataTransformationBody(responseApi.body)
       responseTransformation <- transformRequest.post(data)
     } yield {
       Ok(responseTransformation.body)
@@ -59,7 +59,7 @@ class GoogleKnowledgeGraph @Inject() (ws: WSClient) extends Controller {
 
   }
 
-  private def dataTranformationBody (content: String) : Elem = {
+  private def dataTransformationBody (content: String) : Elem = {
     val data = <Transform>
       <DataSources>
         <Dataset id="GoogleKB_Entities">
