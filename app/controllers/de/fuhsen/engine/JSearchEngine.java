@@ -36,7 +36,7 @@ import play.libs.F.Promise;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
-public class SearchEngine extends Controller {
+public class JSearchEngine extends Controller {
 
     @Inject WSClient ws;
     // timeout

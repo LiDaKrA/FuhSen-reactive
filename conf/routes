@@ -6,7 +6,8 @@
 GET     /                           controllers.Application.index()
 
 # Search Engine API routes
-GET     /engine/v1/search           controllers.de.fuhsen.engine.SearchEngine.index()
+GET     /engine/v1/search           controllers.de.fuhsen.engine.SearchEngine.search(query: String)
+GET     /engine/v1/expandQuery           controllers.de.fuhsen.engine.SearchEngine.expandQuery(query: String)
 
 # Wrappers API routes
 # Social Networks
