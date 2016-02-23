@@ -3,25 +3,26 @@
 # ~~~~
 
 # User Interface routes
-GET     /                                           controllers.Application.index()
+GET     /                           controllers.Application.index()
 
 # Search Engine API routes
-GET     /engine/v1/search                           controllers.de.fuhsen.engine.SearchEngine.index()
+GET     /engine/v1/search           controllers.de.fuhsen.engine.SearchEngine.search(query: String)
+GET     /engine/v1/expandQuery           controllers.de.fuhsen.engine.SearchEngine.expandQuery(query: String)
 
 # REST API Wrappers
 GET     /ldw/v1/restApiWrapper/:wrapperId/search    controllers.de.fuhsen.wrappers.WrapperController.search(wrapperId: String, query: String)
 
 # Social Networks
-GET     /ldw/v1/twitter/search                      controllers.de.fuhsen.wrappers.Twitter.search(query: String)
-GET     /ldw/v1/gplus/search                        controllers.de.fuhsen.wrappers.GooglePlus.search(query: String)
+GET     /ldw/v1/twitter/search      controllers.de.fuhsen.wrappers.Twitter.search(query: String)
+GET     /ldw/v1/gplus/search      controllers.de.fuhsen.wrappers.GooglePlus.search(query: String)
 
 # e-commerce
-GET     /ldw/v1/ebay/search                         controllers.de.fuhsen.wrappers.eBay.search(query: String)
+GET     /ldw/v1/ebay/search       controllers.de.fuhsen.wrappers.eBay.search(query: String)
 
 # Knowledge bases
-GET     /ldw/v1/gkb/search                          controllers.de.fuhsen.wrappers.GoogleKnowledgeGraph.search(query: String)
+GET     /ldw/v1/gkb/search       controllers.de.fuhsen.wrappers.GoogleKnowledgeGraph.search(query: String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file                               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 
