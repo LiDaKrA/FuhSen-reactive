@@ -11,6 +11,7 @@ GET     /engine/v1/expandQuery           controllers.de.fuhsen.engine.SearchEngi
 
 # REST API Wrappers
 GET     /ldw/v1/restApiWrapper/:wrapperId/search    controllers.de.fuhsen.wrappers.WrapperController.search(wrapperId: String, query: String)
+GET     /ldw/v1/restApiWrapper                      controllers.de.fuhsen.wrappers.WrapperController.wrapperIds()
 
 # Social Networks
 GET     /ldw/v1/twitter/search      controllers.de.fuhsen.wrappers.Twitter.search(query: String)

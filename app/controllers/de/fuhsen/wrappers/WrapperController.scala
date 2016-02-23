@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.{JsString, JsArray}
 import play.api.libs.oauth.OAuthCalculator
 import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.mvc.{Action, Controller, Result}
@@ -107,6 +108,13 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         request
     }
   }
+
+  // Return all wrapper ids as a JSON list
+  def wrapperIds() = {
+    Action {
+      Ok(JsArray(WrapperController.sortedWrapperIds.map(id => JsString(id))))
+    }
+  }
 }
 
 /**
@@ -119,4 +127,6 @@ object WrapperController {
     "gkb" -> new GoogleKnowledgeGraphWrapper(),
     "ebay" -> new EBayWrapper()
   )
+
+  val sortedWrapperIds = wrapperMap.keys.toSeq.sortWith(_ < _)
 }
