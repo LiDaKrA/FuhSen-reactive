@@ -20,6 +20,9 @@ GET     /ldw/v1/ebay/search       controllers.de.fuhsen.wrappers.eBay.search(que
 # Knowledge bases
 GET     /ldw/v1/gkb/search       controllers.de.fuhsen.wrappers.GoogleKnowledgeGraph.search(query: String)
 
+# Darknet
+GET     /ldw/v1/tor2web/search       controllers.de.fuhsen.wrappers.Tor2Web.search(query: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
