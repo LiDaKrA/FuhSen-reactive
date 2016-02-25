@@ -1,12 +1,15 @@
 package controllers.de.fuhsen.wrappers
 
+import java.io.{ByteArrayInputStream, StringWriter}
 import javax.inject.Inject
 
+import org.apache.jena.rdf.model.ModelFactory
+import org.apache.jena.riot.{Lang, RDFLanguages}
 import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.{JsString, JsArray}
+import play.api.libs.json.{JsArray, JsString}
 import play.api.libs.oauth.OAuthCalculator
-import play.api.libs.ws.{WSClient, WSRequest}
+import play.api.libs.ws.{DefaultWSProxyServer, WSClient, WSRequest}
 import play.api.mvc.{Action, Controller, Result}
 
 import scala.concurrent.Future
@@ -15,40 +18,59 @@ import scala.concurrent.Future
  * Handles requests to API wrappers. Wrappers must at least implement [[RestApiWrapperTrait]].
  */
 class WrapperController @Inject()(ws: WSClient) extends Controller {
+
   def search(wrapperId: String, query: String) = Action.async {
     WrapperController.wrapperMap.get(wrapperId) match {
       case Some(wrapper) =>
         Logger.info(s"Starting $wrapperId Search with query: " + query)
         val apiRequest = createApiRequest(wrapper, query)
         val apiResponse = executeApiRequest(apiRequest)
-        transformApiResponse(wrapper, apiResponse)
+        val customApiResponse = customApiHandling(wrapper, apiResponse)
+        transformApiResponse(wrapper, customApiResponse)
       case None =>
         Future(NotFound("Wrapper " + wrapperId + " not found! Supported wrapper: " +
             WrapperController.wrapperMap.keys.mkString(", ")))
     }
   }
 
+  /** If a custom response handling is defined execute it against the response if has not been an error */
+  private def customApiHandling(wrapper: RestApiWrapperTrait,
+                                apiResponse: Future[Either[ApiSuccess, ApiError]]): Future[Either[ApiSuccess, ApiError]] = {
+    wrapper.customResponseHandling(ws) match {
+      case Some(customFn) =>
+        apiResponse.flatMap {
+          case Left(result) =>
+            customFn(result.responseBody).
+                map(customResult => Left[ApiSuccess, ApiError](ApiSuccess(customResult)))
+          case r @ Right(_) =>
+            Future(r)
+        }
+      case None =>
+        apiResponse
+    }
+  }
+
   /** Handles transformation if configured for the wrapper */
   private def transformApiResponse(wrapper: RestApiWrapperTrait,
-                                   apiResponse: Future[Either[String, Result]]): Future[Result] = {
-    apiResponse flatMap {
+                                   apiResponse: Future[Either[ApiSuccess, ApiError]]): Future[Result] = {
+    apiResponse.flatMap {
       case Right(errorResult) =>
         // There has been an error previously, don't go on.
-        Future(errorResult)
-      case Left(content) =>
-        handleSilkTransformation(wrapper, content)
+        Future(InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode))
+      case Left(success) =>
+        handleSilkTransformation(wrapper, success.responseBody)
     }
   }
 
   /** Executes the request to the wrapped REST API */
-  private def executeApiRequest(apiRequest: WSRequest): Future[Either[String, Result]] = {
+  private def executeApiRequest(apiRequest: WSRequest): Future[Either[ApiSuccess, ApiError]] = {
     apiRequest.get.map { resp =>
       if (resp.status >= 400) {
-        Right(InternalServerError("There was a problem with the wrapper or the wrapped service. Service response:\n\n" + resp.body))
+        Right(ApiError(resp.status, "There was a problem with the wrapper or the wrapped service. Service response:\n\n" + resp.body))
       } else if (resp.status >= 300) {
-        Right(InternalServerError("Wrapper seems to be configured incorrectly, received a redirect from wrapped service."))
+        Right(ApiError(resp.status, "Wrapper seems to be configured incorrectly, received a redirect from wrapped service."))
       } else {
-        Left(resp.body)
+        Left(ApiSuccess(resp.body))
       }
     }
   }
@@ -59,19 +81,38 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                                acceptType: String = "application/ld+json"): Future[Result] = {
     wrapper match {
       case silkTransform: SilkTransformableTrait =>
-        val transformRequest = ws.url(silkTransform.transformationEndpoint)
-            .withHeaders("Content-Type" -> "application/xml")
-            .withHeaders("Accept" -> acceptType)
-        val response = transformRequest.post(silkTransform.silkTransformationRequestBody(content)) map { response =>
-          if (response.status >= 400) {
-            InternalServerError("There was a problem with the wrapper or the Silk transformation endpoint. Service response:\n\n" + response.body)
-          } else if (response.status >= 300) {
-            InternalServerError("Wrapper seems to be configured incorrectly, received a redirect from Silk transformation endpoint.")
-          } else {
-            Ok(response.body)
+        Logger.info("Execute Silk Transformations")
+        val lang = Option(RDFLanguages.contentTypeToLang(acceptType)).
+            getOrElse(Lang.JSONLD).
+            getName
+        val futureResponses = for(transform <- silkTransform.silkTransformationRequestTasks) yield {
+          val task = silkTransform.silkTransformationRequestTasks.head
+          val transformRequest = ws.url(silkTransform.transformationEndpoint(task.transformationTaskId))
+              .withHeaders("Content-Type" -> "application/xml")
+              .withHeaders("Accept" -> acceptType)
+          val response = transformRequest.post(task.silkTransformationRequestBodyGenerator(content)) map { response =>
+            if (response.status >= 400) {
+              ApiError(response.status, "There was a problem with the wrapper or the Silk transformation endpoint. Service response:\n\n" + response.body)
+            } else if (response.status >= 300) {
+              ApiError(response.status, "Wrapper seems to be configured incorrectly, received a redirect from Silk transformation endpoint.")
+            } else {
+              ApiSuccess(response.body)
+            }
           }
+          response
         }
-        response
+        Future.sequence(futureResponses) map { responses =>
+          val model = ModelFactory.createDefaultModel()
+          responses.foreach {
+            case ApiSuccess(body) =>
+              model.add(ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang))
+            case ApiError(statusCode, errorMessage) =>
+              Logger.warn(s"Got status code $statusCode with message: $errorMessage")
+          }
+          val output = new StringWriter()
+          model.write(output, lang)
+          Ok(output.toString())
+        }
       case _ =>
         // No transformation to be executed
         Future(Ok(content))
@@ -130,3 +171,9 @@ object WrapperController {
 
   val sortedWrapperIds = wrapperMap.keys.toSeq.sortWith(_ < _)
 }
+
+sealed trait ApiResponse
+
+case class ApiError(statusCode: Int, errorMessage: String) extends ApiResponse
+
+case class ApiSuccess(responseBody: String) extends ApiResponse

@@ -5,14 +5,37 @@ import com.typesafe.config.ConfigFactory
 import scala.xml.Elem
 
 /**
- * Specifies how to transform content via a Silk transformation
- */
+  * Specifies how to transform content via a Silk transformation
+  */
 trait SilkTransformableTrait {
-  def silkTransformationRequestBody(content: String): Elem
+  /**
+    * One or more transformation tasks that should be executed.
+    * @return
+    */
+  def silkTransformationRequestTasks: Seq[SilkTransformationTask]
 
-  protected def createSilkTransformationRequestBody(content: String,
-                                                    basePath: String,
-                                                    uriPattern: String): Elem = {
+  def transformationEndpoint(transformationTaskId: String) = {
+    s"""$silkServerUrl/transform/tasks/$projectId/$transformationTaskId/transformInput"""
+  }
+
+  private def silkServerUrl = {
+    ConfigFactory.load.getString("silk.server.url")
+  }
+
+  /**
+    * The project id of the Silk project
+    */
+  def projectId: String
+
+  /**
+    * The type of the transformation input.
+    */
+  def datasetPluginType: DatasetPluginType
+
+  // Helper method to create the transformation request body function via currying
+  protected def createSilkTransformationRequestBody(basePath: String,
+                                                    uriPattern: String)
+                                                   (content: String): Elem = {
     <Transform>
       <DataSources>
         <Dataset id="InputData">
@@ -28,23 +51,16 @@ trait SilkTransformableTrait {
       </resource>
     </Transform>
   }
-
-  def transformationEndpoint = s"""$silkServerUrl/transform/tasks/$projectId/$transformationTaskId/transformInput"""
-
-  private def silkServerUrl = ConfigFactory.load.getString("silk.server.url")
-
-  /**
-   * The project id of the Silk project
-   */
-  def projectId: String
-
-  /**
-   * The task id of the transformation task of the project.
-   */
-  def transformationTaskId: String
-
-  /**
-   * The type of the transformation input.
-   */
-  def datasetPluginType: DatasetPluginType
 }
+
+//
+/**
+  * Holds the data for a Silk transformation request.
+  *
+  * @param transformationTaskId                   The task id of the transformation task of the project.
+  * @param silkTransformationRequestBodyGenerator a function that generates the XML request body having the API response
+  *                                               as parameter. Use the curried version of [[SilkTransformableTrait.createSilkTransformationRequestBody]]
+  *                                               to create these functions.
+  */
+case class SilkTransformationTask(transformationTaskId: String,
+                                  silkTransformationRequestBodyGenerator: String => Elem)
