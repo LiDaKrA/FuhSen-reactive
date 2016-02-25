@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 /**
- * Created by andreas on 2/15/16.
+ * Wrapper around the GooglePlus API.
  */
 class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
   override def apiUrl: String = ConfigFactory.load.getString("gplus.user.url")
@@ -28,17 +28,17 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
 
   override def silkTransformationRequestTasks = Seq(
     SilkTransformationTask(
-      transformationTaskId = ConfigFactory.load.getString("silk.transformation.gplus.id"),
+      transformationTaskId = ConfigFactory.load.getString("silk.transformation.task.gplus.person"),
       createSilkTransformationRequestBody(
-        basePath = "items",
+        basePath = "",
         uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gplus/{id}"
       )
     ),
     SilkTransformationTask(
-      transformationTaskId = ConfigFactory.load.getString("silk.transformation.gplus.id"),
+      transformationTaskId = ConfigFactory.load.getString("silk.transformation.task.gplus.organization"),
       createSilkTransformationRequestBody(
-        basePath = "items",
-        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gplus/{id}"
+        basePath = "organizations",
+        uriPattern = ""
       )
     )
   )
