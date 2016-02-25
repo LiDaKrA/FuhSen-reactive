@@ -71,7 +71,7 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
 
   private def validResponsesToJSONString(results: List[WSResponse]): String = {
     val validResults = results.filter(_.status == 200) flatMap { result =>
-      if (result.status != 200) {
+      if (result.status == 200) {
         Some(result.body)
       } else {
         None
@@ -86,7 +86,10 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
       if (results.forall(_.status != 200)) {
         Logger.warn("All requests failed!")
       } else {
-        Logger.warn("At least one request failed.")
+        val failedRequests = results.filter(_.status != 200)
+        val count = failedRequests.size
+        val example = failedRequests.head
+        Logger.warn(s"$count / ${results.size} requests failed. Example: Status Code: " + example.status + ", Body:" + example.body)
       }
     }
   }
