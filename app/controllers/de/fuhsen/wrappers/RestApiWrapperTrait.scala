@@ -1,5 +1,6 @@
 package controllers.de.fuhsen.wrappers
 
+import controllers.de.fuhsen.FuhsenVocab
 import play.api.libs.ws.{WSClient, WSResponse}
 
 import scala.concurrent.Future
@@ -32,4 +33,11 @@ trait RestApiWrapperTrait {
     * them to a complex API response.
     */
   def customResponseHandling(implicit ws: WSClient): Option[String => Future[String]] = None
+
+  /**
+    * Returns the globally unique URI String of the source that is wrapped. This is used to track provenance.
+    */
+  def sourceLocalName: String
+
+  def sourceUri = FuhsenVocab.sourceNS + sourceLocalName
 }

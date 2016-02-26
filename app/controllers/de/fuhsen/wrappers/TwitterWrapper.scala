@@ -45,4 +45,9 @@ class TwitterWrapper extends RestApiWrapperTrait with RestApiOAuthTrait with Sil
 
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
+
+  /**
+    * Returns the globally unique URI String of the source that is wrapped. This is used to track provenance.
+    */
+  override def sourceLocalName: String = "twitter"
 }

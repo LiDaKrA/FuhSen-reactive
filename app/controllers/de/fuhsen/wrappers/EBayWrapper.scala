@@ -44,4 +44,9 @@ class EBayWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
 
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
+
+  /**
+    * Returns the application wide unique local name of the source that is wrapped. This is used to track provenance.
+    */
+  override def sourceLocalName: String = "ebay"
 }

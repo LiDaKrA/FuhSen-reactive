@@ -98,4 +98,9 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
     val example = failedRequests.head
     Logger.warn(s"$count / ${results.size} requests failed. Example: Status Code: " + example.status + ", Body:" + example.body)
   }
+
+  /**
+    * Returns the globally unique URI String of the source that is wrapped. This is used to track provenance.
+    */
+  override def sourceLocalName: String = "gplus"
 }

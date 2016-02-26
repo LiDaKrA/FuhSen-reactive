@@ -1,17 +1,19 @@
 package controllers.de.fuhsen.wrappers
 
 import java.io.{ByteArrayInputStream, StringWriter}
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
-import controllers.de.fuhsen.dataintegration.SilkTransformableTrait
-import org.apache.jena.rdf.model.ModelFactory
-import org.apache.jena.riot.{Lang, RDFLanguages}
+import controllers.de.fuhsen.dataintegration.{RequestMerger, SilkTransformableTrait}
+import org.apache.jena.query.Dataset
+import org.apache.jena.rdf.model.{Model, ModelFactory}
+import org.apache.jena.riot.{RDFDataMgr, Lang, RDFLanguages}
 import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsArray, JsString}
 import play.api.libs.oauth.OAuthCalculator
-import play.api.libs.ws.{DefaultWSProxyServer, WSClient, WSRequest}
-import play.api.mvc.{Action, Controller, Result}
+import play.api.libs.ws.{WSClient, WSRequest}
+import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
 
@@ -19,18 +21,58 @@ import scala.concurrent.Future
  * Handles requests to API wrappers. Wrappers must at least implement [[RestApiWrapperTrait]].
  */
 class WrapperController @Inject()(ws: WSClient) extends Controller {
+  val requestCounter = new AtomicInteger(0)
 
   def search(wrapperId: String, query: String) = Action.async {
     WrapperController.wrapperMap.get(wrapperId) match {
       case Some(wrapper) =>
         Logger.info(s"Starting $wrapperId Search with query: " + query)
-        val apiRequest = createApiRequest(wrapper, query)
-        val apiResponse = executeApiRequest(apiRequest)
-        val customApiResponse = customApiHandling(wrapper, apiResponse)
-        transformApiResponse(wrapper, customApiResponse)
+        execQueryAgainstWrapper(query, wrapper) map {
+          case Right(errorResult) =>
+            InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode)
+          case Left(success) =>
+            Ok(success.responseBody)
+        }
       case None =>
         Future(NotFound("Wrapper " + wrapperId + " not found! Supported wrapper: " +
-            WrapperController.wrapperMap.keys.mkString(", ")))
+            WrapperController.sortedWrapperIds.mkString(", ")))
+    }
+  }
+
+  private def execQueryAgainstWrapper(query: String, wrapper: RestApiWrapperTrait): Future[Either[ApiSuccess, ApiError]] = {
+    val apiRequest = createApiRequest(wrapper, query)
+    val apiResponse = executeApiRequest(apiRequest)
+    val customApiResponse = customApiHandling(wrapper, apiResponse)
+    transformApiResponse(wrapper, customApiResponse)
+  }
+
+  /**
+    * Returns the merged result from multiple wrappers in N-Quads format.
+    * @param query for each wrapper
+    * @param wrapperIds a comma-separated list of wrapper ids
+    */
+  def searchMultiple(query: String, wrapperIds: String) = Action.async {
+    val wrappers = (wrapperIds.split(",") map (WrapperController.wrapperMap.get)).toSeq
+    if(wrappers.exists(_.isEmpty)) {
+      Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
+          WrapperController.sortedWrapperIds.mkString(", ")))
+    } else {
+      val requestMerger = new RequestMerger()
+      val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper))
+      Future.sequence(resultFutures) map { results =>
+        for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
+          wrapperResult match {
+            case Left(apiSuccess) =>
+              val model = rdfStringToModel(Lang.JSONLD.getName, apiSuccess.responseBody)
+              requestMerger.addWrapperResult(model, wrapper.sourceUri)
+            case Right(_) =>
+            // Ignore for now
+          }
+        }
+        val resultDataset = requestMerger.constructQuadDataset()
+        Ok(datasetToQuadString(resultDataset)).
+            withHeaders(("content-type", Lang.NQUADS.getContentType.getContentType))
+      }
     }
   }
 
@@ -53,11 +95,11 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   /** Handles transformation if configured for the wrapper */
   private def transformApiResponse(wrapper: RestApiWrapperTrait,
-                                   apiResponse: Future[Either[ApiSuccess, ApiError]]): Future[Result] = {
+                                   apiResponse: Future[Either[ApiSuccess, ApiError]]): Future[Either[ApiSuccess, ApiError]] = {
     apiResponse.flatMap {
-      case Right(errorResult) =>
+      case error @ Right(_) =>
         // There has been an error previously, don't go on.
-        Future(InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode))
+        Future(error)
       case Left(success) =>
         handleSilkTransformation(wrapper, success.responseBody)
     }
@@ -79,22 +121,24 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   /** If transformations are configured then execute them via the Silk REST API */
   def handleSilkTransformation(wrapper: RestApiWrapperTrait,
                                content: String,
-                               acceptType: String = "application/ld+json"): Future[Result] = {
+                               acceptType: String = "application/ld+json"): Future[Either[ApiSuccess, ApiError]] = {
     wrapper match {
       case silkTransform: SilkTransformableTrait if silkTransform.silkTransformationRequestTasks.size > 0 =>
         Logger.info("Execute Silk Transformations")
         val lang = acceptTypeToRdfLang(acceptType)
         val futureResponses = executeTransformation(content, acceptType, silkTransform)
         val rdf = convertToRdf(lang, futureResponses)
-        rdf.map(Ok(_))
+        rdf.map(content => Left(ApiSuccess(content)))
       case _ =>
         // No transformation to be executed
-        Future(Ok(content))
+        Future(Left(ApiSuccess(content)))
     }
   }
 
   /** Execute all transformation tasks on the content */
-  private def executeTransformation(content: String, acceptType: String, silkTransform: RestApiWrapperTrait with SilkTransformableTrait): Seq[Future[ApiResponse with Product with Serializable]] = {
+  private def executeTransformation(content: String,
+                                    acceptType: String,
+                                    silkTransform: RestApiWrapperTrait with SilkTransformableTrait): Seq[Future[ApiResponse]] = {
     for (transform <- silkTransform.silkTransformationRequestTasks) yield {
       val task = silkTransform.silkTransformationRequestTasks.head
       val transformRequest = ws.url(silkTransform.transformationEndpoint(task.transformationTaskId))
@@ -126,14 +170,28 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       val model = ModelFactory.createDefaultModel()
       responses.foreach {
         case ApiSuccess(body) =>
-          model.add(ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang))
+          model.add(rdfStringToModel(lang, body))
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
       }
-      val output = new StringWriter()
-      model.write(output, lang)
-      output.toString()
+      modelToRdfString(lang, model)
     }
+  }
+
+  private def modelToRdfString(lang: String, model: Model): String = {
+    val output = new StringWriter()
+    model.write(output, lang)
+    output.toString()
+  }
+
+  private def datasetToQuadString(dataset: Dataset): String = {
+    val output = new StringWriter()
+    RDFDataMgr.write(output, dataset, Lang.NQUADS)
+    output.toString()
+  }
+
+  private def rdfStringToModel(lang: String, body: String): Model = {
+    ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang)
   }
 
   /** Creates the complete API REST request and executes it asynchronously. */
