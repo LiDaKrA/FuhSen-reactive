@@ -80,42 +80,58 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                                content: String,
                                acceptType: String = "application/ld+json"): Future[Result] = {
     wrapper match {
-      case silkTransform: SilkTransformableTrait =>
+      case silkTransform: SilkTransformableTrait if silkTransform.silkTransformationRequestTasks.size > 0 =>
         Logger.info("Execute Silk Transformations")
-        val lang = Option(RDFLanguages.contentTypeToLang(acceptType)).
-            getOrElse(Lang.JSONLD).
-            getName
-        val futureResponses = for(transform <- silkTransform.silkTransformationRequestTasks) yield {
-          val task = silkTransform.silkTransformationRequestTasks.head
-          val transformRequest = ws.url(silkTransform.transformationEndpoint(task.transformationTaskId))
-              .withHeaders("Content-Type" -> "application/xml")
-              .withHeaders("Accept" -> acceptType)
-          val response = transformRequest.post(task.silkTransformationRequestBodyGenerator(content)) map { response =>
-            if (response.status >= 400) {
-              ApiError(response.status, "There was a problem with the wrapper or the Silk transformation endpoint. Service response:\n\n" + response.body)
-            } else if (response.status >= 300) {
-              ApiError(response.status, "Wrapper seems to be configured incorrectly, received a redirect from Silk transformation endpoint.")
-            } else {
-              ApiSuccess(response.body)
-            }
-          }
-          response
-        }
-        Future.sequence(futureResponses) map { responses =>
-          val model = ModelFactory.createDefaultModel()
-          responses.foreach {
-            case ApiSuccess(body) =>
-              model.add(ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang))
-            case ApiError(statusCode, errorMessage) =>
-              Logger.warn(s"Got status code $statusCode with message: $errorMessage")
-          }
-          val output = new StringWriter()
-          model.write(output, lang)
-          Ok(output.toString())
-        }
+        val lang = acceptTypeToRdfLang(acceptType)
+        val futureResponses = executeTransformation(content, acceptType, silkTransform)
+        val rdf = convertToRdf(lang, futureResponses)
+        rdf.map(Ok(_))
       case _ =>
         // No transformation to be executed
         Future(Ok(content))
+    }
+  }
+
+  /** Execute all transformation tasks on the content */
+  private def executeTransformation(content: String, acceptType: String, silkTransform: RestApiWrapperTrait with SilkTransformableTrait): Seq[Future[ApiResponse with Product with Serializable]] = {
+    for (transform <- silkTransform.silkTransformationRequestTasks) yield {
+      val task = silkTransform.silkTransformationRequestTasks.head
+      val transformRequest = ws.url(silkTransform.transformationEndpoint(task.transformationTaskId))
+          .withHeaders("Content-Type" -> "application/xml")
+          .withHeaders("Accept" -> acceptType)
+      val response = transformRequest.post(task.silkTransformationRequestBodyGenerator(content)) map { response =>
+        if (response.status >= 400) {
+          ApiError(response.status, "There was a problem with the wrapper or the Silk transformation endpoint. Service response:\n\n" + response.body)
+        } else if (response.status >= 300) {
+          ApiError(response.status, "Wrapper seems to be configured incorrectly, received a redirect from Silk transformation endpoint.")
+        } else {
+          ApiSuccess(response.body)
+        }
+      }
+      response
+    }
+  }
+
+  /** Returns the Jena RDF Lang name for an accept type. Defaults to JSON-LD */
+  private def acceptTypeToRdfLang(acceptType: String): String = {
+    Option(RDFLanguages.contentTypeToLang(acceptType)).
+        getOrElse(Lang.JSONLD).
+        getName
+  }
+
+  /** Merge all transformation results into a single model and return the serialized model */
+  private def convertToRdf(lang: String, futureResponses: Seq[Future[ApiResponse]]): Future[String] = {
+    Future.sequence(futureResponses) map { responses =>
+      val model = ModelFactory.createDefaultModel()
+      responses.foreach {
+        case ApiSuccess(body) =>
+          model.add(ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang))
+        case ApiError(statusCode, errorMessage) =>
+          Logger.warn(s"Got status code $statusCode with message: $errorMessage")
+      }
+      val output = new StringWriter()
+      model.write(output, lang)
+      output.toString()
     }
   }
 

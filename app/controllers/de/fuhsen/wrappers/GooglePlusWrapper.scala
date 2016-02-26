@@ -86,11 +86,15 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
       if (results.forall(_.status != 200)) {
         Logger.warn("All requests failed!")
       } else {
-        val failedRequests = results.filter(_.status != 200)
-        val count = failedRequests.size
-        val example = failedRequests.head
-        Logger.warn(s"$count / ${results.size} requests failed. Example: Status Code: " + example.status + ", Body:" + example.body)
+        logPartialRequestFailures(results)
       }
     }
+  }
+
+  private def logPartialRequestFailures(results: List[WSResponse]): Unit = {
+    val failedRequests = results.filter(_.status != 200)
+    val count = failedRequests.size
+    val example = failedRequests.head
+    Logger.warn(s"$count / ${results.size} requests failed. Example: Status Code: " + example.status + ", Body:" + example.body)
   }
 }
