@@ -3,6 +3,7 @@ package controllers.de.fuhsen.wrappers
 import java.io.{ByteArrayInputStream, StringWriter}
 import javax.inject.Inject
 
+import controllers.de.fuhsen.dataintegration.SilkTransformableTrait
 import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.riot.{Lang, RDFLanguages}
 import play.Logger

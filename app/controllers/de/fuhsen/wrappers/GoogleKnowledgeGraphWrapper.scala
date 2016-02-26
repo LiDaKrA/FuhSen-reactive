@@ -1,6 +1,7 @@
 package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
+import controllers.de.fuhsen.dataintegration.{SilkTransformationTask, SilkTransformableTrait}
 
 import scala.xml.Elem
 

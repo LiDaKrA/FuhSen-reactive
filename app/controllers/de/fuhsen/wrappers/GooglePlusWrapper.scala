@@ -1,6 +1,7 @@
 package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
+import controllers.de.fuhsen.dataintegration.{SilkTransformationTask, SilkTransformableTrait}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.libs.ws._

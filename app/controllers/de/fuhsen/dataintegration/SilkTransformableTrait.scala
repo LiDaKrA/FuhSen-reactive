@@ -1,6 +1,7 @@
-package controllers.de.fuhsen.wrappers
+package controllers.de.fuhsen.dataintegration
 
 import com.typesafe.config.ConfigFactory
+import controllers.de.fuhsen.wrappers.DatasetPluginType
 
 import scala.xml.Elem
 
@@ -10,6 +11,7 @@ import scala.xml.Elem
 trait SilkTransformableTrait {
   /**
     * One or more transformation tasks that should be executed.
+    *
     * @return
     */
   def silkTransformationRequestTasks: Seq[SilkTransformationTask]
