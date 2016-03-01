@@ -1,13 +1,13 @@
 package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
-import controllers.de.fuhsen.dataintegration.{SilkTransformationTask, SilkTransformableTrait}
+import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
 import play.api.Logger
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.libs.ws._
 
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 /**
  * Wrapper around the GooglePlus API.

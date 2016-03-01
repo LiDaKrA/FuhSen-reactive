@@ -1,4 +1,4 @@
-package controllers.de.fuhsen.dataintegration
+package controllers.de.fuhsen.wrappers.dataintegration
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.DatasetPluginType

@@ -1,10 +1,8 @@
 package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
-import controllers.de.fuhsen.dataintegration.{SilkTransformationTask, SilkTransformableTrait}
-import play.api.libs.oauth.{RequestToken, ConsumerKey}
-
-import scala.xml.Elem
+import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
+import play.api.libs.oauth.{ConsumerKey, RequestToken}
 
 /**
  * Wrapper for the Twitter REST API.

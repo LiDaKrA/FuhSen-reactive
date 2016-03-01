@@ -1,8 +1,9 @@
-package controllers.de.fuhsen.dataintegration
+package utils.dataintegration
 
 import controllers.de.fuhsen.FuhsenVocab
-import org.apache.jena.query.{Syntax, Dataset, QueryExecutionFactory, QueryFactory}
+import org.apache.jena.query.{Dataset, QueryExecutionFactory, QueryFactory, Syntax}
 import org.apache.jena.rdf.model.{Model, ModelFactory}
+import org.apache.jena.riot.Lang
 
 /**
   * Created by andreas on 2/26/16.
@@ -51,5 +52,9 @@ class RequestMerger() {
     )
     val quadDataset = QueryExecutionFactory.create(quadQuery, mergedModel).execConstructDataset()
     quadDataset
+  }
+
+  def serializeMergedModel(lang: Lang): String = {
+    RDFUtil.modelToTripleString(mergedModel, lang)
   }
 }

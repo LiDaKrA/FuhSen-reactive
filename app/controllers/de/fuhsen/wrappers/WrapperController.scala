@@ -1,25 +1,30 @@
 package controllers.de.fuhsen.wrappers
 
-import java.io.{ByteArrayInputStream, StringWriter}
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
-import controllers.de.fuhsen.dataintegration.{RequestMerger, SilkTransformableTrait}
-import org.apache.jena.query.Dataset
-import org.apache.jena.rdf.model.{Model, ModelFactory}
-import org.apache.jena.riot.{RDFDataMgr, Lang, RDFLanguages}
+import com.typesafe.config.ConfigFactory
+import controllers.de.fuhsen.wrappers.dataintegration.{EntityLinking, SilkConfig, SilkTransformableTrait}
+import org.apache.jena.graph.Triple
+import org.apache.jena.query.{Dataset, DatasetFactory}
+import org.apache.jena.rdf.model.ModelFactory
+import org.apache.jena.riot.Lang
+import org.apache.jena.sparql.core.Quad
 import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsArray, JsString}
 import play.api.libs.oauth.OAuthCalculator
-import play.api.libs.ws.{WSClient, WSRequest}
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Action, Controller}
+import utils.dataintegration.RDFUtil._
+import utils.dataintegration.{RequestMerger, UriTranslator}
 
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
 
 /**
- * Handles requests to API wrappers. Wrappers must at least implement [[RestApiWrapperTrait]].
- */
+  * Handles requests to API wrappers. Wrappers must at least implement [[RestApiWrapperTrait]].
+  */
 class WrapperController @Inject()(ws: WSClient) extends Controller {
   val requestCounter = new AtomicInteger(0)
 
@@ -28,9 +33,9 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       case Some(wrapper) =>
         Logger.info(s"Starting $wrapperId Search with query: " + query)
         execQueryAgainstWrapper(query, wrapper) map {
-          case Right(errorResult) =>
+          case errorResult: ApiError =>
             InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode)
-          case Left(success) =>
+          case success: ApiSuccess =>
             Ok(success.responseBody)
         }
       case None =>
@@ -39,7 +44,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  private def execQueryAgainstWrapper(query: String, wrapper: RestApiWrapperTrait): Future[Either[ApiSuccess, ApiError]] = {
+  private def execQueryAgainstWrapper(query: String, wrapper: RestApiWrapperTrait): Future[ApiResponse] = {
     val apiRequest = createApiRequest(wrapper, query)
     val apiResponse = executeApiRequest(apiRequest)
     val customApiResponse = customApiHandling(wrapper, apiResponse)
@@ -48,44 +53,96 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   /**
     * Returns the merged result from multiple wrappers in N-Quads format.
-    * @param query for each wrapper
+    *
+    * @param query      for each wrapper
     * @param wrapperIds a comma-separated list of wrapper ids
     */
   def searchMultiple(query: String, wrapperIds: String) = Action.async {
     val wrappers = (wrapperIds.split(",") map (WrapperController.wrapperMap.get)).toSeq
-    if(wrappers.exists(_.isEmpty)) {
+    if (wrappers.exists(_.isEmpty)) {
       Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
           WrapperController.sortedWrapperIds.mkString(", ")))
     } else {
       val requestMerger = new RequestMerger()
       val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper))
-      Future.sequence(resultFutures) map { results =>
+      Future.sequence(resultFutures) flatMap { results =>
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
-            case Left(apiSuccess) =>
-              val model = rdfStringToModel(Lang.JSONLD.getName, apiSuccess.responseBody)
+            case ApiSuccess(responseBody) =>
+              val model = rdfStringToModel(responseBody, Lang.JSONLD.getName)
               requestMerger.addWrapperResult(model, wrapper.sourceUri)
-            case Right(_) =>
+            case _: ApiError =>
             // Ignore for now
           }
         }
+
+        val sameAs = sameAsLinks(requestMerger.serializeMergedModel(Lang.JSONLD), langToAcceptType(Lang.JSONLD))
         val resultDataset = requestMerger.constructQuadDataset()
-        Ok(datasetToQuadString(resultDataset)).
-            withHeaders(("content-type", Lang.NQUADS.getContentType.getContentType))
+        val rewrittenDataset = rewriteDatasetBasedOnSameAsLinks(resultDataset, sameAs)
+        rewrittenDataset map { d =>
+          Ok(datasetToQuadString(d, Lang.NQUADS)).
+              withHeaders(("content-type", Lang.NQUADS.getContentType.getContentType))
+        }
       }
+    }
+  }
+
+  /**
+    * Rewrites the entity URIs based on the sameAs links. All entities of each transitive closure will
+    * have the same URI and point to the original URI via sameAs link (one per rewritten entity and source graph).
+    *
+    * @param inputDataset
+    * @param sameAs
+    * @return
+    */
+  private def rewriteDatasetBasedOnSameAsLinks(inputDataset: Dataset,
+                                               sameAs: Future[Option[Traversable[Triple]]]): Future[Dataset] = {
+    sameAs map {
+      case Some(sameAsTriples) =>
+        val it = inputDataset.asDatasetGraph().find()
+        val quads = ArrayBuffer.empty[Quad]
+        while(it.hasNext) {
+          quads.append(it.next())
+        }
+        rewriteDatasetBasedOnSameAsLinks(sameAsTriples, quads)
+      case None =>
+        inputDataset
+    }
+  }
+
+  private def rewriteDatasetBasedOnSameAsLinks(sameAsTriples: Traversable[Triple],
+                                               quads: ArrayBuffer[Quad]): Dataset = {
+    val translatedQuads = UriTranslator.translateQuads(
+      quads = quads.toTraversable,
+      links = sameAsTriples
+    )
+    val translatedDataset = DatasetFactory.create()
+    val datasetGraph = translatedDataset.asDatasetGraph()
+    for (quad <- translatedQuads) {
+      datasetGraph.add(quad)
+    }
+    translatedDataset
+  }
+
+  def sameAsLinks(entityRDF: String, acceptType: String): Future[Option[Traversable[Triple]]] = {
+    executePersonLinking(entityRDF, acceptType) map {
+      case ApiSuccess(body) =>
+        Some(stringToTriple(entityRDF, acceptTypeToRdfLang(acceptType)))
+      case _ =>
+        None
     }
   }
 
   /** If a custom response handling is defined execute it against the response if has not been an error */
   private def customApiHandling(wrapper: RestApiWrapperTrait,
-                                apiResponse: Future[Either[ApiSuccess, ApiError]]): Future[Either[ApiSuccess, ApiError]] = {
+                                apiResponse: Future[ApiResponse]): Future[ApiResponse] = {
     wrapper.customResponseHandling(ws) match {
       case Some(customFn) =>
         apiResponse.flatMap {
-          case Left(result) =>
-            customFn(result.responseBody).
-                map(customResult => Left[ApiSuccess, ApiError](ApiSuccess(customResult)))
-          case r @ Right(_) =>
+          case ApiSuccess(body) =>
+            customFn(body).
+                map(customResult => ApiSuccess(customResult))
+          case r: ApiError =>
             Future(r)
         }
       case None =>
@@ -95,43 +152,35 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   /** Handles transformation if configured for the wrapper */
   private def transformApiResponse(wrapper: RestApiWrapperTrait,
-                                   apiResponse: Future[Either[ApiSuccess, ApiError]]): Future[Either[ApiSuccess, ApiError]] = {
+                                   apiResponse: Future[ApiResponse]): Future[ApiResponse] = {
     apiResponse.flatMap {
-      case error @ Right(_) =>
+      case error: ApiError =>
         // There has been an error previously, don't go on.
         Future(error)
-      case Left(success) =>
-        handleSilkTransformation(wrapper, success.responseBody)
+      case ApiSuccess(body) =>
+        handleSilkTransformation(wrapper, body)
     }
   }
 
   /** Executes the request to the wrapped REST API */
-  private def executeApiRequest(apiRequest: WSRequest): Future[Either[ApiSuccess, ApiError]] = {
-    apiRequest.get.map { resp =>
-      if (resp.status >= 400) {
-        Right(ApiError(resp.status, "There was a problem with the wrapper or the wrapped service. Service response:\n\n" + resp.body))
-      } else if (resp.status >= 300) {
-        Right(ApiError(resp.status, "Wrapper seems to be configured incorrectly, received a redirect from wrapped service."))
-      } else {
-        Left(ApiSuccess(resp.body))
-      }
-    }
+  private def executeApiRequest(apiRequest: WSRequest): Future[ApiResponse] = {
+    apiRequest.get.map(convertToApiResponse("Wrapper or the wrapped service"))
   }
 
   /** If transformations are configured then execute them via the Silk REST API */
   def handleSilkTransformation(wrapper: RestApiWrapperTrait,
                                content: String,
-                               acceptType: String = "application/ld+json"): Future[Either[ApiSuccess, ApiError]] = {
+                               acceptType: String = "application/ld+json"): Future[ApiResponse] = {
     wrapper match {
       case silkTransform: SilkTransformableTrait if silkTransform.silkTransformationRequestTasks.size > 0 =>
         Logger.info("Execute Silk Transformations")
         val lang = acceptTypeToRdfLang(acceptType)
         val futureResponses = executeTransformation(content, acceptType, silkTransform)
         val rdf = convertToRdf(lang, futureResponses)
-        rdf.map(content => Left(ApiSuccess(content)))
+        rdf.map(content => ApiSuccess(content))
       case _ =>
         // No transformation to be executed
-        Future(Left(ApiSuccess(content)))
+        Future(ApiSuccess(content))
     }
   }
 
@@ -144,54 +193,59 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       val transformRequest = ws.url(silkTransform.transformationEndpoint(task.transformationTaskId))
           .withHeaders("Content-Type" -> "application/xml")
           .withHeaders("Accept" -> acceptType)
-      val response = transformRequest.post(task.silkTransformationRequestBodyGenerator(content)) map { response =>
-        if (response.status >= 400) {
-          ApiError(response.status, "There was a problem with the wrapper or the Silk transformation endpoint. Service response:\n\n" + response.body)
-        } else if (response.status >= 300) {
-          ApiError(response.status, "Wrapper seems to be configured incorrectly, received a redirect from Silk transformation endpoint.")
-        } else {
-          ApiSuccess(response.body)
-        }
-      }
+      val response = transformRequest
+          .post(task.silkTransformationRequestBodyGenerator(content))
+          .map(convertToApiResponse("Silk transformation endpoint"))
       response
     }
   }
 
-  /** Returns the Jena RDF Lang name for an accept type. Defaults to JSON-LD */
-  private def acceptTypeToRdfLang(acceptType: String): String = {
-    Option(RDFLanguages.contentTypeToLang(acceptType)).
-        getOrElse(Lang.JSONLD).
-        getName
+  private def convertToApiResponse(serviceName: String)(response: WSResponse): ApiResponse = {
+    if (response.status >= 400) {
+      ApiError(response.status, s"There was a problem with the $serviceName. Service response:\n\n" + response.body)
+    } else if (response.status >= 300) {
+      ApiError(response.status, s"$serviceName seems to be configured incorrectly, received a redirect.")
+    } else {
+      ApiSuccess(response.body)
+    }
+  }
+
+  /**
+    * Executes the person linking rule and returns a set of sameAs links.
+    *
+    * @param content The RDF content as String.
+    * @param acceptType An HTTP accept type that is used for serialization and deserialization from/to the REST
+    *                   services.
+    * @return
+    */
+  private def executePersonLinking(content: String,
+                                   acceptType: String): Future[ApiResponse] = {
+    val silkConfig = SilkConfig(
+      projectId = ConfigFactory.load.getString("silk.socialApiProject.id"),
+      linkingTaskId = ConfigFactory.load.getString("silk.linking.task.person"),
+      silkServerUrl = ConfigFactory.load.getString("silk.server.url")
+    )
+    val entityLinking = new EntityLinking(silkConfig)
+    val linkRequest = ws.url(silkConfig.endpoint)
+        .withHeaders("Content-Type" -> "application/xml")
+        .withHeaders("Accept" -> acceptType)
+    linkRequest.post(entityLinking.linkTemplate(content, acceptTypeToRdfLang(acceptType)))
+        .map(convertToApiResponse("Silk linking service"))
   }
 
   /** Merge all transformation results into a single model and return the serialized model */
-  private def convertToRdf(lang: String, futureResponses: Seq[Future[ApiResponse]]): Future[String] = {
+  private def convertToRdf(lang: String,
+                           futureResponses: Seq[Future[ApiResponse]]): Future[String] = {
     Future.sequence(futureResponses) map { responses =>
       val model = ModelFactory.createDefaultModel()
       responses.foreach {
         case ApiSuccess(body) =>
-          model.add(rdfStringToModel(lang, body))
+          model.add(rdfStringToModel(body, lang))
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
       }
-      modelToRdfString(lang, model)
+      modelToTripleString(model, lang)
     }
-  }
-
-  private def modelToRdfString(lang: String, model: Model): String = {
-    val output = new StringWriter()
-    model.write(output, lang)
-    output.toString()
-  }
-
-  private def datasetToQuadString(dataset: Dataset): String = {
-    val output = new StringWriter()
-    RDFDataMgr.write(output, dataset, Lang.NQUADS)
-    output.toString()
-  }
-
-  private def rdfStringToModel(lang: String, body: String): Model = {
-    ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang)
   }
 
   /** Creates the complete API REST request and executes it asynchronously. */
@@ -234,8 +288,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 }
 
 /**
- * For now, hard code all available wrappers here. Later this should probably be replaced by a plugin mechanism.
- */
+  * For now, hard code all available wrappers here. Later this should probably be replaced by a plugin mechanism.
+  */
 object WrapperController {
   val wrapperMap = Map[String, RestApiWrapperTrait](
     "gplus" -> new GooglePlusWrapper(),

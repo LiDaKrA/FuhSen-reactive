@@ -1,8 +1,8 @@
-package controllers.de.fuhsen.dataintegration
+package utils.dataintegration
 
 import java.util.logging.Logger
 
-import org.apache.jena.graph.{Node, NodeFactory}
+import org.apache.jena.graph.{Triple, Node, NodeFactory}
 import org.apache.jena.sparql.core.Quad
 import org.apache.jena.vocabulary.OWL
 
@@ -28,20 +28,20 @@ object UriTranslator {
     */
   def rewriteURIs(quads: Traversable[Quad])
                  (implicit uriMap: Map[String, String]): Traversable[Quad] = {
-    var counter = 0
+    var quadCounter = 0
+    var sameAsCounter = 0
     val entityGraphChecker = new EntityGraphChecker
 
     log.info("Start quad URI translation.")
     val translatedQuads = for (quad <- quads) yield {
-      counter += 1
-
+      quadCounter += 1
       val links = checkAndWriteSameAsLinks(entityGraphChecker, quad.getGraph.getURI, quad.getSubject, quad.getObject)
-
       val (sNew, oNew) = translateQuadURIs(quad.getSubject, quad.getObject)
       val rewrittenQuad = new Quad(quad.getGraph, sNew, quad.getPredicate, oNew)
+      sameAsCounter += links.size
       rewrittenQuad +: links
     }
-    log.info("End URI translation: Processed " + counter + " quads")
+    log.info(s"End of URI translation: Rewrote $quadCounter quads and output $sameAsCounter sameAs links.")
     translatedQuads.flatten
   }
 
@@ -60,7 +60,7 @@ object UriTranslator {
   }
 
   def translateQuads(quads: Traversable[Quad],
-                     links: Traversable[Quad]): Traversable[Quad] = {
+                     links: Traversable[Triple]): Traversable[Quad] = {
     implicit val uriMap: Map[String, String] = generateUriMap(links)
     rewriteURIs(quads)
   }
@@ -90,8 +90,8 @@ object UriTranslator {
   }
 
   /** Generate a Map from uri to "global" uri */
-  def generateUriMap(quads: Traversable[Quad]): Map[String, String] = {
-    val entityToClusterMap: Map[String, EntityCluster] = createEntityCluster(quads)
+  def generateUriMap(sameAsStmts: Traversable[Triple]): Map[String, String] = {
+    val entityToClusterMap: Map[String, EntityCluster] = createEntityCluster(sameAsStmts)
     generateUriMap(entityToClusterMap)
   }
 
@@ -107,13 +107,14 @@ object UriTranslator {
     uriMap.toMap
   }
 
-  private def createEntityCluster(quads: Traversable[Quad]): Map[String, EntityCluster] = {
+  /** Create entity cluster, i.e. transitive closures of the sameAs link graph */
+  private def createEntityCluster(sameAsStmts: Traversable[Triple]): Map[String, EntityCluster] = {
     val entityToClusterMap = new mutable.HashMap[String, EntityCluster]()
 
     //    val overAllCount = linkReader.size
     var counter = 0
 
-    for (quad <- quads) {
+    for (quad <- sameAsStmts) {
       counter += 1
       val (entity1, entity2) = extractEntityStrings(quad)
       val clusterOfEntity1 = entityToClusterMap.get(entity1)
@@ -138,7 +139,7 @@ object UriTranslator {
     entityToClusterMap.toMap
   }
 
-  private def extractEntityStrings(quad: Quad): (String, String) = (quad.getSubject.getURI, quad.getObject.getURI)
+  private def extractEntityStrings(triple: Triple): (String, String) = (triple.getSubject.getURI, triple.getObject.getURI)
 }
 
 /**

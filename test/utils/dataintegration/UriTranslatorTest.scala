@@ -1,6 +1,5 @@
 package utils.dataintegration
 
-import controllers.de.fuhsen.dataintegration.UriTranslator
 import org.apache.jena.graph.NodeFactory
 import org.apache.jena.sparql.core.Quad
 import org.apache.jena.vocabulary.OWL
@@ -9,10 +8,10 @@ import org.scalatest.{FlatSpec, Matchers}
 /**
   * Created on 2/29/16.
   */
-class UriTranslator extends FlatSpec with Matchers {
+class UriTranslatorTest extends FlatSpec with Matchers {
   behavior of "UriTranslator"
 
-  val quads = Seq(
+  val sameAsStatements = Seq(
     quad("s1", "sG"),
     quad("s3", "sG"),
     quad("s5", "s3"),
@@ -20,9 +19,9 @@ class UriTranslator extends FlatSpec with Matchers {
     quad("sA", "sB"),
     quad("sD", "sB"),
     quad("sC", "sA")
-  )
+  ) map (_.asTriple())
 
-  implicit val uriCluster = UriTranslator.generateUriMap(quads)
+  implicit val uriCluster = UriTranslator.generateUriMap(sameAsStatements)
 
   it should "create correct transitive closures of sameAs graphs" in {
     uriCluster("s1") shouldBe "sG"
