@@ -93,7 +93,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   private def datasetToNQuadsResult(rewrittenDataset: Future[Dataset]): Future[Result] = {
     rewrittenDataset map { d =>
       Ok(datasetToQuadString(d, Lang.TRIG)).
-          withHeaders(("content-type", Lang.NQUADS.getContentType.getContentType))
+          withHeaders(("content-type", Lang.TRIG.getContentType.getContentType))
     }
   }
 
