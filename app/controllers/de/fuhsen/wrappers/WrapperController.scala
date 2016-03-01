@@ -15,7 +15,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsArray, JsString}
 import play.api.libs.oauth.OAuthCalculator
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Result, Action, Controller}
 import utils.dataintegration.RDFUtil._
 import utils.dataintegration.{RequestMerger, UriTranslator}
 
@@ -24,6 +24,7 @@ import scala.concurrent.Future
 
 /**
   * Handles requests to API wrappers. Wrappers must at least implement [[RestApiWrapperTrait]].
+  * Depending on implemented traits also does transformation, linking and merging of entities.
   */
 class WrapperController @Inject()(ws: WSClient) extends Controller {
   val requestCounter = new AtomicInteger(0)
@@ -63,28 +64,52 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
           WrapperController.sortedWrapperIds.mkString(", ")))
     } else {
-      val requestMerger = new RequestMerger()
-      val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper))
-      Future.sequence(resultFutures) flatMap { results =>
-        for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
-          wrapperResult match {
-            case ApiSuccess(responseBody) =>
-              val model = rdfStringToModel(responseBody, Lang.TURTLE.getName)
-              requestMerger.addWrapperResult(model, wrapper.sourceUri)
-            case _: ApiError =>
-            // Ignore for now
-          }
-        }
+      fetchAndIntegrateWrapperResults(wrappers, query)
+    }
+  }
 
-        val sameAs = sameAsLinks(requestMerger.serializeMergedModel(Lang.TURTLE), langToAcceptType(Lang.TURTLE))
-        val resultDataset = requestMerger.constructQuadDataset()
-        val rewrittenDataset = rewriteDatasetBasedOnSameAsLinks(resultDataset, sameAs)
-        rewrittenDataset map { d =>
-          Ok(datasetToQuadString(d, Lang.NQUADS)).
-              withHeaders(("content-type", Lang.NQUADS.getContentType.getContentType))
-        }
+  /**
+    * Link and merge entities from different sources.
+    * @param wrappers
+    * @param query
+    * @return
+    */
+  private def fetchAndIntegrateWrapperResults(wrappers: Seq[Option[RestApiWrapperTrait]],
+                                      query: String): Future[Result] = {
+    // Fetch the transformed results from each wrapper
+    val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper))
+    Future.sequence(resultFutures) flatMap { results =>
+      // Merge results
+      val requestMerger = mergeWrapperResults(wrappers, results)
+      // Link entities
+      val sameAsTriples = personLinking(requestMerger.serializeMergedModel(Lang.TURTLE), langToAcceptType(Lang.TURTLE))
+      val resultDataset = requestMerger.constructQuadDataset()
+      // Rewrite/merge entities based on entity linking
+      val rewrittenDataset = rewriteDatasetBasedOnSameAsLinks(resultDataset, sameAsTriples)
+      datasetToNQuadsResult(rewrittenDataset)
+    }
+  }
+
+  private def datasetToNQuadsResult(rewrittenDataset: Future[Dataset]): Future[Result] = {
+    rewrittenDataset map { d =>
+      Ok(datasetToQuadString(d, Lang.NQUADS)).
+          withHeaders(("content-type", Lang.NQUADS.getContentType.getContentType))
+    }
+  }
+
+  private def mergeWrapperResults(wrappers: Seq[Option[RestApiWrapperTrait]],
+                                  results: Seq[ApiResponse]): RequestMerger = {
+    val requestMerger = new RequestMerger()
+    for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
+      wrapperResult match {
+        case ApiSuccess(responseBody) =>
+          val model = rdfStringToModel(responseBody, Lang.TURTLE.getName)
+          requestMerger.addWrapperResult(model, wrapper.sourceUri)
+        case _: ApiError =>
+        // Ignore for now
       }
     }
+    requestMerger
   }
 
   /**
@@ -124,7 +149,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     translatedDataset
   }
 
-  def sameAsLinks(entityRDF: String, acceptType: String): Future[Option[Traversable[Triple]]] = {
+  def personLinking(entityRDF: String, acceptType: String): Future[Option[Traversable[Triple]]] = {
     executePersonLinking(entityRDF, acceptType) map {
       case ApiSuccess(body) =>
         Some(stringToTriple(body, acceptTypeToRdfLang(acceptType)))
