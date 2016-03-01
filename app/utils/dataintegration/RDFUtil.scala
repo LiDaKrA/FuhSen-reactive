@@ -28,7 +28,7 @@ object RDFUtil {
   }
 
   def stringToTriple(rdfContent: String, lang: Lang): Traversable[Triple] = {
-    val model = rdfStringToModel(lang.getName, rdfContent)
+    val model = rdfStringToModel(rdfContent, lang.getName)
     val it = model.listStatements()
     val triples = ArrayBuffer.empty[Triple]
     while(it.hasNext) {
@@ -39,13 +39,16 @@ object RDFUtil {
   }
 
   def rdfStringToModel(body: String, lang: Lang): Model = {
+    if(body == "") {
+      return ModelFactory.createDefaultModel()
+    }
     ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang.getName)
   }
 
-  /** Returns the Jena RDF Lang name for an accept type. Defaults to JSON-LD */
+  /** Returns the Jena RDF Lang name for an accept type. Defaults to Turtle */
   def acceptTypeToRdfLang(acceptType: String): String = {
     Option(RDFLanguages.contentTypeToLang(acceptType)).
-        getOrElse(Lang.JSONLD).
+        getOrElse(Lang.TURTLE).
         getName
   }
 

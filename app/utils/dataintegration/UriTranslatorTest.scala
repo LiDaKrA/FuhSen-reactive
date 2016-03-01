@@ -114,9 +114,9 @@ object UriTranslator {
     //    val overAllCount = linkReader.size
     var counter = 0
 
-    for (quad <- sameAsStmts) {
+    for (sameAsTriple <- sameAsStmts) {
       counter += 1
-      val (entity1, entity2) = extractEntityStrings(quad)
+      val (entity1, entity2) = extractEntityStrings(sameAsTriple)
       val clusterOfEntity1 = entityToClusterMap.get(entity1)
       val clusterOfEntity2 = entityToClusterMap.get(entity2)
 

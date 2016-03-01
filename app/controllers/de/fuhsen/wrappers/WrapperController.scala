@@ -69,14 +69,14 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
             case ApiSuccess(responseBody) =>
-              val model = rdfStringToModel(responseBody, Lang.JSONLD.getName)
+              val model = rdfStringToModel(responseBody, Lang.TURTLE.getName)
               requestMerger.addWrapperResult(model, wrapper.sourceUri)
             case _: ApiError =>
             // Ignore for now
           }
         }
 
-        val sameAs = sameAsLinks(requestMerger.serializeMergedModel(Lang.JSONLD), langToAcceptType(Lang.JSONLD))
+        val sameAs = sameAsLinks(requestMerger.serializeMergedModel(Lang.TURTLE), langToAcceptType(Lang.TURTLE))
         val resultDataset = requestMerger.constructQuadDataset()
         val rewrittenDataset = rewriteDatasetBasedOnSameAsLinks(resultDataset, sameAs)
         rewrittenDataset map { d =>
@@ -127,8 +127,9 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   def sameAsLinks(entityRDF: String, acceptType: String): Future[Option[Traversable[Triple]]] = {
     executePersonLinking(entityRDF, acceptType) map {
       case ApiSuccess(body) =>
-        Some(stringToTriple(entityRDF, acceptTypeToRdfLang(acceptType)))
-      case _ =>
+        Some(stringToTriple(body, acceptTypeToRdfLang(acceptType)))
+      case ApiError(status, message) =>
+        Logger.warn(s"Person linking service returned a status code of $status")
         None
     }
   }
@@ -170,7 +171,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   /** If transformations are configured then execute them via the Silk REST API */
   def handleSilkTransformation(wrapper: RestApiWrapperTrait,
                                content: String,
-                               acceptType: String = "application/ld+json"): Future[ApiResponse] = {
+                               acceptType: String = "text/turtle"): Future[ApiResponse] = {
     wrapper match {
       case silkTransform: SilkTransformableTrait if silkTransform.silkTransformationRequestTasks.size > 0 =>
         Logger.info("Execute Silk Transformations")
