@@ -13,48 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
-import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
+import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformationTask, SilkTransformableTrait}
 
 /**
- * Wrapper around Google Knowledge Graph API for person search.
- */
-class GoogleKnowledgeGraphWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
+  * Wrapper for the Tor2Web REST API.
+  */
+class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
+
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map(
-      ("key" -> ConfigFactory.load.getString("gkb.app.key")),
-      ("types" -> "Person")
+    "key" -> ConfigFactory.load.getString("tor2web.app.key")
   )
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
-    Map("query" -> queryString)
+    Map("q" -> queryString)
   }
 
   /** The REST endpoint URL */
-  override def apiUrl: String = ConfigFactory.load.getString("gkb.url")
-
-  /** The type of the transformation input. */
-  override def datasetPluginType: DatasetPluginType = DatasetPluginType.JsonDatasetPlugin
-
-  override def silkTransformationRequestTasks = Seq(
-    SilkTransformationTask(
-      transformationTaskId = "GkbResultsTransformation",
-      createSilkTransformationRequestBody(
-        basePath = "itemListElement",
-        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gkb/{id}"
-      )
-    )
-  )
-
-  /** The project id of the Silk project */
-  override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
+  override def apiUrl: String = ConfigFactory.load.getString("tor2web.url")
 
   /**
     * Returns the globally unique URI String of the source that is wrapped. This is used to track provenance.
     */
-  override def sourceLocalName: String = "gkb"
+  override def sourceLocalName: String = "tor2web"
+
+  /** SILK Transformation Trait **/
+  override def silkTransformationRequestTasks = Seq(
+    SilkTransformationTask(
+      transformationTaskId = "DarkWebSitesTransformation",
+      createSilkTransformationRequestBody(
+        basePath = "doc",
+        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/tor2web/{@attributes/docId}"
+      )
+    )
+  )
+
+  /** The type of the transformation input. */
+  override def datasetPluginType: DatasetPluginType = DatasetPluginType.JsonDatasetPlugin
+
+  /** The project id of the Silk project */
+  override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
+
 }
