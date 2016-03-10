@@ -45,7 +45,7 @@ class GoogleKnowledgeGraphWrapper extends RestApiWrapperTrait with SilkTransform
       transformationTaskId = "GkbResultsTransformation",
       createSilkTransformationRequestBody(
         basePath = "itemListElement",
-        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gkb/{id}"
+        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gkb/{result/@id}"
       )
     )
   )

@@ -23,6 +23,7 @@ import org.apache.jena.graph.Triple
 import org.apache.jena.riot.{RDFLanguages, Lang, RDFDataMgr}
 
 import scala.collection.mutable.ArrayBuffer
+import play.Logger
 
 /**
   * Created on 2/29/16.
@@ -57,7 +58,7 @@ object RDFUtil {
     if(body == "") {
       return ModelFactory.createDefaultModel()
     }
-    ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes()), null, lang.getName)
+    ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes("UTF-8")), null, lang.getName)
   }
 
   /** Returns the Jena RDF Lang name for an accept type. Defaults to Turtle */
