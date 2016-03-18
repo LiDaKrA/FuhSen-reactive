@@ -26,8 +26,8 @@ import play.api.libs.ws._
 import scala.concurrent.Future
 
 /**
- * Wrapper around the GooglePlus API.
- */
+  * Wrapper around the GooglePlus API.
+  */
 
 case class Person(id: String, displayName: String)
 
@@ -83,9 +83,9 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
                               (implicit ws: WSClient): Future[List[WSResponse]] = {
     Future.sequence(people.map { person =>
       //Google plus get person request
-      ws.url(apiUrl + "/" + person.id)
+      val request = ws.url(apiUrl + "/" + person.id)
           .withQueryString(queryParams.toSeq: _*)
-          .get()
+      request.get()
     })
   }
 

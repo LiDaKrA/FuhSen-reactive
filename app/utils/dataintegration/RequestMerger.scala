@@ -15,11 +15,9 @@
  */
 package utils.dataintegration
 
-import com.sun.xml.internal.bind.v2.runtime.property.PropertyFactory
 import controllers.de.fuhsen.FuhsenVocab
-import controllers.de.fuhsen.wrappers.WrapperController
 import org.apache.jena.query.{Dataset, QueryExecutionFactory, QueryFactory, Syntax}
-import org.apache.jena.rdf.model.{Property, Model, ModelFactory}
+import org.apache.jena.rdf.model.{Model, ModelFactory}
 import org.apache.jena.riot.Lang
 
 /**
