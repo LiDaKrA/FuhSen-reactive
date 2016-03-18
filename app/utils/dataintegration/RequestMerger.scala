@@ -15,9 +15,11 @@
  */
 package utils.dataintegration
 
+import com.sun.xml.internal.bind.v2.runtime.property.PropertyFactory
 import controllers.de.fuhsen.FuhsenVocab
+import controllers.de.fuhsen.wrappers.WrapperController
 import org.apache.jena.query.{Dataset, QueryExecutionFactory, QueryFactory, Syntax}
-import org.apache.jena.rdf.model.{Model, ModelFactory}
+import org.apache.jena.rdf.model.{Property, Model, ModelFactory}
 import org.apache.jena.riot.Lang
 
 /**
@@ -59,14 +61,42 @@ class RequestMerger() {
         |    ?s ?p ?o
         |  }
         |} WHERE {
-        |  ?s ?p ?o .
-        |  ?s <${FuhsenVocab.sourceUri}> ?sourceGraph .
+        |  SELECT ?s ?p ?o
+        |         (IRI(CONCAT(STR(?sourceEntityUrl), '/graph')) As ?sourceGraph)
+        |  {
+        |    ?s ?p ?o .
+        |    ?s <${FuhsenVocab.url}> ?sourceEntityUrl .
+        |  }
         |}
       """.stripMargin,
       Syntax.syntaxARQ
     )
     val quadDataset = QueryExecutionFactory.create(quadQuery, mergedModel).execConstructDataset()
+    // Add the provenance graph content to the dataset
+    quadDataset.addNamedModel(FuhsenVocab.provenanceGraphUri, constructProvenanceModel())
     quadDataset
+  }
+
+  def constructProvenanceModel(): Model = {
+    val quadQuery = QueryFactory.create(
+    s"""
+       |CONSTRUCT {
+       |  ?sourceGraph <${FuhsenVocab.url}> ?sourceEntityUrl .
+       |  ?sourceGraph <${FuhsenVocab.sourceUri}> ?sourceUri .
+       |} WHERE {
+       |  SELECT (IRI(CONCAT(STR(?sourceEntityUrl), '/graph')) As ?sourceGraph)
+       |         ?sourceEntityUrl
+       |         ?sourceUri
+       |  {
+       |    ?s <${FuhsenVocab.url}> ?sourceEntityUrl .
+       |    ?s <${FuhsenVocab.sourceUri}> ?sourceUri .
+       |  }
+       |}
+     """.stripMargin,
+      Syntax.syntaxARQ
+    )
+    val model = QueryExecutionFactory.create(quadQuery, mergedModel).execConstruct()
+    model
   }
 
   def serializeMergedModel(lang: Lang): String = {
