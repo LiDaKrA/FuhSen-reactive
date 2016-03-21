@@ -10,7 +10,9 @@ script:
 before_script:
   - wget http://downloads.typesafe.com/typesafe-activator/1.3.7/typesafe-activator-1.3.7-minimal.zip
   - unzip -q typesafe-activator-1.3.7-minimal.zip
-script: typesafe-activator-1.3.7-minimal/activator-1.3.7-minimal/activator test
+
+script:
+  - sbt about
 
 notifications:
   email: true
