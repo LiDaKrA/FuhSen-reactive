@@ -9,8 +9,8 @@ script:
 
 before_script:
   - wget http://downloads.typesafe.com/typesafe-activator/1.3.7/typesafe-activator-1.3.7-minimal.zip
-  - unzip -q play-$PLAY_VERSION.zip
-script: play-$PLAY_VERSION/play test
+  - unzip -q typesafe-activator-1.3.7-minimal.zip
+script: typesafe-activator-1.3.7-minimal/activator test
 
 notifications:
   email: true
