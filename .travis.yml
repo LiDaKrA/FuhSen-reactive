@@ -16,6 +16,8 @@ script:
 
 deploy:
   provider: releases
+  user: "luigiselmi"
+  password: "azslmkqll2"
   api_key: "GITHUB OAUTH TOKEN"
   file: "target/universal/fuhsen-1.0-SNAPSHOT.tar"
   skip_cleanup: true
