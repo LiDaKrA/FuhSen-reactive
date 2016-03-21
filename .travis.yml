@@ -1,0 +1,26 @@
+language: scala
+scala: 
+  - 2.11.6
+jdk:
+  - oraclejdk8
+script:
+  - "sbt ++$TRAVIS_SCALA_VERSION test"
+  - "sbt ++$TRAVIS_SCALA_VERSION publish-local"
+
+#before_script:
+#  - wget http://downloads.typesafe.com/typesafe-activator/1.3.7/typesafe-activator-1.3.7-minimal.zip
+#  - unzip -q typesafe-activator-1.3.7-minimal.zip
+
+script:
+  - "sbt package universal:packageZipTarball"
+
+deploy:
+  provider: releases
+  api_key: "GITHUB OAUTH TOKEN"
+  file: "target/universal/fuhsen-1.0-SNAPSHOT.tar"
+  skip_cleanup: true
+  on:
+    repo: LiDaKrA/FuhSen-reactive
+    tags: true
+notifications:
+  email: true
