@@ -12,5 +12,7 @@ deploy:
   file: target/universal/fuhsen-1.0-SNAPSHOT.tgz
   on:
     repo: LiDaKrA/FuhSen-reactive
+    tags: true
+    all_branches: true
 notifications:
   email: true
