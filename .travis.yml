@@ -13,5 +13,14 @@ script:
 
 script:
   - "sbt package universal:packageZipTarball"
+
+deploy:
+  provider: releases
+  api_key: "GITHUB OAUTH TOKEN"
+  file: "target/universal/fuhsen-1.0-SNAPSHOT.tar"
+  skip_cleanup: true
+  on:
+    repo: LiDaKrA/FuhSen-reactive
+    tags: true
 notifications:
   email: true
