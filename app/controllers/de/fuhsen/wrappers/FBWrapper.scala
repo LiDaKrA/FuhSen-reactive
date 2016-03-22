@@ -1,20 +1,14 @@
 package controllers.de.fuhsen.wrappers
 
 import javax.inject.Inject
-import play.api.libs.ws.{WSRequest, WSClient, WSResponse}
-import play.api.mvc.{Action, Controller, Result}
+import com.typesafe.config.ConfigFactory
+import play.api.libs.ws.{WSRequest, WSClient}
+import play.api.mvc.{Action, Controller}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
 import play.api.mvc.Cookie
-import play.api.mvc.DiscardingCookie
-import play.mvc.Http
-import play.mvc.Http.Request
 
 /**
   * Created by cmorales on 16.03.2016.
@@ -22,16 +16,17 @@ import play.mvc.Http.Request
 class FBWrapper @Inject() (ws: WSClient) extends Controller{
 
   def search(query:String) = Action{ request =>
-    Redirect("https://www.facebook.com/dialog/oauth?client_id=1744904279055316&redirect_uri=http://localhost:9000/facebook/code2token&response_type=code&scope=public_profile,user_friends,email,user_about_me,user_posts").withCookies(Cookie("query", query.replace(" ","%20")))
+    Redirect(ConfigFactory.load.getString("facebook.request_code.url")
+            +"?client_id="+ConfigFactory.load.getString("facebook.app.key")
+            +"&redirect_uri="+ConfigFactory.load.getString("facebook.login.redirect.uri")
+            +"&response_type=code"
+            +"&scope="+ConfigFactory.load.getString("facebook.scope")).withCookies(Cookie("query", query.replace(" ","%20")))
   }
 
   def actual_search(code:String) = Action.async{ request =>
-
-    val cookie_query_option = request.cookies.get("query")
-
-    val cookie_query : String = cookie_query_option match {
+    val cookie_query : String = request.cookies.get("query") match {
       case Some(name) =>  name.value.replace("%20"," ")
-      case None => "No query value"
+      case None => throw new Exception("ERROR: No query value.")
     }
 
     implicit val tokenReads: Reads[Token] = (
@@ -40,29 +35,31 @@ class FBWrapper @Inject() (ws: WSClient) extends Controller{
         (JsPath \ "expires_in").read[Int]
       )(Token.apply _)
 
-    val apiResponse: WSRequest = ws.url("https://graph.facebook.com/v2.3/oauth/access_token?client_id=1744904279055316&redirect_uri=http://localhost:9000/facebook/code2token&client_secret=4a10b25a3727e529b3b332bc63a59425&code="+code)
+    val apiResponse: WSRequest = ws.url(ConfigFactory.load.getString("facebook.cod2accestoken.url")
+                                       +"?client_id="+ConfigFactory.load.getString("facebook.app.key")
+                                       +"&redirect_uri="+ConfigFactory.load.getString("facebook.login.redirect.uri")
+                                       +"&client_secret="+ConfigFactory.load.getString("facebook.app.secret")
+                                       +"&code="+code)
 
-    apiResponse.get().map {
-      response =>
+    apiResponse.get().map { response =>
         response.json.validate[Token] match {
           case s: JsSuccess[Token] => {
-            val response_token: Token = s.get
-
-            val search_response : WSRequest = ws.url("https://graph.facebook.com/search?access_token=" + response_token.access_token + "&type=user&fields=id,name,first_name,last_name,age_range,link,gender,locale,picture,timezone,updated_time,verified,email").withQueryString("q" -> cookie_query)
-
+            val search_response : WSRequest = ws.url(ConfigFactory.load.getString("facebook.search.url")
+                                                    +"?access_token=" + s.get.access_token
+                                                    +"&type=user"
+                                                    +"&fields="+ConfigFactory.load.getString("facebook.search.fields")).withQueryString("q" -> cookie_query)
             for {searchResponse <- search_response.get()}
               yield {
                 println(searchResponse.body)
               }
-            Ok("Test")
+            Ok("OK")
           }
           case e: JsError => {
-            println("Error:"+JsError.toFlatJson(e))
-            Ok("ERROR")
+            //println("Error:"+JsError.toFlatJson(e))
+            throw new Exception("ERROR: Facebook authentication error.")
           }
         }
     }
   }
 }
 case class Token(access_token: String, token_type: String, expires_in: Int)
-
