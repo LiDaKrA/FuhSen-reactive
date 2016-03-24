@@ -15,9 +15,8 @@
  */
 package controllers;
 
-import play.*;
+import controllers.de.fuhsen.wrappers.TokenManager;
 import play.mvc.*;
-
 import views.html.*;
 
 public class Application extends Controller {
@@ -26,4 +25,9 @@ public class Application extends Controller {
         return ok(index.render("Your new application is ready."));
     }
 
+    public Result InitSearch() {
+        return ok(token_retrieval.render(TokenManager.getFBTokenLifeLength()));
+    }
 }
+
+
