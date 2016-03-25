@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{EntityLinking, SilkConfig, SilkTransformableTrait}
+import controllers.de.fuhsen.wrappers.security.{RestApiOAuthTrait, RestApiOAuth2Trait}
 import org.apache.jena.graph.Triple
 import org.apache.jena.query.{Dataset, DatasetFactory}
 import org.apache.jena.rdf.model.ModelFactory
@@ -85,6 +86,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   /**
     * Link and merge entities from different sources.
+ *
     * @param wrappers
     * @param query
     * @return

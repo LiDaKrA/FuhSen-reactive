@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package controllers.de.fuhsen.wrappers
+package controllers.de.fuhsen.wrappers.security
 
 /**
  * Defines OAuth2 related methods.
  */
 trait RestApiOAuth2Trait {
+
   def oAuth2ClientKey : String
   def oAuth2ClientSecret : String
   def oAuth2AccessToken : String
+
 }

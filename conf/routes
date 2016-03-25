@@ -16,9 +16,9 @@ GET     /ldw/v1/restApiWrapper                              controllers.de.fuhse
 
 #POST     /facebook/search                                    controllers.de.fuhsen.wrappers.FacebookWrapper.search
 
-GET     /initSearch                                         controllers.Application.InitSearch()
-GET     /:wrapperId/getToken                                controllers.de.fuhsen.wrappers.TokenRetrievalController.getToken(wrapperId: String)
-GET     /:wrapperId/code2token                              controllers.de.fuhsen.wrappers.TokenRetrievalController.code2token(code:String, wrapperId: String)
+GET     /initSearch                                         controllers.de.fuhsen.wrappers.security.TokenRetrievalController.initSearch
+GET     /:wrapperId/getToken                                controllers.de.fuhsen.wrappers.security.TokenRetrievalController.getToken(wrapperId: String)
+GET     /:wrapperId/code2token                              controllers.de.fuhsen.wrappers.security.TokenRetrievalController.code2token(code:String, wrapperId: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                                       controllers.Assets.versioned(path="/public", file: Asset)

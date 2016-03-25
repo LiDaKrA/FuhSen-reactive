@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package controllers.de.fuhsen.wrappers
+package controllers.de.fuhsen.wrappers.security
 
-import play.api.libs.oauth.{RequestToken, ConsumerKey}
+import play.api.libs.oauth.{ConsumerKey, RequestToken}
 
 /**
  * Defines OAuth related methods.
  */
 trait RestApiOAuthTrait {
-  def oAuthConsumerKey: ConsumerKey
 
+  def oAuthConsumerKey: ConsumerKey
   def oAuthRequestToken: RequestToken
+
 }

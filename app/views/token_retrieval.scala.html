@@ -3,7 +3,7 @@
 @main("Search init (Token retrieval test page)") {
     @message
 
-    <form action="@controllers.de.fuhsen.wrappers.routes.TokenRetrievalController.getToken("Facebook")" method="get">
+    <form action="@controllers.de.fuhsen.wrappers.security.routes.TokenRetrievalController.getToken("Facebook")" method="get">
         <button>Retrieve FB Access token</button>
     </form>
 
