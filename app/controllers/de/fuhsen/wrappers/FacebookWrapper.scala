@@ -49,7 +49,7 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
     SilkTransformationTask(
       transformationTaskId = "FacebookPersonTransformation",
       createSilkTransformationRequestBody(
-        basePath = "",
+        basePath = "data",
         uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/facebook/{id}"
       )
     )
