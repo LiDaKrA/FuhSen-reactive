@@ -1,7 +1,18 @@
 @(message: String)
 
 @main("Welcome to Play") {
+    <div class="row">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/startPage.css")">
 
-    @play20.welcome(message, style = "Java")
-
+        <div class="col-md-12 search-widget">
+            <h1 class="invisible-but-readable">Heading Search Widget</h1>
+            <div class="row">
+                <img src="@routes.Assets.versioned("images/logoBig.png")" class="bigLogo" alt="Logo_Description"/>
+            </div>
+            <div class="row">
+                <div class="col-md-12" id="searchbar">
+                </div>
+            </div>
+        </div>
+    </div>
 }

@@ -16,6 +16,7 @@ package controllers.de.fuhsen.wrappers
  */
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
+import controllers.de.fuhsen.wrappers.security.RestApiOAuthTrait
 import play.api.libs.oauth.{ConsumerKey, RequestToken}
 
 /**
@@ -23,7 +24,7 @@ import play.api.libs.oauth.{ConsumerKey, RequestToken}
  */
 class TwitterWrapper extends RestApiWrapperTrait with RestApiOAuthTrait with SilkTransformableTrait {
   /** Query parameters that should be added to the request. */
-  override def queryParams: Map[String, String] = Map()
+  override def queryParams: Map[String, String] = Map("count" -> "10")
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
