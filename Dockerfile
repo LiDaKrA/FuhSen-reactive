@@ -1,4 +1,9 @@
 # Dockerfile for Fuhsen-reactive
+# 1) Build an image using this docker file. Run the following docker command
+# docker build -t lidakra/fuhsen:latest .
+# 2) Run a container with Fuhsen. Run the following docker command
+# docker run -p 127.0.0.1:9000:9000 -i -t lidakra/fuhsen
+#
 # Pull base image
 FROM ubuntu:15.04
 MAINTAINER Luigi Selmi <luigiselmi@gmail.com>
