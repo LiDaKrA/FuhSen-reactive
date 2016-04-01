@@ -201,7 +201,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         // There has been an error previously, don't go on.
         Future(error)
       case ApiSuccess(body) =>
-        //println("BODY OF THE RESPONSE:"+body)
         handleSilkTransformation(wrapper, body)
     }
   }
@@ -215,6 +214,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   def handleSilkTransformation(wrapper: RestApiWrapperTrait,
                                content: String,
                                acceptType: String = "text/turtle"): Future[ApiResponse] = {
+                               //acceptType: String = "text/csv"): Future[ApiResponse] = {
     wrapper match {
       case silkTransform: SilkTransformableTrait if silkTransform.silkTransformationRequestTasks.size > 0 =>
         Logger.info("Execute Silk Transformations")
@@ -288,7 +288,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
       }
-      modelToTripleString(model, lang)
+      //modelToTripleString(model, lang)
+      modelToTripleString(model, "text/csv")
     }
   }
 
