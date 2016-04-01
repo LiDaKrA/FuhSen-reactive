@@ -1,11 +1,10 @@
 var SearchBar = React.createClass({
     render: function() {
         return (
-            <form className="searchForm" id="searchform" action="results.html"  method="GET">
-                <input type="text" id="searchinput" name="q" placeholder="Here one" class="form-control"/>
-                <button class="btn btn-embossed btn-primary" id="btnsearchsubmit">
-                    Search
-                </button>
+            <form method="get" role="search" id="form-search" url="loadingResults">
+                <label><span>Search_text_field</span></label>
+                <input type="search" class="query" name="query" placeholder="Persons, Organizations or Products"/>
+                <button type="submit">Go</button>
             </form>
         );
     }

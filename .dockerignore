@@ -1,0 +1,2 @@
+#Exclude the following files and directories when creating a docker image of the project
+target
