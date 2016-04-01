@@ -21,11 +21,15 @@ RUN apt-get update && \
 # Define JAVA_HOME environment variable
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
-WORKDIR /home/lidakra
-
+# Install Silk Framework rel.2.7.1
+WORKDIR /home/
+RUN wget https://github.com/silk-framework/silk/releases/download/release-2.7.1/silk-workbench-2.7.1.tgz && \
+    tar xvf silk-workbench-2.7.1.tgz
+	
 # Install Fuhsen release in /home/lidakra/
+WORKDIR /home/lidakra/
 RUN wget https://github.com/LiDaKrA/FuhSen-reactive/releases/download/v1.0.4/fuhsen-1.0-SNAPSHOT.tgz && \
     tar xvf fuhsen-1.0-SNAPSHOT.tgz
 
 # Run Fuhsen 
-CMD ["./fuhsen-1.0-SNAPSHOT/bin/fuhsen"]
+CMD ["./fuhsen-1.0-SNAPSHOT/start_fuhsen.sh"]
