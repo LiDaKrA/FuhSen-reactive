@@ -29,9 +29,9 @@ RUN wget https://github.com/silk-framework/silk/releases/download/release-2.7.1/
 	
 # Install Fuhsen release in /home/lidakra/
 WORKDIR /home/lidakra
-RUN wget https://github.com/LiDaKrA/FuhSen-reactive/releases/download/v1.0.4.1/fuhsen-1.0-SNAPSHOT.tgz && \
+RUN wget https://github.com/LiDaKrA/FuhSen-reactive/releases/download/v1.0.4.2/fuhsen-1.0.4.2.tgz && \
     tar xvf fuhsen-1.0-SNAPSHOT.tgz && \
-    rm fuhsen-1.0-SNAPSHOT.tgz
+    rm fuhsen-1.0.4.2.tgz
 
 # Install the mapping file for Silk
 WORKDIR /home/lidakra/mapping
