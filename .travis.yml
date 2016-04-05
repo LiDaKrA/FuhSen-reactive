@@ -9,7 +9,7 @@ deploy:
   provider: releases
   api_key:
     secure: Q/OEvslHmljhYsjOH8pkJaUnBxWCuhgrNRrpDV+EhPeWZ+HUHvvbnVrgavyiNwlF2navBmZTiv7YxKpfu8NdkwB1COAt1drR61r6mb10cuFdvZ3I5ZxXfOp/gMa4/Yv/SEPNo9ADIX288OsHZw1Hftd0+S+hOflGF6rCdp40RtLjxubhqffl0xmNJw14QR/M/rh5yIAqKN0/G0KrMO7RPc9mYiFaF37y4686f5z8T7h8yUSX9ajyfq92fpVWS80206h6y6WajTJeq06YlM8TmJ7w0W6gdz5TiZHN3GaoyozLgUAIOaBxfrQRALuhNR8js/HqLrx1DFu2uTBTVUqaEqRDG0LJ6+4xbXgOqhiaUzB5ek7VjRqn4tLPWtXjMovVdAm6BWkFxmERv5R3GI//XitPU/X96v5BB8b5B19dXmiFTfxre688cUDmEJEPsUhfmkrYS7Vs7MKjHJdGoEowrI6YMV3fFFavxYtQpUiLrupi+xke4gOdFXvQRG2j3A5xivrQ76qKavXibxe6Y/TKAgXajg9vm1hBFKJDL0acw+f+XVzvDsY6ILtXZX683eeQOujDU/8q6K3ZzJ2HfUOMf8f/LqCDthusm9CJXKplsym95cDui8pv/bE++u8AlobrkOOWIr2aVI/YuH3Be5jRzT36UxcAcuV/suTQzM12lyw=
-  file: target/universal/fuhsen-1.4.0.2.tgz
+  file: target/universal/fuhsen-1.4.0.3.tgz
   on:
     repo: LiDaKrA/FuhSen-reactive
     tags: true
