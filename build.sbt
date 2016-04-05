@@ -1,6 +1,6 @@
 name := """fuhsen"""
 
-version := "1.0.4.2"
+version := "1.0.4.3"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, SbtWeb)
 
