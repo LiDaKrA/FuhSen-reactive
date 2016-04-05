@@ -24,17 +24,20 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 # Install Silk Framework rel.2.7.1
 WORKDIR /home/
 RUN wget https://github.com/silk-framework/silk/releases/download/release-2.7.1/silk-workbench-2.7.1.tgz && \
-    tar xvf silk-workbench-2.7.1.tgz
+    tar xvf silk-workbench-2.7.1.tgz && \
+    rm silk-workbench-2.7.1.tgz
 	
 # Install Fuhsen release in /home/lidakra/
 WORKDIR /home/lidakra
-RUN wget https://github.com/LiDaKrA/FuhSen-reactive/releases/download/v1.0.4/fuhsen-1.0-SNAPSHOT.tgz && \
-    tar xvf fuhsen-1.0-SNAPSHOT.tgz
+RUN wget https://github.com/LiDaKrA/FuhSen-reactive/releases/download/v1.0.4.1/fuhsen-1.0-SNAPSHOT.tgz && \
+    tar xvf fuhsen-1.0-SNAPSHOT.tgz && \
+    rm fuhsen-1.0-SNAPSHOT.tgz
 
 # Install the mapping file for Silk
 WORKDIR /home/lidakra/mapping
 RUN wget https://github.com/LiDaKrA/data-integration-workspace/releases/download/0.9.1/social_api_mappings.tar.gz && \
-    tar xvf social_api_mappings.tar.gz
+    tar xvf social_api_mappings.tar.gz && \
+    rm social_api_mappings.tar.gz
 
 # Run Fuhsen 
 #CMD ["./fuhsen-1.0-SNAPSHOT/start_fuhsen.sh"]
