@@ -29,6 +29,10 @@ To obtain the latest version of the project please clone the github repository
 
 	git clone https://github.com/LiDaKrA/FuhSen-reactive.git
 
-### Build 
+### Build
+Before making a build update the version of the project in the following files:
+.travis.yml, build.sbt, Docker, start_fuhsen.sh
+
+### Run 
 In order to run the app navigate until project folder, then execute command "activator ui", once the UI is launched go to Run tab and select "Run app".
 The application is going to be compiled and launched in the following address: http://localhost:9000
