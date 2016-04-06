@@ -9,5 +9,15 @@ var SearchBar = React.createClass({
         );
     }
 });
-
 React.render(<SearchBar />, document.getElementById('searchbar'));
+
+var FacebookForm = React.createClass({
+    render: function() {
+        return (
+            <form action="/facebook/getToken" method="get">
+                <button>Retrieve a new access token</button>
+            </form>
+        );
+    }
+});
+React.render(<FacebookForm />, document.getElementById('facebookform'));
