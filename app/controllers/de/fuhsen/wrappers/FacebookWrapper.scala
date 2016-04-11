@@ -32,7 +32,7 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
-    val query_string: String = queryString.replace(" ", "%20")
+    val query_string: String = queryString.replace(" ", "+")
     Map("q" -> query_string)
   }
   /** The REST endpoint URL */
