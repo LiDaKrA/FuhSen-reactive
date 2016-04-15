@@ -2,11 +2,11 @@
 
 <div align="center">
     @{
-        if(message == "")
+        if(message == "-1")
             <p>No valid Facebook token found, if Facebook results are needed please:
                 <div id="facebookform"/>
             </p>
         else if (message.toInt < 24) <p>Facebook token found, still valid for {message} hours.</p>
-        else <p>Facebook token found, still valid for {message.toFloat/24} days.</p>
+        else <p>Facebook token found, still valid for {message.toInt/24} days.</p>
     }
 </div>
