@@ -3,18 +3,19 @@
 @main("Welcome to Play") {
     <div class="row">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/startPage.css")">
-
         <div class="col-md-12 search-widget">
             <h1 class="invisible-but-readable">Heading Search Widget</h1>
             <div class="row">
                 <img src="@routes.Assets.versioned("images/logoBig.png")" class="bigLogo" alt="Logo_Description"/>
             </div>
             <div class="row">
-                <div class="col-md-12" id="searchbar">
+                <div class="col-md-12" id="searchform">
+                    form-search
                 </div>
             </div>
         </div>
         @token_retrieval(message)
     </div>
 
+    <script type='text/javascript' src='@routes.Assets.versioned("javascripts/search.js")'></script>
 }
