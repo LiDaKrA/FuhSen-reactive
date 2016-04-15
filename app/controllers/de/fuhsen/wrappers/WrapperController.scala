@@ -53,7 +53,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
           case errorResult: ApiError =>
             InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode)
           case success: ApiSuccess =>
-            Ok(success.responseBody)
+            Ok(views.html.results.render(success.responseBody))
         }
       case None =>
         Future(NotFound("Wrapper " + wrapperId + " not found! Supported wrapper: " +
@@ -288,8 +288,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
       }
-      //modelToTripleString(model, lang)
-      modelToTripleString(model, "text/csv")
+      modelToTripleString(model, lang)
+      //modelToTripleString(model, "text/csv")
     }
   }
 
