@@ -1,14 +1,12 @@
 @(message: String)
 
-@main("Search init (Token retrieval test page)") {
-    @message
-
-    <form action="@controllers.de.fuhsen.wrappers.security.routes.TokenRetrievalController.getToken("Facebook")" method="get">
-        <button>Retrieve FB Access token</button>
-    </form>
-
-   @* <form action="@controllers.de.fuhsen.wrappers.routes.FacebookWrapper.search()" method="POST">
-        <input type="text" id="search_id" name="search_name" value="Enter the keywords here">
-        <button>Search</button>
-    </form>*@
-}
+<div align="center">
+    @{
+        if(message == "-1")
+            <p>No valid Facebook token found, if Facebook results are needed please:
+                <div id="facebookform"/>
+            </p>
+        else if (message.toInt < 24) <p>Facebook token found, still valid for {message} hours.</p>
+        else <p>Facebook token found, still valid for {message.toInt/24} days.</p>
+    }
+</div>

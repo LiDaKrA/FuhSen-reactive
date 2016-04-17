@@ -10,7 +10,6 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/results.css")">
-
     </head>
     <body>
         <noscript>
@@ -23,23 +22,25 @@
             </div>
         </noscript>
 
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.fullPath("react", "react.js"))'></script>
+
         <header class="hidden-phone">
             <h1 class="invisible-but-readable">ddbnext.Heading_Header</h1>
             <div class="container">
                 <div class="row" id="header-main-row">
                     <nav class="widget col-md-12" data-widget="NavigationWidget">
                         <div class="row">
-                            <div class="col-md-7"></div>
-                            <div class="col-md-5 toolbar">
-                                <div class="status-bar">
+                            <div class="col-md-7 vcenter"></div>
+                            <div class="col-md-5 vcenter">
+                                <div class="toolbar status-bar">
                                     <div class="language-wrapper">
                                         <a href="#">English</a>
                                         <div class="arrow-container">
-                                            <div class="arrow-up"></div>
+                                        <div class="arrow-up"></div>
                                         </div>
                                         <ul class="selector language">
-                                            <li><a href="/fuhsen/?lang=de" >Deutsch</a></li>
-                                            <li class="selected-language"><a class="nopointer">English</a></li>
+                                        <li><a href="/fuhsen/?lang=de" >Deutsch</a></li>
+                                        <li class="selected-language"><a class="nopointer">English</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -50,17 +51,11 @@
             </div>
         </header>
 
-
-
         <div id="main-container" class="container" role="main">
             @content
         </div>
 
-
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
-        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.fullPath("react", "react.js"))'></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("JSXTransformer.js"))'></script>
-
-        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/app.js")'></script>
     </body>
 </html>

@@ -24,6 +24,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsError, JsPath, JsSuccess, Reads}
 import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.mvc.{Action, Controller}
+import views.html.index
 
 import scala.collection.mutable.ListBuffer
 
@@ -63,7 +64,7 @@ class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
       response.json.validate[Token] match {
         case s: JsSuccess[Token] => {
           TokenManager.addToken(s.get)
-          Ok(views.html.token_retrieval.render(TokenManager.getFBTokenLifeLength))
+          Ok(index.render(TokenManager.getFBTokenLifeLength))
         }
         case e: JsError => {
           throw new Exception("ERROR: Facebook authentication error.")
@@ -85,7 +86,7 @@ object TokenManager {
 
         elapsed_time match {
           case x if x >= curr_token.expires_in => "0" //Expired
-          case _ => (curr_token.expires_in - elapsed_time).toString //Lifetime un seconds
+          case _ => ( (curr_token.expires_in-elapsed_time)/3600 ).toString //Lifetime in hours.
         }
       case None => "-1" //No Token found
     }

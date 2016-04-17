@@ -629,7 +629,7 @@ header .header-spacer,.header .header-spacer {
 #form-search-header button:before,
 .nav form button:before {
     display: inline-block;
-    content: url("../images/icons/search.png");
+    content: url("../images/icons/search1.png");
     margin: -150px 0 0 0;
 }
 

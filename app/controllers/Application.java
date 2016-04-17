@@ -15,15 +15,14 @@
  */
 package controllers;
 
+import controllers.de.fuhsen.wrappers.security.TokenManager;
 import play.mvc.*;
 import views.html.*;
 
 public class Application extends Controller {
-
     public Result index() {
-        return ok(index.render("FuhSen Explorer"));
+        return ok(index.render(TokenManager.getFBTokenLifeLength()));
     }
-
 }
 
 
