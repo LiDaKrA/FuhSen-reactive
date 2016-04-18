@@ -1,0 +1,37 @@
+@(typeofheader: String)
+
+<header class="hidden-phone">
+<h1 class="invisible-but-readable">ddbnext.Heading_Header</h1>
+    <div class="container">
+        <div class="row" id="header-main-row">
+            <nav class="widget col-md-12" data-widget="NavigationWidget">
+                <div class="row">
+                    @{
+                        if(typeofheader == "2")
+                                <div id="smallsearchform"/>
+                    }
+                    <div class="col-md-7"></div>
+                    <div class="col-md-5 toolbar">
+                        <div class="status-bar">
+                            <div class="language-wrapper">
+                                <div class="language-wrapper">
+                                    <a href="#">English</a>
+                                    <div class="arrow-container">
+                                        <div class="arrow-up"></div>
+                                    </div>
+                                    <ul class="selector language">
+                                        <li><a href="/fuhsen/?lang=de" >Deutsch</a></li>
+                                        <li class="selected-language"><a class="nopointer">English</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+
+
+
