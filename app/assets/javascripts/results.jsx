@@ -1,4 +1,3 @@
-
 var Container = React.createClass({
     render: function () {
         return (
@@ -142,3 +141,5 @@ var TableRow = React.createClass({
 });
 
 React.render(<Container />, document.getElementById('skeleton'));
+
+React.render(<SearchForm id_class="form-search-header"/>, document.getElementById('searchform'));
