@@ -1,7 +1,7 @@
 var SearchForm = React.createClass({
     render: function() {
         return (
-            <form method="get" role="search" id={this.props.id_class} action="http://localhost:9000/ldw/v1/restApiWrapper/id/twitter/search">
+            <form method="get" role="search" id={this.props.id_class} action="/results">
                 <label><span>Search_text_field</span></label>
                 <input type="search" class="query" name="query" placeholder="Persons, Organizations or Products"/>
                 <button type="submit">Go</button>
