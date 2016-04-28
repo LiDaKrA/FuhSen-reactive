@@ -4,6 +4,7 @@
 
 # User Interface routes
 GET     /                                                   controllers.Application.index()
+GET     /results                                            controllers.Application.results()
 
 # Search Engine API routes
 GET     /engine/v1/search                                   controllers.de.fuhsen.engine.SearchEngine.search(query: String)
@@ -14,15 +15,12 @@ GET     /ldw/v1/restApiWrapper/id/:wrapperId/search         controllers.de.fuhse
 GET     /ldw/v1/restApiWrapper/search                       controllers.de.fuhsen.wrappers.WrapperController.searchMultiple(query: String, wrapperIds: String)
 GET     /ldw/v1/restApiWrapper                              controllers.de.fuhsen.wrappers.WrapperController.wrapperIds()
 
-#POST     /facebook/search                                    controllers.de.fuhsen.wrappers.FacebookWrapper.search
-
 GET     /initSearch                                         controllers.de.fuhsen.wrappers.security.TokenRetrievalController.initSearch
 GET     /:wrapperId/getToken                                controllers.de.fuhsen.wrappers.security.TokenRetrievalController.getToken(wrapperId: String)
 GET     /:wrapperId/code2token                              controllers.de.fuhsen.wrappers.security.TokenRetrievalController.code2token(code:String, wrapperId: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                                       controllers.Assets.versioned(path="/public", file: Asset)
-
-GET    /webjars/*file          controllers.WebJarAssets.at(file)
+GET    /webjars/*file                                       controllers.WebJarAssets.at(file)
 
 
