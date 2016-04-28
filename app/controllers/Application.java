@@ -20,9 +20,8 @@ import play.mvc.*;
 import views.html.*;
 
 public class Application extends Controller {
-    public Result index() {
-        return ok(index.render(TokenManager.getFBTokenLifeLength()));
-    }
+    public Result index() {return ok(index.render(TokenManager.getFBTokenLifeLength()));}
+    public Result results() {return ok(results.render());}
 }
 
 
