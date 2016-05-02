@@ -4,7 +4,8 @@
 
 # User Interface routes
 GET     /                                                   controllers.Application.index()
-GET     /results                                            controllers.Application.results()
+GET     /results                                            controllers.Application.results(query: String)
+GET     /keyword                                            controllers.Application.getKeyword()
 
 # Search Engine API routes
 GET     /engine/v1/search                                   controllers.de.fuhsen.engine.SearchEngine.search(query: String)

@@ -20,8 +20,22 @@ import play.mvc.*;
 import views.html.*;
 
 public class Application extends Controller {
-    public Result index() {return ok(index.render(TokenManager.getFBTokenLifeLength()));}
-    public Result results() {return ok(results.render());}
+
+    private String keyword;
+
+    public Result index() {
+        return ok(index.render(TokenManager.getFBTokenLifeLength()));
+    }
+
+    public Result results(String query) {
+        this.keyword = query;
+        return ok(results.render());
+    }
+
+    public Result getKeyword(){
+        String json_res = "{ \"keyword\" : \""+this.keyword+"\" }";
+        return ok(json_res);
+    }
 }
 
 

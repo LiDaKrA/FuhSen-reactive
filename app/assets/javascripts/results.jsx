@@ -1,7 +1,39 @@
-var Container = React.createClass({
-    loadCommentsFromServer: function () {
+var Trigger = React.createClass({
+    loadKeywordFromServer: function () {
         $.ajax({
             url: this.props.url,
+            dataType: 'json',
+            cache: false,
+            success: function (kw) {
+                this.setState({keyword: kw["keyword"]});
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    getInitialState: function () {
+        return {keyword: null};
+    },
+    componentDidMount: function () {
+        this.loadKeywordFromServer();
+        //setInterval(this.loadKeywordFromServer, this.props.pollInterval);
+    },
+    render: function () {
+        if (this.state.keyword) {
+            return ( <Container keyword={this.state.keyword} pollInterval={200000}/>);
+        }
+        return <div>Loading...</div>;
+    }
+});
+
+var Container = React.createClass({
+    loadCommentsFromServer: function () {
+
+        var searchUrl = "/ldw/v1/restApiWrapper/id/twitter/search?query="+this.props.keyword;
+
+        $.ajax({
+            url: searchUrl,
             dataType: 'json',
             cache: false,
             success: function (data) {
@@ -119,7 +151,8 @@ var ResultsList = React.createClass({
     render: function () {
         var resultsNodes = this.props.data["@graph"].map(function (result) {
             return (
-                <ResultElement img={result.img} webpage={result.url}
+                <ResultElement img={result.img}
+                               webpage={result.url}
                                name={result["http://xmlns.com/foaf/0.1/name"]}
                                location={result["http://vocab.cs.uni-bonn.de/fuhsen#location"]}
                                alias={result["http://vocab.cs.uni-bonn.de/fuhsen#alias"]}
@@ -169,5 +202,5 @@ var ResultElement = React.createClass({
     }
 });
 
-React.render(<Container url="/ldw/v1/restApiWrapper/id/twitter/search?query=Camilo" pollInterval={200000}/>, document.getElementById('skeleton'));
+React.render(<Trigger url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));
 React.render(<SearchForm id_class="form-search-header"/>, document.getElementById('searchform'));
