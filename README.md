@@ -1,8 +1,10 @@
-# FuhSen-reactive [![Build Status](https://travis-ci.org/LiDaKrA/FuhSen-reactive.svg?branch=master)](https://travis-ci.org/LiDaKrA/FuhSen-reactive)
+# FuhSen [![Build Status](https://travis-ci.org/LiDaKrA/FuhSen-reactive.svg?branch=master)](https://travis-ci.org/LiDaKrA/FuhSen-reactive)
 ================
 
 * Copyright (C) 2015-2016 EIS Uni-Bonn
 * Licensed under the Apache License
+
+![Logo](https://cloud.githubusercontent.com/assets/4923203/15185984/39e36d62-1769-11e6-993f-cbe815ded833.png)
 
 Reactive version of the Federated RDF-Based Hybrid Search Engine - **FuhSen**.
 
