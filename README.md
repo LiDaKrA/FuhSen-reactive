@@ -4,7 +4,7 @@
 * Copyright (C) 2015-2016 EIS Uni-Bonn
 * Licensed under the Apache License
 
-Reactive version of the Federated RDF-Based Hybrid Search Engine.
+Reactive version of the Federated RDF-Based Hybrid Search Engine - **FuhSen**.
 
 -----
 
