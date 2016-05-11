@@ -36,3 +36,7 @@ Before making a build update the version of the project in the following files:
 ### Run 
 In order to run the app navigate until project folder, then execute command "activator ui", once the UI is launched go to Run tab and select "Run app".
 The application is going to be compiled and launched in the following address: http://localhost:9000
+
+### Architecture and Reusability
+The FuhSen wiki contains video tutorials, class, and interaction diagrams to facilitate the understanding of the FunSen architecture  and to facilitate the extension and resuse of FuhSen.
+https://github.com/LiDaKrA/FuhSen-reactive/wiki
