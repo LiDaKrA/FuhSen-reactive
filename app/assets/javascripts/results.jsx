@@ -23,7 +23,12 @@ var Trigger = React.createClass({
         if (this.state.keyword) {
             return ( <Container keyword={this.state.keyword} pollInterval={200000}/>);
         }
-        return <div>Loading...</div>;
+        return <div className="row">
+                    <div className="col-md-12" style="text-align: center">
+                        <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
+                        <img src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                    </div>
+               </div>;
     }
 });
 
@@ -58,7 +63,12 @@ var Container = React.createClass({
                         <ResultsContainer data={this.state.data}></ResultsContainer>
                     </div>);
         }
-        return <div>Loading...</div>;
+        return <div className="row">
+                    <div className="col-md-12" style="text-align: center">
+                        <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
+                        <img src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                    </div>
+               </div>;
     }
 });
 
@@ -154,7 +164,7 @@ var CSVForm = React.createClass({
     handleClick: function(e) {
 
         var JSONData = JSON.stringify(this.props.data["@graph"]);
-        var ReportTitle = "current results in CSV format"
+        var ReportTitle = "Current results in CSV format"
         var ShowLabel = false;
 
         //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
