@@ -24,9 +24,9 @@ var Trigger = React.createClass({
             return ( <Container keyword={this.state.keyword} pollInterval={200000}/>);
         }
         return <div className="row">
-                    <div className="col-md-12" style="text-align: center">
+                    <div className="col-md-12">
                         <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
-                        <img src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                        <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
                     </div>
                </div>;
     }
@@ -64,9 +64,9 @@ var Container = React.createClass({
                     </div>);
         }
         return <div className="row">
-                    <div className="col-md-12" style="text-align: center">
+                    <div className="col-md-12">
                         <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
-                        <img src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                        <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
                     </div>
                </div>;
     }
