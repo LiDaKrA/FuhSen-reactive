@@ -60,13 +60,13 @@ var Container = React.createClass({
         if (this.state.data) {
             return ( <div>
                         <Facets></Facets>
-                        <ResultsContainer data={this.state.data}></ResultsContainer>
+                        <ResultsContainer data={this.state.data} keyword={this.props.keyword}></ResultsContainer>
                     </div>);
         }
         return <div className="row">
-                    <div className="col-md-12">
-                        <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
+                    <div className="col-md-12 text-center">
                         <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                        <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>Bitte warten Sie, während die Ergebnisse laden...</h2>
                     </div>
                </div>;
     }
@@ -109,54 +109,124 @@ var Facets = React.createClass({
 });
 
 var ResultsContainer = React.createClass({
-    render: function () {
-        return (
-            <div className="col-md-9">
-                <div id="results-paginator-options" className="results-paginator-options">
-                    <div class="off result-pages-count"></div>
-                    <div className="row">
-                        <div className="col-md-10">
-                            <ul className="tabulator list-inline">
-                                <li>
-                                    <span className="total-results">10</span>
-                                    <span className="total-results-label"> Ergebnisse:</span>
-                                </li>
-                                <li>
-                                    <a href="#" className="active-link">
-                                        <p><strong>Personen</strong></p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="">
-                                        Organisationen
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="">
-                                        Produkte
-                                    </a>
-                                </li>
-                            </ul>
+    getInitialState: function () {
+        return {new_data:"", selected: "1", loading: false};
+    },
+    onItemClick: function (event) {
+        var optionSelected = event.currentTarget.dataset.id;
+
+        this.setState({new_data : "", selected : optionSelected, loading: true});
+
+        var searchUrl = "/ldw/v1/restApiWrapper/id/twitter/search?query=";
+        var type;
+
+        if(optionSelected==="1") {
+            type = "Camilo"
+        } else if(optionSelected==="2"){
+            type = "Diego"
+        } else if(optionSelected==="3"){
+            type = "Luigi"
+        }
+
+        searchUrl = searchUrl+type
+
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                this.setState({new_data : data, selected : optionSelected, loading: false});
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    render: function(){
+
+        var personenItem = <li onClick={this.onItemClick} data-id="1">Personen</li>
+        var organizationenItem = <li onClick={this.onItemClick} data-id="2">Organizationen</li>
+        var produkteItem = <li onClick={this.onItemClick} data-id="3">Produkte</li>
+
+        if(this.state.selected==="1") {
+            personenItem = <li onClick={this.onItemClick} data-id="1"><p><b>Personen</b></p></li>
+        } else if(this.state.selected==="2"){
+            organizationenItem = <li onClick={this.onItemClick} data-id="2"><p><b>Organizationen</b></p></li>
+        } else if(this.state.selected==="3"){
+            produkteItem = <li onClick={this.onItemClick} data-id="3"><p><b>Produkte</b></p></li>
+        }
+
+        if (this.state.loading) {
+            return <div className="col-md-9">
+                        <div id="results-paginator-options" className="results-paginator-options">
+                            <div class="off result-pages-count"></div>
+                            <div className="row">
+                                <div className="col-md-10 tabulator">
+                                    <ul className="list-inline">
+                                        <li>
+                                            <span className="total-results-label"> Ergebnisse:</span>
+                                        </li>
+                                        {personenItem}
+                                        {organizationenItem}
+                                        {produkteItem}
+                                    </ul>
+                                </div>
+                                <div className="col-md-2">
+                                    <CSVForm data={final_data}></CSVForm>
+                                </div>
+                            </div>
                         </div>
-                        <div className="col-md-2">
-                            <CSVForm data={this.props.data}></CSVForm>
+
+                        <div className="row">
+                            <div className="col-md-12 text-center">
+                                <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                                <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>Bitte warten Sie, während die Ergebnisse laden...</h2>
+                            </div>
                         </div>
+                    </div>;
+        }
+        
+        var final_data;
+
+        if(this.state.new_data === "") {
+            final_data = this.props.data
+        } else {
+            final_data = this.state.new_data
+        }
+
+        return <div className="col-md-9">
+            <div id="results-paginator-options" className="results-paginator-options">
+                <div class="off result-pages-count"></div>
+                <div className="row">
+                    <div className="col-md-10 tabulator">
+                        <ul className="list-inline">
+                            <li>
+                                <span className="total-results">{final_data["@graph"].length}</span>
+                                <span className="total-results-label"> Ergebnisse:</span>
+                            </li>
+                            {personenItem}
+                            {organizationenItem}
+                            {produkteItem}
+                        </ul>
                     </div>
-                </div>
-                <div className="search-results-content">
-                    <div className="row">
-                        <div className="col-md-12">
-                            <ul id="search-results" className="search-results">
-                                <ul className="results-list list-unstyled">
-                                    <ResultsList data={this.props.data}>
-                                    </ResultsList>
-                                </ul>
-                            </ul>
-                        </div>
+                    <div className="col-md-2">
+                        <CSVForm data={final_data}></CSVForm>
                     </div>
                 </div>
             </div>
-        );
+            <div className="search-results-content">
+                <div className="row">
+                    <div className="col-md-12">
+                        <ul id="search-results" className="search-results">
+                            <ul className="results-list list-unstyled">
+                                <ResultsList data={final_data}>
+                                </ResultsList>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 });
 
