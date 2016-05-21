@@ -107,9 +107,14 @@
 .facets-item>a.h3, .time-facet>a.h3 {
   z-index: 10;
   display: block;
-  padding: 0 20px 0 10px;
+  padding: 5px 20px 0 10px; /** AAA **/
   background: url("../images/icons/arrows.png") no-repeat;
   background-position: 100% -48px;
+  /** AAA **/
+  height: 28px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  font-size: 16px;
 }
 
 .facets-list .facets-item >a:hover, .facets-list .time-facet >a:hover {
@@ -866,11 +871,19 @@ input[type="checkbox"],input[type="radio"] {
   display: inline-block;
   vertical-align: top;
 }
+
+/** AAA **/
+.flyout-right-body ul{
+  padding-left: 0px;
+}
+
 .flyout-right-body .left-col >li, .flyout-right-body .right-col >li {
   background: #E5E6E8;
   padding: 5px 5px 5px 5px;
   margin-bottom:2px;
   line-height: 15px;
+  min-width: 250px;/** AAA **/
+  height: 25px; /** AAA **/
 }
 .flyout-right-body.body-extender .left-col >li {
   margin-right: 5px;
@@ -878,13 +891,23 @@ input[type="checkbox"],input[type="radio"] {
 .flyout-right-body.body-extender .right-col >li, .flyout-page-nav .pages-overall-index span {
   margin-left: 5px;
 }
+/** AAA to remove bullet in li**/
+.pages-overall-index {
+  list-style: none;
+}
 .flyout-right-body .left-col >li a {
   display: block;
 }
-.flyout-right-body .left-col >li span, .flyout-right-body .right-col >li span {
-  float: right;
-  margin-left: 5px;
+
+/** AAA **/
+.flyout-right-body .left-col >li .sub-item span, .right-col >li .sub-item span {
+  float: left;
 }
+.flyout-right-body .left-col >li .sub-item-result span, .right-col >li .sub-item-result span {
+  float: right;
+  direction: rtl;
+}
+
 .body-extender{
   width:500px;
 }
@@ -893,6 +916,7 @@ input[type="checkbox"],input[type="radio"] {
 }
 .flyout-right-body .left-col >li,  .flyout-right-body .right-col >li {
   cursor: pointer;
+  list-style: none; /** AAA : was not exist ***/
 }
 .flyout-right-body .left-col >li:hover,  .flyout-right-body .right-col >li:hover, .add-more-filters:hover {
   text-decoration: underline;
@@ -971,6 +995,7 @@ input[type="checkbox"],input[type="radio"] {
 .add-more-filters:hover .icon{
   background-position-y:5px -100px;
 }
+
 .small-loader{
   height:24px;
   width:24px;

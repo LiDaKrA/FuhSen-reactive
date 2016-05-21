@@ -1,3 +1,12 @@
+var facetsStaticData = [
+    {name:'Geschlecht',elements:['male', 'female'],results:[2,8]},
+    {name:'Geburtstag',elements:['1.1.1900'],results:[1]},
+    {name:'Beruf',elements:['I am a fresh so yeah'],results:[3]},
+    {name:'Lebt in',elements:['Bonn', 'Koeln'],results:[1,3]},
+    {name:'Arbeitet bei',elements:['Google', 'Fraunhofer'],results:[1,1]},
+    {name:'Studium an',elements:['Uni Bonn', 'Uni Berlin'],results:[3,7]}
+];
+
 var Trigger = React.createClass({
     loadKeywordFromServer: function () {
         $.ajax({
@@ -21,7 +30,7 @@ var Trigger = React.createClass({
     },
     render: function () {
         if (this.state.keyword) {
-            return ( <Container keyword={this.state.keyword} pollInterval={200000}/>);
+            return ( <Container facetData={this.props.facetsData} keyword={this.state.keyword} pollInterval={200000}/>);
         }
         return <div className="row">
                     <div className="col-md-12">
@@ -58,8 +67,8 @@ var Container = React.createClass({
     },
     render: function () {
         if (this.state.data) {
-            return ( <div>
-                        <Facets></Facets>
+            return ( <div class="row search-results-container">
+                        <FacetList facetData={this.props.facetData}/>
                         <ResultsContainer data={this.state.data} keyword={this.props.keyword}></ResultsContainer>
                     </div>);
         }
@@ -69,6 +78,123 @@ var Container = React.createClass({
                         <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>Bitte warten Sie, während die Ergebnisse laden...</h2>
                     </div>
                </div>;
+    }
+});
+
+
+//************** Begin Facets Components *******************
+
+var FacetItems = React.createClass({
+    getInitialState: function() {
+        arr_ele = [];//fill elements of the sub menu in an array
+        return  { showTextBox: false };
+    },
+    onClick: function() {
+        var propsName = this.props.name.replace(/\s/g, '');
+        var propsName_key = arr_ele.indexOf(propsName);
+
+        //Check if the menu item is shown
+        // if Yes hide it, if No show it
+        if(this.state.showTextBox){
+
+            //Check if the item is in the array: means you just now clicked it, then hide it by setting the state to false and remove it from the array
+            //if not in the array: means it was hidden by showing other item:
+            //      - then show it by using normal js
+            //      - set the state to true
+            //      - hide and remove all others
+            if( propsName_key >= 0 ){
+                this.setState({ showTextBox: false });
+                arr_ele.splice(propsName_key, 1);
+            }
+            else{
+                this.setState({ showTextBox: true });
+                arr_ele.push(propsName);
+                document.getElementById(propsName).style.display = "inline";
+                if(arr_ele[0] != propsName){
+                    document.getElementById(arr_ele[0]).style.display = "none";
+                    arr_ele.splice(0, 1);
+                }
+
+            }
+        }
+        else{
+            this.setState({ showTextBox: true });
+            if(propsName_key < 0){
+                arr_ele.push(propsName);
+            }
+            for(var i = 0; i<arr_ele.length-1; i++){
+                if (arr_ele[i] != propsName){
+                    document.getElementById(arr_ele[i]).style.display = "none";
+                    arr_ele.splice(arr_ele[i], 1);
+                }
+            }
+        }
+    },
+    render: function () {
+        var propsName = this.props.name.replace(/\s/g, '') ;
+        return (
+            <div className="facets-item bt bb bl br" >
+                <a className="h3" href="#" onClick={this.onClick}>{this.props.name}</a>
+                <div id={""+propsName+""}>
+                    { this.state.showTextBox ? <FacetSubMenuItems elements={this.props.elements} results={this.props.results}/> : null }
+                </div>
+            </div>
+
+        );
+    }
+});
+
+var FacetSubMenuItems = React.createClass({
+    render: function () {
+        var subMenuEle = [];
+        for (var i = 0; i < this.props.elements.length; i++) {
+            subMenuEle.push(<li ><a href="#" onClick={this.onClick}><span className="sub-item">{this.props.elements[i]}</span><span className="sub-item-result">({this.props.results[i]})</span></a></li>);
+        }
+        return (
+            <div>
+                <div className="flyout-left-container">
+                    <ul className="selected-items unstyled"></ul>
+                    <div className="input-search-fct-container">
+                        <input type="text" className="input-search-fct"/>
+                    </div>
+                </div>
+
+                <div className="flyout-right-container" >
+                    <div className="flyout-right-head">
+                        <span>Sorted by frequency</span>
+                        <div className="flyout-page-nav fr">
+                            <ul className="inline">
+                                <li className="pages-overall-index">Page<span>1</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="flyout-right-body" >
+                        <ul className="left-col unstyled">
+                            {subMenuEle}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+});
+
+// inject/ passing data
+var FacetList = React.createClass({
+    render: function () {
+        var MItems = this.props.facetData.map(function(menuItems){
+            return <FacetItems name={menuItems.name} elements={menuItems.elements} results={menuItems.results}/>
+        });
+        return (
+            <div className="col-md-3 facets-container hidden-phone">
+                <div className="facets-head">
+                    <h3>Ergebnisse filtern</h3>
+                </div>
+                <div className="js facets-list bt bb">
+                    {MItems}
+                </div>
+            </div>
+        )
     }
 });
 
@@ -107,6 +233,8 @@ var Facets = React.createClass({
         );
     }
 });
+
+//************** End Facets Components *******************
 
 var ResultsContainer = React.createClass({
     getInitialState: function () {
@@ -372,5 +500,5 @@ var ResultElement = React.createClass({
     }
 });
 
-React.render(<Trigger url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));
+React.render(<Trigger facetsData={facetsStaticData} url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));
 React.render(<SearchForm id_class="form-search-header"/>, document.getElementById('searchform'));
