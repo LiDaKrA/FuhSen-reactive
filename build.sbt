@@ -8,7 +8,7 @@ scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
   //javaJdbc,
-  //cache,
+  cache,
   javaWs,
   "org.apache.jena" % "apache-jena-libs" % "3.0.1",
   "junit" % "junit" % "4.12" % "test",

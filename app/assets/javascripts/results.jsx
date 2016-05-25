@@ -44,7 +44,7 @@ var Trigger = React.createClass({
 var Container = React.createClass({
     loadCommentsFromServer: function () {
 
-        var searchUrl = "/ldw/v1/restApiWrapper/id/twitter/search?query="+this.props.keyword;
+        var searchUrl = "/ldw/restApiWrapper/id/twitter/search?query="+this.props.keyword;
 
         $.ajax({
             url: searchUrl,
@@ -245,7 +245,7 @@ var ResultsContainer = React.createClass({
 
         this.setState({new_data : "", selected : optionSelected, loading: true});
 
-        var searchUrl = "/ldw/v1/restApiWrapper/id/twitter/search?query=";
+        var searchUrl = "/ldw/restApiWrapper/id/twitter/search?query=";
         var type;
 
         if(optionSelected==="1") {

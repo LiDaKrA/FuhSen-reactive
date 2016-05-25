@@ -29,7 +29,7 @@ import scala.concurrent.Future
   * Wrapper around the GooglePlus API.
   */
 
-case class Person(id: String, displayName: String)
+case class Person(id: String, displayName: String, objectType: String)
 
 class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
   override def apiUrl: String = ConfigFactory.load.getString("gplus.user.url")
@@ -71,8 +71,9 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
   // Returns a JSON array of person objects
   override def customResponseHandling(implicit ws: WSClient) = Some(apiResponse => {
     val people = (Json.parse(apiResponse) \ "items").as[List[Person]]
+    val pages = people.filter(_.objectType == "page")
     for {
-      results <- requestAllPeople(people)
+      results <- requestAllPeople(pages)
     } yield {
       logIfBadRequestsExist(results)
       validResponsesToJSONString(results)

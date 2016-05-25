@@ -19,13 +19,23 @@ package controllers.de.fuhsen
   * Created by andreas on 2/26/16.
   */
 object FuhsenVocab {
-  val NS = "http://vocab.cs.uni-bonn.de/fuhsen#"
 
-  val sourceUri = NS + "merge/sourceUri"
+  val NS = "http://vocab.lidakra.de/fuhsen"
 
-  val sourceNS = NS + "source/"
+  val sourceUri = NS + "#" + "merge/sourceUri"
 
-  val url = NS + "url"
+  val sourceNS = NS + "#" + "source/"
 
-  val provenanceGraphUri = NS + "provenanceGraph"
+  val url = NS + "#" + "url"
+
+  val provenanceGraphUri = NS + "#" + "provenanceGraph"
+
+  //************** Search Object **********************
+
+  val SEARCH_URI = NS + "/" + "search#"
+  val SEARCH = NS + "#" + "Search"
+  val UID = NS + "#" + "uid"
+  val QUERY_DATE = NS + "#" + "queryDate"
+  val KEYWORD = NS + "#" + "keyword"
+
 }
