@@ -1,11 +1,12 @@
 # Dockerfile for Fuhsen-reactive
 # 1) Build an image using this docker file. Run the following docker command
 # docker build -t lidakra/fuhsen:latest .
-# 2) Run a container with Fuhsen. Run the following docker command
-# docker run -i -t -p 9000:9000 lidakra/fuhsen /bin/bash
-# Use -d to start the service as a daemon (docker run -d -p 9000:9000 lidakra/fuhsen ) 
+# 2) Run a container with Fuhsen. Run the following docker command for testing
+# docker run -i -t -p 9000:9000 --name fuhsen lidakra/fuhsen /bin/bash
+# Use -d to start the service as a daemon (docker run -d -p 9000:9000 --name fuhsen lidakra/fuhsen ) 
 # Pull base image
-FROM ubuntu:15.04
+#FROM ubuntu:15.04
+FROM ubuntu
 MAINTAINER Luigi Selmi <luigiselmi@gmail.com>
 
 # Install Java 8.
@@ -26,7 +27,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 #RUN wget https://github.com/LiDaKrA/FuhSen-reactive/releases/download/v1.0.5/fuhsen-1.0.4.4.tgz && \
 #    tar xvf fuhsen-1.0.4.4.tgz
 
-#Install Fuhsen package from the project folder (create a package using "sbt package" command)
+#Install Fuhsen package from the project folder (create a package using "sbt universal:package-zip-tarball" command)
 COPY target/universal/fuhsen-1.0.4.4.tgz /home/lidakra/
 WORKDIR /home/lidakra/
 RUN tar xvf fuhsen-1.0.4.4.tgz  
