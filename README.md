@@ -29,7 +29,7 @@ The quick and easy way to start compiling, running and coding FuhSen is to use "
 However, you can also set up your favorits Java IDE (Eclipse or IntellJ Idea). https://www.playframework.com/documentation/2.4.x/IDE
 
 ### Install and Build
-Fuhsen can be installed from the source code on Github or from the Docker image in the Lidakra repository
+Fuhsen can be installed from the source code on Github or from the Docker image in the [Lidakra repository](https://hub.docker.com/r/lidakra/)
 
 ### Install and build from the source code  
 To obtain the latest version of the project please clone the github repository
@@ -49,6 +49,9 @@ Before making a build, update the version of the project in the following files:
 .travis.yml, build.sbt, Dockerfile, start_fuhsen.sh
 
 ### Install from the Docker image
+A Docker image containing Fuhsen can be built from the Docker file or pulled from the Lidakra Repository on Docker Hub.
+Once the image has been downloaded or created the configuration file in conf/application.conf must be changed in order to provide
+the keys for the data sources used by Fuhsen and also to update the url of the Silk Workbench.
 The config file must be provided in a Docker data volume loaded with the config file. As an example copy the config file in 
 a folder in the server host (e.g. /home/lidakra/application.conf) then create or run a container using an image
 already available or a small one like alpine (a small Linux version)
