@@ -8,13 +8,16 @@ GET     /results                                            controllers.Applicat
 GET     /keyword                                            controllers.Application.getKeyword()
 
 # Search Engine API routes
-GET     /engine/v1/search                                   controllers.de.fuhsen.engine.SearchEngine.search(query: String)
-GET     /engine/v1/expandQuery                              controllers.de.fuhsen.engine.SearchEngine.expandQuery(query: String)
+GET     /engine/api/search                                  controllers.de.fuhsen.engine.SearchEngineController.search(query: String)
+POST    /engine/api/queryprocessing                         controllers.de.fuhsen.engine.QueryProcessingController.execute
+POST    /engine/api/federatedquery                          controllers.de.fuhsen.engine.FederatedQueryController.execute
+POST    /engine/api/entitysummarization                     controllers.de.fuhsen.engine.EntitySummarizationController.execute
+POST    /engine/api/semanticranking                         controllers.de.fuhsen.engine.SemanticRankingController.execute
 
 # REST API Wrappers
-GET     /ldw/v1/restApiWrapper/id/:wrapperId/search         controllers.de.fuhsen.wrappers.WrapperController.search(wrapperId: String, query: String)
-GET     /ldw/v1/restApiWrapper/search                       controllers.de.fuhsen.wrappers.WrapperController.searchMultiple(query: String, wrapperIds: String)
-GET     /ldw/v1/restApiWrapper                              controllers.de.fuhsen.wrappers.WrapperController.wrapperIds()
+GET     /ldw/restApiWrapper/id/:wrapperId/search         controllers.de.fuhsen.wrappers.WrapperController.search(wrapperId: String, query: String)
+GET     /ldw/restApiWrapper/search                       controllers.de.fuhsen.wrappers.WrapperController.searchMultiple2(query: String, wrapperIds: String)
+GET     /ldw/restApiWrapper                              controllers.de.fuhsen.wrappers.WrapperController.wrapperIds()
 
 GET     /initSearch                                         controllers.de.fuhsen.wrappers.security.TokenRetrievalController.initSearch
 GET     /:wrapperId/getToken                                controllers.de.fuhsen.wrappers.security.TokenRetrievalController.getToken(wrapperId: String)

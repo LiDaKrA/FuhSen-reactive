@@ -34,6 +34,7 @@ import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.{Result, Action, Controller}
 import utils.dataintegration.RDFUtil._
 import utils.dataintegration.{RequestMerger, UriTranslator}
+import controllers.de.fuhsen.common.{ApiResponse, ApiSuccess, ApiError}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
@@ -83,6 +84,34 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       fetchAndIntegrateWrapperResults(wrappers, query)
     }
   }
+  /**
+    * Returns the merged result from multiple wrappers in JSON-LD format.
+    * @param query for each wrapper
+    * @param wrapperIds a comma-separated list of wrapper ids
+    */
+  def searchMultiple2(query: String, wrapperIds: String) = Action.async {
+    val wrappers = (wrapperIds.split(",") map (WrapperController.wrapperMap.get)).toSeq
+    if(wrappers.exists(_.isEmpty)) {
+      Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
+        WrapperController.sortedWrapperIds.mkString(", ")))
+    } else {
+      val requestMerger = new RequestMerger()
+      val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper))
+      Future.sequence(resultFutures) map { results =>
+        for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
+          wrapperResult match {
+            case ApiSuccess(responseBody) =>
+              val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
+              requestMerger.addWrapperResult(model, wrapper.sourceUri)
+            case _: ApiError =>
+          }
+        }
+        //val resultDataset = requestMerger.constructQuadDataset()
+        Ok(requestMerger.serializeMergedModel(Lang.JSONLD))
+      }
+    }
+  }
+
 
   /**
     * Link and merge entities from different sources.
@@ -109,8 +138,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   private def datasetToNQuadsResult(rewrittenDataset: Future[Dataset]): Future[Result] = {
     rewrittenDataset map { d =>
-      Ok(datasetToQuadString(d, Lang.TRIG)).
-          withHeaders(("content-type", Lang.TRIG.getContentType.getContentType))
+      Ok(datasetToQuadString(d, Lang.JSONLD)).
+          withHeaders(("content-type", Lang.JSONLD.getContentType.getContentType))
     }
   }
 
@@ -120,7 +149,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
       wrapperResult match {
         case ApiSuccess(responseBody) =>
-          val model = rdfStringToModel(responseBody, Lang.TURTLE.getName)
+          val model = rdfStringToModel(responseBody, Lang.JSONLD.getName)
           requestMerger.addWrapperResult(model, wrapper.sourceUri)
         case _: ApiError =>
         // Ignore for now
@@ -354,9 +383,3 @@ object WrapperController {
 
   val sortedWrapperIds = wrapperMap.keys.toSeq.sortWith(_ < _)
 }
-
-sealed trait ApiResponse
-
-case class ApiError(statusCode: Int, errorMessage: String) extends ApiResponse
-
-case class ApiSuccess(responseBody: String) extends ApiResponse
