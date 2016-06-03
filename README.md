@@ -1,17 +1,15 @@
 # FuhSen [![Build Status](https://travis-ci.org/LiDaKrA/FuhSen-reactive.svg?branch=master)](https://travis-ci.org/LiDaKrA/FuhSen-reactive)
 
-* Copyright (C) 2015-2016 EIS Uni-Bonn
-* Licensed under the Apache License
-
 ![Logo](https://cloud.githubusercontent.com/assets/4923203/15185984/39e36d62-1769-11e6-993f-cbe815ded833.png)
 
+
+### Description
 Reactive version of the Federated RDF-Based Hybrid Search Engine - **FuhSen**.
 
------
-
-## Getting started
-
-###Software requirements
+### Documentation
+The FuhSen wiki contains video tutorials, class, and interaction diagrams to facilitate the understanding of the FunSen architecture  and to facilitate the extension and resuse of FuhSen.
+https://github.com/LiDaKrA/FuhSen-reactive/wiki
+### Dependencies
 FuhSen reactive project depends on the following software
 
 * JDK 1.8
@@ -21,23 +19,40 @@ Download Play: https://www.playframework.com/download
 
 Installation steps: https://www.playframework.com/documentation/2.4.x/Installing
 
-### IDE support 
+Fuhsen depends on the Silk Workbench to transform the data collected from the data sources into RDF.
+An instance of the workbench must be available with the configuration files containing the transformation rules.
+Fuhsen collects data from social networks and other data sources. Some of these require a key to use their API that is 
+stored in conf/application.conf. The key must be provided before starting Fuhsen. 
+#### IDE support 
 The quick and easy way to start compiling, running and coding FuhSen is to use "activator ui".
 However, you can also set up your favorits Java IDE (Eclipse or IntellJ Idea). https://www.playframework.com/documentation/2.4.x/IDE
 
-### Download 
+### Install and Build
+Fuhsen can be installed from the source code on Github or from the Docker image in the Lidakra repository  
 To obtain the latest version of the project please clone the github repository
 
 	git clone https://github.com/LiDaKrA/FuhSen-reactive.git
 
-### Build
-Before making a build update the version of the project in the following files:
+Before making a build, update the version of the project in the following files:
 .travis.yml, build.sbt, Docker, start_fuhsen.sh
 
-### Run 
+The config file must be provided in a Docker data volume loaded with the config file. As an example copy the config file in 
+a folder in the server host (e.g. /home/lidakra/application.conf) then create or run a container using an image
+already available or a small one like alpine (a small Linux version)
+
+    $ docker run -d -v /home/lidakra/application.conf:/home/lidakra/fuhsen-1.0.4.4/conf/application.conf \
+                                         --name fuhsen-conf alpine echo "Fuhsen Config File"
+
+
+### Run
 In order to run the app navigate until project folder, then execute command "activator ui", once the UI is launched go to Run tab and select "Run app".
 The application is going to be compiled and launched in the following address: http://localhost:9000
 
-### Architecture and Reusability
-The FuhSen wiki contains video tutorials, class, and interaction diagrams to facilitate the understanding of the FunSen architecture  and to facilitate the extension and resuse of FuhSen.
-https://github.com/LiDaKrA/FuhSen-reactive/wiki
+### Example Usage
+
+### License
+
+* Copyright (C) 2015-2016 EIS Uni-Bonn
+* Licensed under the Apache License
+
+
