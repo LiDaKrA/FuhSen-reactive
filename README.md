@@ -56,9 +56,9 @@ Once the image has been downloaded or created the configuration file in conf/app
 the keys for the data sources used by Fuhsen and also to update the url of the Silk Workbench.
 The config file must be provided in a Docker data volume loaded with the config file. As an example copy the config file in 
 a folder in the server host (e.g. /home/lidakra/application.conf) then create or run a container using an image
-already available or a small one like alpine (a small Linux version)
+already available or a small one like alpine (a small Linux version) mapping the config file in the host with the keys to the config file in the container
 
-    $ docker run -d -v /home/lidakra/application.conf:/home/lidakra/fuhsen-1.0.4.4/conf/application.conf \
+    $ docker run -d -v /home/lidakra/application.conf:/home/lidakra/fuhsen-1.0.4.4/conf/application.conf:ro \
                                          --name fuhsen-conf alpine echo "Fuhsen Config File"
 
 Start a container with Fuhsen using the config file in the data volume
