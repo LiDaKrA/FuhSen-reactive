@@ -21,6 +21,8 @@ Installation steps: https://www.playframework.com/documentation/2.4.x/Installing
 
 Fuhsen depends on the Silk Workbench to transform the data collected from the data sources into RDF.
 An instance of the workbench must be available with the configuration files containing the transformation rules.
+The configuration files for the RDF transformation and all the resources needed to set up an instance of the Silk Workbench are 
+provided in the project [Data Integration Workspace](https://github.com/LiDaKrA/data-integration-workspace).
 Fuhsen collects data from social networks and other data sources. Some of these require a key to use their API that is 
 stored in conf/application.conf. The key must be provided before starting Fuhsen. 
 
