@@ -44,7 +44,7 @@ The build system for Fuhsen is Sbt. The project can be compiled and run using Sb
 
 The project can be packaged in a tar file in /target/universal/ with the command
 
-    $ sbt universal:packageZipTarball 
+    $ sbt package universal:packageZipTarball 
 
 
 Before making a build, update the version of the project in the following files:
@@ -66,8 +66,19 @@ Start a container with Fuhsen using the config file in the data volume
     $ docker run -d -p 9000:9000 --volumes-from fuhsen-conf --name fuhsen lidakra/fuhsen
 
 ### Run
-In order to run the app navigate until project folder, then execute command "activator ui", once the UI is launched go to Run tab and select "Run app".
-The application is going to be compiled and launched in the following address: http://localhost:9000
+Fuhsen can be started using Sbt or the Typesafe activator.
+
+#### Run with Sbt
+From the project root folder run the command
+
+    $ sbt start
+
+The Fuhsen server will listen on port 9000.
+
+#### Run with Typesafe Activator 
+From the project root folder execute the command "activator ui". The application is going to be compiled and launched 
+at the following address: http://localhost:9000. Once the UI is launched in the browser go to the Run tab and select "Run app".
+
 
 ### Example Usage
 
