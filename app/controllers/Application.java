@@ -24,7 +24,7 @@ public class Application extends Controller {
     private String keyword;
 
     public Result index() {
-        return ok(index.render(TokenManager.getFBTokenLifeLength()));
+        return ok(index.render());
     }
 
     public Result results(String query) {
