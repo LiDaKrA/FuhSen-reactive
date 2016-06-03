@@ -27,24 +27,6 @@
 
         <header class="hidden-phone">
             <h1 class="invisible-but-readable">ddbnext.Heading_Header</h1>
-            <div class="container">
-                <div class="row" id="header-main-row">
-                    <nav class="widget col-md-12" data-widget="NavigationWidget">
-                        <div class="row">
-                            <div class="col-md-7">
-                                <a href="http://localhost:9000/">
-                                    <img src="@routes.Assets.versioned("images/logoBig2.png")" class="smallLogo" alt="Logo_Description"/>
-                                </a>
-                            </div>
-                            <div class="col-md-5 toolbar">
-                                <div class="search-header hidden-phone">
-                                    <div id="searchform"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-            </div>
         </header>
 
         <div id="main-container" class="container" role="main">
@@ -53,6 +35,8 @@
 
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.min.js"))'></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("JSXTransformer.js"))'></script>
+
+        <script type='text/javascript' src='@routes.Assets.versioned("javascripts/translation.js")'></script>
         <script type='text/javascript' src='@routes.Assets.versioned("javascripts/search.js")'></script>
         <script type='text/javascript' src='@routes.Assets.versioned("javascripts/results.js")'></script>
     </body>

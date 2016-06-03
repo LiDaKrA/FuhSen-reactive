@@ -1,11 +1,76 @@
 var facetsStaticData = [
-    {name:'Geschlecht',elements:['male', 'female'],results:[2,8]},
-    {name:'Geburtstag',elements:['1.1.1900'],results:[1]},
-    {name:'Beruf',elements:['I am a fresh so yeah'],results:[3]},
-    {name:'Lebt in',elements:['Bonn', 'Koeln'],results:[1,3]},
-    {name:'Arbeitet bei',elements:['Google', 'Fraunhofer'],results:[1,1]},
-    {name:'Studium an',elements:['Uni Bonn', 'Uni Berlin'],results:[3,7]}
+    {name:'gender',elements:['male', 'female'],results:[2,8]},
+    {name:'birthday',elements:['1.1.1900'],results:[1]},
+    {name:'occupation',elements:['I am a fresh so yeah'],results:[3]},
+    {name:'livein',elements:['Bonn', 'Koeln'],results:[1,3]},
+    {name:'workfor',elements:['Google', 'Fraunhofer'],results:[1,1]},
+    {name:'studies',elements:['Uni Bonn', 'Uni Berlin'],results:[3,7]}
 ];
+
+var ContainerResults = React.createClass({
+    getInitialState: function () {
+        return {
+            dictionary: "ger"
+        }
+    },
+    // event handler for language switch
+    // change dictionary then update state so the page notices the change
+    setLang: function () {
+        var lang = document.getElementById("langselect").value;
+        switch (lang) {
+            case "german":
+                globalDict = dictGer;
+                this.setState({dictionary: "ger"});
+                globalFlushFilters();
+                break;
+            case "english":
+                globalDict = dictEng;
+                this.setState({dictionary: "eng"});
+                globalFlushFilters();
+                break;
+        }
+    },
+    render: function () {
+        return (
+            <div>
+                <div className="container">
+                    <div className="row" id="header-main-row">
+                        <nav className="widget col-md-12" data-widget="NavigationWidget">
+                            <div className="row">
+                                <div className="col-md-7">
+                                    <a href="http://localhost:9000/">
+                                        <img src="http://localhost:9000/assets/images/logoBig2.png" class="smallLogo" alt="Logo_Description"/>
+                                </a>
+                                </div>
+                                <div className="col-md-5 toolbar search-header hidden-phone text-right">
+                                    <LangSwitcherResults onlangselect={this.setLang}/>
+                                    <SearchForm id_class="form-search-header"/>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+
+                <div className="row search-results-container">
+                    <Trigger facetsData={facetsStaticData} url="/keyword" pollInterval={200000}/>
+                </div>
+            </div>
+        );
+    }
+});
+
+var LangSwitcherResults = React.createClass({
+    render: function () {
+        return (
+            <form action="" id="langselectform">
+                <select name="lang" id="langselect" onChange={this.props.onlangselect}>
+                    <option value="german">Deutsch</option>
+                    <option value="english">English</option>
+                </select>
+            </form>
+        );
+    }
+});
 
 var Trigger = React.createClass({
     loadKeywordFromServer: function () {
@@ -75,7 +140,7 @@ var Container = React.createClass({
         return <div className="row">
                     <div className="col-md-12 text-center">
                         <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                        <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>Bitte warten Sie, während die Ergebnisse laden...</h2>
+                        <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
                     </div>
                </div>;
     }
@@ -161,10 +226,10 @@ var FacetSubMenuItems = React.createClass({
 
                 <div className="flyout-right-container" >
                     <div className="flyout-right-head">
-                        <span>Sorted by frequency</span>
+                        <span>{getTranslation("sortedby")}</span>
                         <div className="flyout-page-nav fr">
                             <ul className="inline">
-                                <li className="pages-overall-index">Page<span>1</span></li>
+                                <li className="pages-overall-index">{getTranslation("page")}<span>1</span></li>
                             </ul>
                         </div>
                     </div>
@@ -183,12 +248,12 @@ var FacetSubMenuItems = React.createClass({
 var FacetList = React.createClass({
     render: function () {
         var MItems = this.props.facetData.map(function(menuItems){
-            return <FacetItems name={menuItems.name} elements={menuItems.elements} results={menuItems.results}/>
+            return <FacetItems name={getTranslation(menuItems.name)} elements={menuItems.elements} results={menuItems.results}/>
         });
         return (
             <div className="col-md-3 facets-container hidden-phone">
                 <div className="facets-head">
-                    <h3>Ergebnisse filtern</h3>
+                    <h3>{getTranslation("resultfilters")}</h3>
                 </div>
                 <div className="js facets-list bt bb">
                     {MItems}
@@ -254,6 +319,9 @@ var ResultsContainer = React.createClass({
             type = "Diego"
         } else if(optionSelected==="3"){
             type = "Luigi"
+        } else if(optionSelected==="4"){
+            searchUrl = "/ldw/restApiWrapper/id/tor2web/search?query="
+            type = "Obama"
         }
 
         searchUrl = searchUrl+type
@@ -272,16 +340,19 @@ var ResultsContainer = React.createClass({
     },
     render: function(){
 
-        var personenItem = <li onClick={this.onItemClick} data-id="1">Personen</li>
-        var organizationenItem = <li onClick={this.onItemClick} data-id="2">Organizationen</li>
-        var produkteItem = <li onClick={this.onItemClick} data-id="3">Produkte</li>
+        var personenItem = <li onClick={this.onItemClick} data-id="1">{getTranslation("people")}</li>
+        var organizationenItem = <li onClick={this.onItemClick} data-id="2">{getTranslation("organisations")}</li>
+        var produkteItem = <li onClick={this.onItemClick} data-id="3">{getTranslation("products")}</li>
+        var darkWebItem = <li onClick={this.onItemClick} data-id="4">Websites</li>
 
         if(this.state.selected==="1") {
-            personenItem = <li onClick={this.onItemClick} data-id="1"><p><b>Personen</b></p></li>
+            personenItem = <li onClick={this.onItemClick} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
         } else if(this.state.selected==="2"){
-            organizationenItem = <li onClick={this.onItemClick} data-id="2"><p><b>Organizationen</b></p></li>
+            organizationenItem = <li onClick={this.onItemClick} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
         } else if(this.state.selected==="3"){
-            produkteItem = <li onClick={this.onItemClick} data-id="3"><p><b>Produkte</b></p></li>
+            produkteItem = <li onClick={this.onItemClick} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
+        } else if(this.state.selected==="4"){
+            darkWebItem = <li onClick={this.onItemClick} data-id="$"><p><b>Websites</b></p></li>
         }
 
         if (this.state.loading) {
@@ -289,17 +360,18 @@ var ResultsContainer = React.createClass({
                         <div id="results-paginator-options" className="results-paginator-options">
                             <div class="off result-pages-count"></div>
                             <div className="row">
-                                <div className="col-md-10 tabulator">
+                                <div className="col-md-8 tabulator">
                                     <ul className="list-inline">
                                         <li>
-                                            <span className="total-results-label"> Ergebnisse:</span>
+                                            <span className="total-results-label"> {getTranslation("results")}:</span>
                                         </li>
                                         {personenItem}
                                         {organizationenItem}
                                         {produkteItem}
+                                        {darkWebItem}
                                     </ul>
                                 </div>
-                                <div className="col-md-2">
+                                <div className="col-md-4">
                                     <CSVForm data={final_data}></CSVForm>
                                 </div>
                             </div>
@@ -308,7 +380,7 @@ var ResultsContainer = React.createClass({
                         <div className="row">
                             <div className="col-md-12 text-center">
                                 <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                                <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>Bitte warten Sie, während die Ergebnisse laden...</h2>
+                                <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
                             </div>
                         </div>
                     </div>;
@@ -326,18 +398,19 @@ var ResultsContainer = React.createClass({
             <div id="results-paginator-options" className="results-paginator-options">
                 <div class="off result-pages-count"></div>
                 <div className="row">
-                    <div className="col-md-10 tabulator">
+                    <div className="col-md-8 tabulator">
                         <ul className="list-inline">
                             <li>
                                 <span className="total-results">{final_data["@graph"].length}</span>
-                                <span className="total-results-label"> Ergebnisse:</span>
+                                <span className="total-results-label"> {getTranslation("results")}:</span>
                             </li>
                             {personenItem}
                             {organizationenItem}
                             {produkteItem}
+                            {darkWebItem}
                         </ul>
                     </div>
-                    <div className="col-md-2">
+                    <div className="col-md-4 text-right">
                         <CSVForm data={final_data}></CSVForm>
                     </div>
                 </div>
@@ -363,7 +436,7 @@ var CSVForm = React.createClass({
 
         var JSONData = JSON.stringify(this.props.data["@graph"]);
         var ReportTitle = "Current results in CSV format"
-        var ShowLabel = false;
+        var ShowLabel = true;
 
         //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
         var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
@@ -439,7 +512,7 @@ var CSVForm = React.createClass({
     render: function() {
         return (
             <button onClick={this.handleClick}>
-                Export to CSV
+                {getTranslation("exporttocsv")}
             </button>
         );
     }
@@ -448,21 +521,66 @@ var CSVForm = React.createClass({
 var ResultsList = React.createClass({
     render: function () {
         var resultsNodes = this.props.data["@graph"].map(function (result) {
-            return (
-                <ResultElement img={result.img}
-                               webpage={result.url}
-                               name={result["http://xmlns.com/foaf/0.1/name"]}
-                               location={result["http://vocab.cs.uni-bonn.de/fuhsen#location"]}
-                               alias={result["http://vocab.cs.uni-bonn.de/fuhsen#alias"]}
-                               social_url="http://localhost:9000/assets/images/datasources/facebook.png">
-                </ResultElement>
-            );
+
+            if(result["@id"].indexOf("tor2web") == -1) {
+                return (
+                    <ResultElement
+                        img={result.img}
+                        webpage={result.url}
+                        name={result["http://xmlns.com/foaf/0.1/name"]}
+                        location={result["http://vocab.cs.uni-bonn.de/fuhsen#location"]}
+                        alias={result["http://vocab.cs.uni-bonn.de/fuhsen#alias"]}
+                        social_url="http://localhost:9000/assets/images/datasources/facebook.png">
+                    </ResultElement>
+                );
+            } else {
+                return (
+                    <DWResultElement
+                        img="http://localhost:9000/assets/images/Tor_project_logo_hq.png"
+                        onion_url={result.url}
+                        comment={result["http://www.w3.org/2000/01/rdf-schema#comment"]}
+                        social_url="http://localhost:9000/assets/images/Tor_logo1.png">
+                    </DWResultElement>
+                );
+            }
         });
 
         return (
             <div className="commentList">
                 {resultsNodes}
             </div>
+        );
+    }
+});
+
+var DWResultElement = React.createClass({
+    render: function () {
+        return (
+            <li className="item bt">
+                <div className="summary row">
+                    <div className="thumbnail-wrapper col-md-2">
+                        <div className="thumbnail">
+                            <img src={this.props.img} height="60px" width="75px"/>
+                        </div>
+                    </div>
+                    <div className="summary-main-wrapper col-md-8">
+                        <div className="summary-main">
+                            <h2 className="title">
+                                {this.props.onion_url}
+                            </h2>
+                            <div className="subtitle">
+                                <p><b>{getTranslation("comment")}</b>: {this.props.comment}</p>
+                                <p><b>Link: </b>: <a href={this.props.onion_url} target="_blank">{getTranslation("clickhere")}</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="thumbnail-wrapper col-md-1">
+                        <div class="thumbnail">
+                            <img src={this.props.social_url} alt="Information from FB" height="45" width="45"/>
+                        </div>
+                    </div>
+                </div>
+            </li>
         );
     }
 });
@@ -483,9 +601,9 @@ var ResultElement = React.createClass({
                                 {this.props.name}
                             </h2>
                             <div className="subtitle">
-                                <p>Nick: {this.props.alias}</p>
-                                <p>Location: {this.props.location}</p>
-                                <p>Webpage: {this.props.webpage}</p>
+                                <p>{getTranslation("nick")}: {this.props.alias}</p>
+                                <p>{getTranslation("location")}: {this.props.location}</p>
+                                <p>{getTranslation("webpage")}: {this.props.webpage}</p>
                             </div>
                         </div>
                     </div>
@@ -500,5 +618,4 @@ var ResultElement = React.createClass({
     }
 });
 
-React.render(<Trigger facetsData={facetsStaticData} url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));
-React.render(<SearchForm id_class="form-search-header"/>, document.getElementById('searchform'));
+React.render(<ContainerResults facetsData={facetsStaticData} url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));

@@ -64,7 +64,7 @@ class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
       response.json.validate[Token] match {
         case s: JsSuccess[Token] => {
           TokenManager.addToken(s.get)
-          Ok(index.render(TokenManager.getFBTokenLifeLength))
+          Ok(TokenManager.getFBTokenLifeLength)
         }
         case e: JsError => {
           throw new Exception("ERROR: Facebook authentication error.")
