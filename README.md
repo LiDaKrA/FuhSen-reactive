@@ -80,9 +80,9 @@ From the project root folder execute the command "activator ui". The application
 at the following address: http://localhost:9000. Once the UI is launched in the browser go to the Run tab and select "Run app".
 
 
-### Example Usage
+#### Example Usage
 
-### License
+#### License
 
 * Copyright (C) 2015-2016 EIS Uni-Bonn
 * Licensed under the Apache License
