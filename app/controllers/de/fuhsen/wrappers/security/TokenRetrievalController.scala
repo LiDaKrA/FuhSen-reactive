@@ -33,10 +33,6 @@ import scala.collection.mutable.ListBuffer
   */
 class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
 
-  def initSearch = Action {
-    Ok(views.html.token_retrieval(TokenManager.getFBTokenLifeLength))
-  }
-
   def getToken(provider:String) = Action { request =>
     Redirect(ConfigFactory.load.getString("facebook.request_code.url")
         +"?client_id="+ConfigFactory.load.getString("facebook.app.key")
@@ -64,7 +60,7 @@ class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
       response.json.validate[Token] match {
         case s: JsSuccess[Token] => {
           TokenManager.addToken(s.get)
-          Ok(TokenManager.getFBTokenLifeLength)
+          Ok(index.render())
         }
         case e: JsError => {
           throw new Exception("ERROR: Facebook authentication error.")
