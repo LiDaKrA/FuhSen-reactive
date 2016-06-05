@@ -8,11 +8,6 @@ var facetsStaticData = [
 ];
 
 var ContainerResults = React.createClass({
-    getInitialState: function () {
-        return {
-            dictionary: "ger"
-        }
-    },
     // event handler for language switch
     // change dictionary then update state so the page notices the change
     setLang: function () {
@@ -40,10 +35,11 @@ var ContainerResults = React.createClass({
                                 <div className="col-md-7">
                                     <a href="http://localhost:9000/">
                                         <img src="http://localhost:9000/assets/images/logoBig2.png" class="smallLogo" alt="Logo_Description"/>
-                                </a>
+                                    </a>
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <LangSwitcherResults onlangselect={this.setLang}/>
+
                                     <SearchForm id_class="form-search-header"/>
                                 </div>
                             </div>
@@ -98,11 +94,11 @@ var Trigger = React.createClass({
             return ( <Container facetData={this.props.facetsData} keyword={this.state.keyword} pollInterval={200000}/>);
         }
         return <div className="row">
-                    <div className="col-md-12">
-                        <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
-                        <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                    </div>
-               </div>;
+            <div className="col-md-12">
+                <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
+                <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+            </div>
+        </div>;
     }
 });
 
@@ -133,16 +129,16 @@ var Container = React.createClass({
     render: function () {
         if (this.state.data) {
             return ( <div class="row search-results-container">
-                        <FacetList facetData={this.props.facetData}/>
-                        <ResultsContainer data={this.state.data} keyword={this.props.keyword}></ResultsContainer>
-                    </div>);
+                <FacetList facetData={this.props.facetData}/>
+                <ResultsContainer data={this.state.data} keyword={this.props.keyword}></ResultsContainer>
+            </div>);
         }
         return <div className="row">
-                    <div className="col-md-12 text-center">
-                        <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                        <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
-                    </div>
-               </div>;
+            <div className="col-md-12 text-center">
+                <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+            </div>
+        </div>;
     }
 });
 
@@ -357,35 +353,35 @@ var ResultsContainer = React.createClass({
 
         if (this.state.loading) {
             return <div className="col-md-9">
-                        <div id="results-paginator-options" className="results-paginator-options">
-                            <div class="off result-pages-count"></div>
-                            <div className="row">
-                                <div className="col-md-8 tabulator">
-                                    <ul className="list-inline">
-                                        <li>
-                                            <span className="total-results-label"> {getTranslation("results")}:</span>
-                                        </li>
-                                        {personenItem}
-                                        {organizationenItem}
-                                        {produkteItem}
-                                        {darkWebItem}
-                                    </ul>
-                                </div>
-                                <div className="col-md-4">
-                                    <CSVForm data={final_data}></CSVForm>
-                                </div>
-                            </div>
+                <div id="results-paginator-options" className="results-paginator-options">
+                    <div class="off result-pages-count"></div>
+                    <div className="row">
+                        <div className="col-md-8 tabulator">
+                            <ul className="list-inline">
+                                <li>
+                                    <span className="total-results-label"> {getTranslation("results")}:</span>
+                                </li>
+                                {personenItem}
+                                {organizationenItem}
+                                {produkteItem}
+                                {darkWebItem}
+                            </ul>
                         </div>
+                        <div className="col-md-4">
+                            <CSVForm data={final_data}></CSVForm>
+                        </div>
+                    </div>
+                </div>
 
-                        <div className="row">
-                            <div className="col-md-12 text-center">
-                                <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                                <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
-                            </div>
-                        </div>
-                    </div>;
+                <div className="row">
+                    <div className="col-md-12 text-center">
+                        <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                        <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                    </div>
+                </div>
+            </div>;
         }
-        
+
         var final_data;
 
         if(this.state.new_data === "") {
