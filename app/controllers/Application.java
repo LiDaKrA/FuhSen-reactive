@@ -27,6 +27,11 @@ public class Application extends Controller {
         return ok(index.render());
     }
 
+    public Result TokenLifeLength(String wrapperId) {
+        String life_length = "{ \"life_length\" : \""+TokenManager.getFBTokenLifeLength()+"\" }";
+        return ok(life_length);
+    }
+
     public Result results(String query) {
         this.keyword = query;
         return ok(results.render());
