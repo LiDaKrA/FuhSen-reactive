@@ -31,7 +31,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         Ok(textBody.get)
 
       //Calling the RDF-Wrappers to get the information
-      ws.url("http://localhost:9000/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds=twitter,gkb").get.map {
+      ws.url("http://localhost:9000/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds=twitter,gkb,facebook,ebay,tor2web").get.map {
         response =>
           val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
           model.add(wrappersResult)

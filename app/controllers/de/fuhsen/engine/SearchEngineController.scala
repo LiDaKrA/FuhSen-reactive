@@ -17,6 +17,7 @@
 package controllers.de.fuhsen.engine
 
 import java.util.{Calendar, UUID}
+import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.FuhsenVocab
 import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.riot.Lang
@@ -34,7 +35,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
 
   def search(uid: String, entityType: String) = Action.async { request =>
 
-    Logger.info("Starting Search Engine Search : " + uid)
+    Logger.info("Starting Search Engine Search : "+uid)
 
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
@@ -47,11 +48,12 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
 
           //Micro-task services executed
           val data = RDFUtil.modelToTripleString(model, Lang.TURTLE)
+          val microtaskServer = ConfigFactory.load.getString("engine.microtask.url")
           val futureResponse: Future[WSResponse] = for {
-            responseOne <- ws.url("http://localhost:9000/engine/api/queryprocessing?query=Diego").post(data)
-            responseTwo <- ws.url("http://localhost:9000/engine/api/federatedquery?query=Diego").post(responseOne.body)
-            responseThree <- ws.url("http://localhost:9000/engine/api/entitysummarization?query=Diego").post(responseTwo.body)
-            responseFour <- ws.url("http://localhost:9000/engine/api/semanticranking?query=Diego").post(responseThree.body)
+            responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing?query=Diego").post(data)
+            responseTwo <- ws.url(microtaskServer+"/engine/api/federatedquery?query=Diego").post(responseOne.body)
+            responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization?query=Diego").post(responseTwo.body)
+            responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking?query=Diego").post(responseThree.body)
           } yield responseFour
           //action taken in case of failure
           futureResponse.recover {
@@ -100,7 +102,6 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
       //.addProperty(model.createProperty(FuhsenVocab.QUERY_DATE), Calendar.getInstance.getTime.toString)
 
     //Storing in session the new search unique identifier
-    //ToDo: Using the session seems not be a good idea, since this will only work for browers clients.
     GraphResultsCache.saveModel(searchUid, model)
     Logger.info("Number of searches: "+GraphResultsCache.size)
     //request.session + ("SearchUid" -> searchUid)
@@ -147,6 +148,71 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |?p rdf:type foaf:Person .
              |?p foaf:name ?name .
              |OPTIONAL { ?p foaf:img ?img } .
+             |OPTIONAL { ?p fs:url ?url } .
+             |}
+          """.stripMargin)
+        QueryExecutionFactory.create(query, model).execConstruct()
+      case "product" =>
+        val query = QueryFactory.create(
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |PREFIX gr: <http://purl.org/goodrelations/v1#>
+             |
+             |CONSTRUCT   {
+             |?p rdf:type fs:SearchableEntity .
+             |?p fs:title ?description .
+             |?p fs:image ?img .
+             |?p fs:ul ?url
+             |}
+             |WHERE {
+             |?p rdf:type gr:ProductOrService .
+             |?p gr:description ?description .
+             |OPTIONAL { ?p foaf:img ?img } .
+             |OPTIONAL { ?p fs:url ?url } .
+             |}
+          """.stripMargin)
+        QueryExecutionFactory.create(query, model).execConstruct()
+      case "organization" =>
+        val query = QueryFactory.create(
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |
+             |CONSTRUCT   {
+             |?p rdf:type fs:SearchableEntity .
+             |?p fs:title ?name .
+             |?p fs:image ?img .
+             |?p fs:ul ?url
+             |}
+             |WHERE {
+             |?p rdf:type foaf:Organization .
+             |?p foaf:name ?name .
+             |OPTIONAL { ?p foaf:img ?img } .
+             |OPTIONAL { ?p fs:url ?url } .
+             |}
+          """.stripMargin)
+        QueryExecutionFactory.create(query, model).execConstruct()
+      case "website" =>
+        val query = QueryFactory.create(
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |
+             |CONSTRUCT   {
+             |?p rdf:type fs:SearchableEntity .
+             |?p fs:title ?label .
+             |?p fs:excerpt ?comment .
+             |?p fs:ul ?url
+             |}
+             |WHERE {
+             |?p rdf:type foaf:Document .
+             |?p rdfs:label ?label .
+             |OPTIONAL { ?p rdfs:comment ?comment } .
              |OPTIONAL { ?p fs:url ?url } .
              |}
           """.stripMargin)
