@@ -84,6 +84,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       fetchAndIntegrateWrapperResults(wrappers, query)
     }
   }
+
   /**
     * Returns the merged result from multiple wrappers in JSON-LD format.
     * @param query for each wrapper

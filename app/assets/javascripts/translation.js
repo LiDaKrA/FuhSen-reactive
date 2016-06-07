@@ -63,7 +63,8 @@ var dictEng = {
     "studies":"Studies",
     "page":"Page",
     "sortedby":"Sorted by frequency",
-    "clickhere":"Click here to visit to this webpage."
+    "clickhere":"Click here to visit to this webpage.",
+    "checkingfbtoken": "Checking Facebook token ..."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -141,8 +142,22 @@ var dictGer = {
     "studies":"Studium an",
     "page":"Seite",
     "sortedby":"Sortieren nach Frequenz",
-    "clickhere":"Clicken Sie hier um diese WebSite zu besuchen."
+    "clickhere":"Clicken Sie hier um diese WebSite zu besuchen.",
+    "checkingfbtoken": "Überprüfen Facebook Token ..."
 };
 
 window.dictGer = dictGer;
 window.dictEng = dictEng;
+
+if(window.globalDict === undefined){
+    window.globalDict = dictGer;
+}
+
+function getTranslation(toTranslate){
+    if(toTranslate in window.globalDict){
+        return window.globalDict[toTranslate];
+    }
+    else return toTranslate;
+}
+
+window.getTranslation = getTranslation;

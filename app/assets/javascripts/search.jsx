@@ -1,32 +1,16 @@
-if(window.globalDict === undefined){
-    window.globalDict = dictGer;
-    function getTranslation(toTranslate){
-        if(toTranslate in globalDict){
-            return globalDict[toTranslate];
-        }
-        else return toTranslate;
-    }
-    window.getTranslation = getTranslation;
-}
-
 var ContainerSearch = React.createClass({
-    getInitialState: function () {
-        return {
-            dictionary: "ger"
-        }
-    },
     // event handler for language switch
     // change dictionary then update state so the page notices the change
     setLang: function () {
         var lang = document.getElementById("langselect").value;
         switch (lang) {
             case "german":
-                globalDict = dictGer;
+                window.globalDict = dictGer;
                 this.setState({dictionary: "ger"});
                 globalFlushFilters();
                 break;
             case "english":
-                globalDict = dictEng;
+                window.globalDict = dictEng;
                 this.setState({dictionary: "eng"});
                 globalFlushFilters();
                 break;
@@ -90,52 +74,57 @@ var SearchForm = React.createClass({
 });
 
 var FacebookForm = React.createClass({
-    getInitialState: function () {
-        return {token_life_length: "-1"};
-    },
-    componentDidMount: function () {
-        this.handleClick();
-    },
-    handleClick: function () {
-
-        var searchUrl = "/facebook/getToken";
-
+    loadTokenLifeLength: function () {
         $.ajax({
-            url: searchUrl,
+            url: "/facebook/getTokenLifeLength",
             dataType: 'json',
             cache: false,
-            success: function (data) {
-                this.setState({token_life_length : data});
+            success: function (lifelength) {
+                this.setState({token_life_length: lifelength["life_length"]});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
             }.bind(this)
         });
     },
+    getInitialState: function () {
+        return {token_life_length: null};
+    },
+    componentDidMount: function () {
+        this.loadTokenLifeLength();
+    },
     render: function() {
-        if(this.state.token_life_length === "-1") {
-            return (
-                <div align="center">
-                    <p>{getTranslation("novalidfbtkfound")}
-                        <br/>
-                        <br/>
-                        <button onClick={this.handleClick}>{getTranslation("newfbtoken")}</button>
-                    </p>
-                </div> )
+        if(this.state.token_life_length) {
+            if(this.state.token_life_length === "-1") {
+                return (
+                    <div align="center">
+                        {getTranslation("novalidfbtkfound")}
+                            <br/>
+                            <br/>
+                            <form action="/facebook/getToken" method="get">
+                                <button>{getTranslation("newfbtoken")} </button>
+                            </form>
+
+                    </div> )
+            }
+            else if(this.state.token_life_length < 24) {
+                return (
+                    <div align="center">
+                        <p>{getTranslation("validfbtkfound")} {this.state.token_life_length} {getTranslation("hours")}.
+                        </p>
+                    </div> )
+            }
+            else {
+                return (
+                    <div align="center">
+                        <p>{getTranslation("validfbtkfound")} {Math.floor(this.state.token_life_length/24)} {getTranslation("days")}.</p>
+                    </div> )
+            }
         }
-        else if(this.state.token_life_length.toInt < 24) {
-            return (
-                <div align="center">
-                    <p>{getTranslation("validfbtkfound")} {this.state.token_life_length} {getTranslation("hours")}.
-                    </p>
-                </div> )
-        }
-        else {
-            return (
-                <div align="center">
-                    <p>{getTranslation("validfbtkfound")} {this.state.token_life_length.toInt/24} {getTranslation("days")}.</p>
-                </div> )
-        }
+        return (
+            <div align="center">
+                {getTranslation("checkingfbtoken")}
+            </div> )
     }
 });
 
