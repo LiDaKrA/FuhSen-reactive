@@ -1,3 +1,5 @@
+checkLanguage();
+
 var ContainerSearch = React.createClass({
     // event handler for language switch
     // change dictionary then update state so the page notices the change
@@ -6,11 +8,13 @@ var ContainerSearch = React.createClass({
         switch (lang) {
             case "german":
                 window.globalDict = dictGer;
+                window.localStorage.lang = "ger";
                 this.setState({dictionary: "ger"});
                 globalFlushFilters();
                 break;
             case "english":
                 window.globalDict = dictEng;
+                window.localStorage.lang = "eng";
                 this.setState({dictionary: "eng"});
                 globalFlushFilters();
                 break;
@@ -49,14 +53,23 @@ var ContainerSearch = React.createClass({
 
 var LangSwitcher = React.createClass({
     render: function () {
-        return (
-                    <form action="" id="langselectform">
-                        <select name="lang" id="langselect" onChange={this.props.onlangselect}>
-                            <option value="german">Deutsch</option>
-                            <option value="english">English</option>
-                        </select>
-                    </form>
-        );
+        if(window.localStorage.getItem("lang") === "ger"){
+            return (
+                <form action="" id="langselectform">
+                    <select name="lang" id="langselect" onChange={this.props.onlangselect}>
+                        <option value="german" selected>Deutsch</option>
+                        <option value="english">English</option>
+                    </select>
+                </form>)
+        } else {
+            return (
+                <form action="" id="langselectform">
+                    <select name="lang" id="langselect" onChange={this.props.onlangselect}>
+                        <option value="german">Deutsch</option>
+                        <option value="english" selected>English</option>
+                    </select>
+                </form>)
+        }
     }
 });
 
