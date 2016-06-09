@@ -8,7 +8,12 @@ GET     /results                                            controllers.Applicat
 GET     /keyword                                            controllers.Application.getKeyword()
 
 # Search Engine API routes
-GET     /engine/api/search                                  controllers.de.fuhsen.engine.SearchEngineController.search(query: String)
+POST    /engine/api/searches                                 controllers.de.fuhsen.engine.SearchEngineController.startSession(query: String)
+GET     /engine/api/searches/:uid/results                    controllers.de.fuhsen.engine.SearchEngineController.search(uid: String, entityType: String)
+DELETE  /engine/api/searches                                 controllers.de.fuhsen.engine.SearchEngineController.stopSession(uid: String)
+GET  /engine/api/searches/:uid/facets                    controllers.de.fuhsen.engine.SearchEngineController.stopSession(uid: String)
+
+#Mini-task services enriching the results graph
 POST    /engine/api/queryprocessing                         controllers.de.fuhsen.engine.QueryProcessingController.execute
 POST    /engine/api/federatedquery                          controllers.de.fuhsen.engine.FederatedQueryController.execute
 POST    /engine/api/entitysummarization                     controllers.de.fuhsen.engine.EntitySummarizationController.execute
