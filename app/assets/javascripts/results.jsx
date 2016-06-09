@@ -1,3 +1,5 @@
+checkLanguage();
+
 var facetsStaticData = [
     {name:'gender',elements:['male', 'female'],results:[2,8]},
     {name:'birthday',elements:['1.1.1900'],results:[1]},
@@ -14,12 +16,14 @@ var ContainerResults = React.createClass({
         var lang = document.getElementById("langselect").value;
         switch (lang) {
             case "german":
-                globalDict = dictGer;
+                window.globalDict = dictGer;
+                window.localStorage.lang = "ger";
                 this.setState({dictionary: "ger"});
                 globalFlushFilters();
                 break;
             case "english":
-                globalDict = dictEng;
+                window.globalDict = dictEng;
+                window.localStorage.lang = "eng";
                 this.setState({dictionary: "eng"});
                 globalFlushFilters();
                 break;
@@ -38,7 +42,7 @@ var ContainerResults = React.createClass({
                                     </a>
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
-                                    <LangSwitcherResults onlangselect={this.setLang}/>
+                                    <LangSwitcher onlangselect={this.setLang}/>
 
                                     <SearchForm id_class="form-search-header"/>
                                 </div>
@@ -51,19 +55,6 @@ var ContainerResults = React.createClass({
                     <Trigger facetsData={facetsStaticData} url="/keyword" pollInterval={200000}/>
                 </div>
             </div>
-        );
-    }
-});
-
-var LangSwitcherResults = React.createClass({
-    render: function () {
-        return (
-            <form action="" id="langselectform">
-                <select name="lang" id="langselect" onChange={this.props.onlangselect}>
-                    <option value="german">Deutsch</option>
-                    <option value="english">English</option>
-                </select>
-            </form>
         );
     }
 });
