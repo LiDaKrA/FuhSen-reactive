@@ -149,8 +149,14 @@ var dictGer = {
 window.dictGer = dictGer;
 window.dictEng = dictEng;
 
-if(window.globalDict === undefined){
+//if(window.globalDict === undefined){
+if(window.localStorage.getItem("lang") === undefined || window.localStorage.getItem("lang") === "ger"){
     window.globalDict = dictGer;
+    window.localStorage.lang = "ger";
+}
+else{
+    window.globalDict = dictEng;
+    window.localStorage.lang = "eng";
 }
 
 function getTranslation(toTranslate){
@@ -160,4 +166,19 @@ function getTranslation(toTranslate){
     else return toTranslate;
 }
 
+function checkLanguage(){
+    if(window.localStorage.getItem("lang") === undefined) {
+        window.globalDict = dictGer;
+        window.localStorage.lang = "ger";
+    }
+    else if(window.localStorage.getItem("lang") === "ger") {
+        window.globalDict = dictGer;
+    }
+    else if(window.localStorage.getItem("lang") === "eng") {
+        window.globalDict = dictEng;
+    }
+}
+
 window.getTranslation = getTranslation;
+window.checkLanguage = checkLanguage;
+
