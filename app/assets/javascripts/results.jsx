@@ -509,7 +509,7 @@ var ResultsList = React.createClass({
     render: function () {
         var resultsNodes = this.props.data["@graph"].map(function (result) {
 
-            if(result["@id"].indexOf("tor2web") == -1) {
+            if(result["http://vocab.cs.uni-bonn.de/fuhsen#source"] === undefined){
                 return (
                     <ResultElement
                         img={result.img}
