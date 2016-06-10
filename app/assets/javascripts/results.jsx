@@ -37,8 +37,8 @@ var ContainerResults = React.createClass({
                         <nav className="widget col-md-12" data-widget="NavigationWidget">
                             <div className="row">
                                 <div className="col-md-7">
-                                    <a href="http://localhost:9000/">
-                                        <img src="http://localhost:9000/assets/images/logoBig2.png" class="smallLogo" alt="Logo_Description"/>
+                                    <a href="/">
+                                        <img src="/assets/images/logoBig2.png" class="smallLogo" alt="Logo_Description"/>
                                     </a>
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
@@ -87,7 +87,7 @@ var Trigger = React.createClass({
         return <div className="row">
             <div className="col-md-12">
                 <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
-                <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
             </div>
         </div>;
     }
@@ -126,8 +126,8 @@ var Container = React.createClass({
         }
         return <div className="row">
             <div className="col-md-12 text-center">
-                <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
             </div>
         </div>;
     }
@@ -366,8 +366,8 @@ var ResultsContainer = React.createClass({
 
                 <div className="row">
                     <div className="col-md-12 text-center">
-                        <img className="img-responsive center-block" src="http://localhost:9000/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                        <h2><img src="http://localhost:9000/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                        <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                        <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
                     </div>
                 </div>
             </div>;
@@ -517,16 +517,16 @@ var ResultsList = React.createClass({
                         name={result["http://xmlns.com/foaf/0.1/name"]}
                         location={result["http://vocab.cs.uni-bonn.de/fuhsen#location"]}
                         alias={result["http://vocab.cs.uni-bonn.de/fuhsen#alias"]}
-                        social_url="http://localhost:9000/assets/images/datasources/facebook.png">
+                        social_url="/assets/images/datasources/facebook.png">
                     </ResultElement>
                 );
             } else {
                 return (
                     <DWResultElement
-                        img="http://localhost:9000/assets/images/Tor_project_logo_hq.png"
+                        img="/assets/images/Tor_project_logo_hq.png"
                         onion_url={result.url}
                         comment={result["http://www.w3.org/2000/01/rdf-schema#comment"]}
-                        social_url="http://localhost:9000/assets/images/Tor_logo1.png">
+                        social_url="/assets/images/Tor_logo1.png">
                     </DWResultElement>
                 );
             }
