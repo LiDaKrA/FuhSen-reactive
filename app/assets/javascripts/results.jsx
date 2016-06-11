@@ -9,6 +9,20 @@ var facetsStaticData = [
     {name:'studies',elements:['Uni Bonn', 'Uni Berlin'],results:[3,7]}
 ];
 
+function extractQuery(key) {
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split("=");
+        if (pair[0] == key) {
+            return pair[1];
+        }
+    }
+    return (false);
+}
+var queryDirty = extractQuery("query");
+var query = queryDirty.replace(new RegExp('\\+', 'g'), ' ');
+
 var ContainerResults = React.createClass({
     // event handler for language switch
     // change dictionary then update state so the page notices the change
@@ -52,7 +66,7 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container">
-                    <Trigger facetsData={facetsStaticData} url="/keyword" pollInterval={200000}/>
+                    <Trigger facetsData={facetsStaticData} url={"/engine/api/searches?query="+query} pollInterval={200000}/>
                 </div>
             </div>
         );
@@ -64,9 +78,10 @@ var Trigger = React.createClass({
         $.ajax({
             url: this.props.url,
             dataType: 'json',
+            type: "POST",
             cache: false,
             success: function (kw) {
-                this.setState({keyword: kw["keyword"]});
+                this.setState({keyword: kw["keyword"], searchUid:kw["uid"]});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -74,7 +89,7 @@ var Trigger = React.createClass({
         });
     },
     getInitialState: function () {
-        return {keyword: null};
+        return {keyword: null, searchUid: null};
     },
     componentDidMount: function () {
         this.loadKeywordFromServer();
@@ -82,7 +97,7 @@ var Trigger = React.createClass({
     },
     render: function () {
         if (this.state.keyword) {
-            return ( <Container facetData={this.props.facetsData} keyword={this.state.keyword} pollInterval={200000}/>);
+            return ( <Container facetData={this.props.facetsData} keyword={this.state.keyword} searchUid={this.state.searchUid} pollInterval={200000}/>);
         }
         return <div className="row">
             <div className="col-md-12">
@@ -96,7 +111,7 @@ var Trigger = React.createClass({
 var Container = React.createClass({
     loadCommentsFromServer: function () {
 
-        var searchUrl = "/ldw/restApiWrapper/id/twitter/search?query="+this.props.keyword;
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType=person";
 
         $.ajax({
             url: searchUrl,
@@ -121,7 +136,7 @@ var Container = React.createClass({
         if (this.state.data) {
             return ( <div class="row search-results-container">
                 <FacetList facetData={this.props.facetData}/>
-                <ResultsContainer data={this.state.data} keyword={this.props.keyword}></ResultsContainer>
+                <ResultsContainer data={this.state.data} keyword={this.props.keyword} searchUid={this.props.searchUid}/>
             </div>);
         }
         return <div className="row">
@@ -297,18 +312,17 @@ var ResultsContainer = React.createClass({
 
         this.setState({new_data : "", selected : optionSelected, loading: true});
 
-        var searchUrl = "/ldw/restApiWrapper/id/twitter/search?query=";
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType=";
         var type;
 
         if(optionSelected==="1") {
-            type = "Camilo"
+            type = "person"
         } else if(optionSelected==="2"){
-            type = "Diego"
+            type = "organization"
         } else if(optionSelected==="3"){
-            type = "Luigi"
+            type = "product"
         } else if(optionSelected==="4"){
-            searchUrl = "/ldw/restApiWrapper/id/tor2web/search?query="
-            type = "Obama"
+            type = "website"
         }
 
         searchUrl = searchUrl+type
@@ -509,14 +523,14 @@ var ResultsList = React.createClass({
     render: function () {
         var resultsNodes = this.props.data["@graph"].map(function (result) {
 
-            if(result["http://vocab.cs.uni-bonn.de/fuhsen#source"] === undefined){
+            if(result["fs:source"] === undefined){
                 return (
                     <ResultElement
-                        img={result.img}
+                        img={result.image}
                         webpage={result.url}
-                        name={result["http://xmlns.com/foaf/0.1/name"]}
-                        location={result["http://vocab.cs.uni-bonn.de/fuhsen#location"]}
-                        alias={result["http://vocab.cs.uni-bonn.de/fuhsen#alias"]}
+                        name={result["fs:title"]}
+                        location=""
+                        alias=""
                         social_url="/assets/images/datasources/facebook.png">
                     </ResultElement>
                 );
@@ -525,7 +539,7 @@ var ResultsList = React.createClass({
                     <DWResultElement
                         img="/assets/images/Tor_project_logo_hq.png"
                         onion_url={result.url}
-                        comment={result["http://www.w3.org/2000/01/rdf-schema#comment"]}
+                        comment={result["fs:excerpt"]}
                         social_url="/assets/images/Tor_logo1.png">
                     </DWResultElement>
                 );

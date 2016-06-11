@@ -142,7 +142,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |?p rdf:type fs:SearchableEntity .
              |?p fs:title ?name .
              |?p fs:image ?img .
-             |?p fs:ul ?url
+             |?p fs:url ?url
              |}
              |WHERE {
              |?p rdf:type foaf:Person .
@@ -164,7 +164,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |?p rdf:type fs:SearchableEntity .
              |?p fs:title ?description .
              |?p fs:image ?img .
-             |?p fs:ul ?url
+             |?p fs:url ?url
              |}
              |WHERE {
              |?p rdf:type gr:ProductOrService .
@@ -185,7 +185,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |?p rdf:type fs:SearchableEntity .
              |?p fs:title ?name .
              |?p fs:image ?img .
-             |?p fs:ul ?url
+             |?p fs:url ?url
              |}
              |WHERE {
              |?p rdf:type foaf:Organization .
@@ -207,13 +207,15 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |?p rdf:type fs:SearchableEntity .
              |?p fs:title ?label .
              |?p fs:excerpt ?comment .
-             |?p fs:ul ?url
+             |?p fs:url ?url .
+             |?p fs:source ?source
              |}
              |WHERE {
              |?p rdf:type foaf:Document .
              |?p rdfs:label ?label .
              |OPTIONAL { ?p rdfs:comment ?comment } .
              |OPTIONAL { ?p fs:url ?url } .
+             |OPTIONAL { ?p fs:source ?source } .
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()

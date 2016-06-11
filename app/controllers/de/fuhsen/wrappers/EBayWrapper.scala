@@ -31,7 +31,7 @@ class EBayWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
     "GLOBAL-ID" -> "EBAY-DE",
     "RESPONSE-DATA-FORMAT" -> "JSON",
     "REST-PAYLOAD" -> "",
-    "paginationInput.entriesPerPage" -> "50"
+    "paginationInput.entriesPerPage" -> "20"
   )
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
