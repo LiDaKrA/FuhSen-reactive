@@ -1,5 +1,6 @@
 package controllers.de.fuhsen.engine
 
+import com.typesafe.config.ConfigFactory
 import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.riot.Lang
@@ -30,8 +31,8 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       if (keyword.isEmpty)
         Ok(textBody.get)
 
-      //Calling the RDF-Wrappers to get the information
-      ws.url("http://localhost:9000/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds=twitter,gkb,facebook,ebay,tor2web").get.map {
+      //Calling the RDF-Wrappers to get the information //engine.microtask.url
+      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds=gkb,gplus,twitter,facebook,ebay,tor2web").get.map {
         response =>
           val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
           model.add(wrappersResult)

@@ -32,15 +32,23 @@ import scala.concurrent.Future
 case class Person(id: String, displayName: String, objectType: String)
 
 class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
-  override def apiUrl: String = ConfigFactory.load.getString("gplus.user.url")
 
-  override def queryParams: Map[String, String] = Map(
-    "key" -> ConfigFactory.load.getString("gplus.app.key")
+  override def apiUrl: String = ConfigFactory.load.getString("yql.url")
+  //Replaced by YQL access point
+  //override def apiUrl: String = ConfigFactory.load.getString("gplus.user.url")
+
+
+  override def queryParams: Map[String, String] = Map (
+    "format" -> "json"
+    //Replaced by YQL
+    //"key" -> ConfigFactory.load.getString("gplus.app.key")
   )
 
   /** Returns for a given query string the representation as query parameter. */
-  override def searchQueryAsParam(queryString: String): Map[String, String] = Map(
-    "query" -> queryString
+  override def searchQueryAsParam(queryString: String): Map[String, String] = Map (
+    "q" -> ("USE 'http://www.datatables.org/google/google.plus.people.search.xml';SELECT * FROM google.plus.people.search WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND query='"+queryString+"' and maxResults='50'")
+    //Replaced by YQL
+    //"query" -> queryString
   )
 
   /** The type of the transformation input. */
@@ -50,14 +58,18 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
     SilkTransformationTask(
       transformationTaskId = ConfigFactory.load.getString("silk.transformation.task.gplus.person"),
       createSilkTransformationRequestBody(
-        basePath = "",
-        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/gplus/{id}"
+        basePath = "query/results/json",
+        //Replaced by YQL
+        //basePath = "",
+        uriPattern = "http://vocab.lidakra.de/fuhsen/search/entity/gplus/{id}"
       )
     ),
     SilkTransformationTask(
       transformationTaskId = ConfigFactory.load.getString("silk.transformation.task.gplus.organization"),
       createSilkTransformationRequestBody(
-        basePath = "organizations",
+        basePath = "query/results/json/organizations",
+        //Replaced by YQL
+        //basePath = "organizations",
         uriPattern = ""
       )
     )
@@ -70,10 +82,12 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
 
   // Returns a JSON array of person objects
   override def customResponseHandling(implicit ws: WSClient) = Some(apiResponse => {
-    val people = (Json.parse(apiResponse) \ "items").as[List[Person]]
-    val pages = people.filter(_.objectType == "page")
+    val people = (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
+    //Replaced by YQL
+    //val people = (Json.parse(apiResponse) \ "items").as[List[Person]]
+    //val pages = people.filter(_.objectType == "page")
     for {
-      results <- requestAllPeople(pages)
+      results <- requestAllPeople(people)
     } yield {
       logIfBadRequestsExist(results)
       validResponsesToJSONString(results)
@@ -84,7 +98,10 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
                               (implicit ws: WSClient): Future[List[WSResponse]] = {
     Future.sequence(people.map { person =>
       //Google plus get person request
-      val request = ws.url(apiUrl + "/" + person.id)
+      //Replaced by YQL
+      //val _url = apiUrl + "/" + person.id
+      val _url = apiUrl + "?q=USE 'http://www.datatables.org/google/google.plus.people.xml';SELECT * FROM google.plus.people WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND userId='"+person.id+"'"
+      val request = ws.url(_url)
           .withQueryString(queryParams.toSeq: _*)
       request.get()
     })

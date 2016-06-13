@@ -25,8 +25,10 @@ import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, S
 class GoogleKnowledgeGraphWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map(
-      ("key" -> ConfigFactory.load.getString("gkb.app.key")),
-      ("types" -> "Person")
+      ("limit" -> "30"),
+      ("key" -> ConfigFactory.load.getString("gkb.app.key")) //,
+      //("types" -> "Person") //,
+      //("types" -> "Organization") //This does not work only returns organization results
   )
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
