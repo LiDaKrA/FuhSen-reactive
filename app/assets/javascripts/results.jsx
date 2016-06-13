@@ -395,6 +395,44 @@ var ResultsContainer = React.createClass({
             final_data = this.state.new_data
         }
 
+        if(final_data["@graph"] === undefined)
+        {
+            return <div className="col-md-9">
+                <div id="results-paginator-options" className="results-paginator-options">
+                    <div class="off result-pages-count"></div>
+                    <div className="row">
+                        <div className="col-md-8 tabulator">
+                            <ul className="list-inline">
+                                <li>
+                                    <span className="total-results">0</span>
+                                    <span className="total-results-label"> {getTranslation("results")}:</span>
+                                </li>
+                                {personenItem}
+                                {organizationenItem}
+                                {produkteItem}
+                                {darkWebItem}
+                            </ul>
+                        </div>
+                        <div className="col-md-4 text-right">
+                            <CSVForm data={final_data}></CSVForm>
+                        </div>
+                    </div>
+                </div>
+                <div className="search-results-content">
+                    <div className="row">
+                        <div className="col-md-12">
+                            <ul id="search-results" className="search-results">
+                                <ul className="results-list list-unstyled">
+                                    <h1>No results found.</h1>
+                                </ul>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+
         return <div className="col-md-9">
             <div id="results-paginator-options" className="results-paginator-options">
                 <div class="off result-pages-count"></div>
