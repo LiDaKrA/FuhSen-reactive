@@ -81,6 +81,7 @@ at the following address: http://localhost:9000. Once the UI is launched in the 
 
 
 #### Example Usage
+The demo server address is:  http://rdfsearchengine-fuhsen.rhcloud.com/fuhsen/
 
 #### License
 
