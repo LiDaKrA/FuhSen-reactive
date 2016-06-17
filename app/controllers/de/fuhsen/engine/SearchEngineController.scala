@@ -137,18 +137,35 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
              |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
              |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
              |
              |CONSTRUCT   {
-             |?p rdf:type fs:SearchableEntity .
+             |?p rdf:type foaf:Person .
              |?p fs:title ?name .
              |?p fs:image ?img .
-             |?p fs:url ?url
+             |?p fs:url ?url .
+             |?p fs:source ?source .
+             |?p fs:alias ?alias .
+             |?p fs:location ?location .
+             |?p fs:label ?label .
+             |?p fs:comment ?comment .
+             |?p foaf:gender ?gender .
+             |?p fs:occupation ?occupation .
+             |?p fs:birthday ?birthday .
              |}
              |WHERE {
              |?p rdf:type foaf:Person .
              |?p foaf:name ?name .
+             |?p fs:source ?source .
              |OPTIONAL { ?p foaf:img ?img } .
              |OPTIONAL { ?p fs:url ?url } .
+             |OPTIONAL { ?p fs:alias ?alias } .
+             |OPTIONAL { ?p fs:location ?location } .
+             |OPTIONAL { ?p rdfs:label ?label } .
+             |OPTIONAL { ?p rdfs:comment ?comment } .
+             |OPTIONAL { ?p foaf:gender ?gender } .
+             |OPTIONAL { ?p fs:occupation ?occupation } .
+             |OPTIONAL { ?p fs:birthday ?birthday } .
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
@@ -161,16 +178,26 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |PREFIX gr: <http://purl.org/goodrelations/v1#>
              |
              |CONSTRUCT   {
-             |?p rdf:type fs:SearchableEntity .
+             |?p rdf:type gr:ProductOrService .
              |?p fs:title ?description .
              |?p fs:image ?img .
-             |?p fs:url ?url
+             |?p fs:url ?url .
+             |?p fs:location ?location .
+             |?p fs:country ?country .
+             |?p fs:priceLabel ?price .
+             |?p fs:condition ?condition .
+             |?p fs:source ?source .
              |}
              |WHERE {
              |?p rdf:type gr:ProductOrService .
              |?p gr:description ?description .
+             |?p fs:source ?source .
              |OPTIONAL { ?p foaf:img ?img } .
              |OPTIONAL { ?p fs:url ?url } .
+             |OPTIONAL { ?p fs:location ?location } .
+             |OPTIONAL { ?p fs:country ?country } .
+             |OPTIONAL { ?p fs:priceLabel ?price } .
+             |OPTIONAL { ?p fs:condition ?condition } .
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
@@ -180,18 +207,25 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
              |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
              |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
              |
              |CONSTRUCT   {
-             |?p rdf:type fs:SearchableEntity .
+             |?p rdf:type foaf:Organization .
              |?p fs:title ?name .
              |?p fs:image ?img .
-             |?p fs:url ?url
+             |?p fs:url ?url .
+             |?p fs:label ?label .
+             |?p fs:comment ?comment .
+             |?p fs:source ?source .
              |}
              |WHERE {
              |?p rdf:type foaf:Organization .
              |?p foaf:name ?name .
+             |?p fs:source ?source .
              |OPTIONAL { ?p foaf:img ?img } .
              |OPTIONAL { ?p fs:url ?url } .
+             |OPTIONAL { ?p rdfs:label ?label } .
+             |OPTIONAL { ?p rdfs:comment ?comment } .
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
@@ -204,7 +238,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
              |
              |CONSTRUCT   {
-             |?p rdf:type fs:SearchableEntity .
+             |?p rdf:type foaf:Document .
              |?p fs:title ?label .
              |?p fs:excerpt ?comment .
              |?p fs:url ?url .

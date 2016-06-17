@@ -263,12 +263,13 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                                     acceptType: String,
                                     silkTransform: RestApiWrapperTrait with SilkTransformableTrait): Seq[Future[ApiResponse]] = {
     for (transform <- silkTransform.silkTransformationRequestTasks) yield {
-      val task = silkTransform.silkTransformationRequestTasks.head
-      val transformRequest = ws.url(silkTransform.transformationEndpoint(task.transformationTaskId))
+      Logger.info("Executing silk transformation: "+transform.transformationTaskId)
+      //val task = silkTransform.silkTransformationRequestTasks.head
+      val transformRequest = ws.url(silkTransform.transformationEndpoint(transform.transformationTaskId))
           .withHeaders("Content-Type" -> "application/xml")
           .withHeaders("Accept" -> acceptType)
       val response = transformRequest
-          .post(task.silkTransformationRequestBodyGenerator(content))
+          .post(transform.silkTransformationRequestBodyGenerator(content))
           .map(convertToApiResponse("Silk transformation endpoint"))
       response
     }
