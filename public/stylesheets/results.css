@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+.headers-li {
+  cursor: pointer;
+}
+
 .search-results .fake {
   position: absolute;
   right: -20px;
