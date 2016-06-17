@@ -56,9 +56,14 @@ var ContainerResults = React.createClass({
                                     </a>
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
-                                    <LangSwitcher onlangselect={this.setLang}/>
-
-                                    <SearchForm id_class="form-search-header"/>
+                                    <div className="row">
+                                        <div className="col-md-10 text-right">
+                                            <SearchForm id_class="form-search-header"/>
+                                        </div>
+                                        <div className="col-md-2">
+                                            <LangSwitcher onlangselect={this.setLang}/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </nav>
@@ -341,19 +346,19 @@ var ResultsContainer = React.createClass({
     },
     render: function(){
 
-        var personenItem = <li onClick={this.onItemClick} data-id="1">{getTranslation("people")}</li>
-        var organizationenItem = <li onClick={this.onItemClick} data-id="2">{getTranslation("organisations")}</li>
-        var produkteItem = <li onClick={this.onItemClick} data-id="3">{getTranslation("products")}</li>
-        var darkWebItem = <li onClick={this.onItemClick} data-id="4">Websites</li>
+        var personenItem = <li className="headers-li" onClick={this.onItemClick} data-id="1">{getTranslation("people")}</li>
+        var organizationenItem = <li className="headers-li" onClick={this.onItemClick} data-id="2">{getTranslation("organisations")}</li>
+        var produkteItem = <li className="headers-li" onClick={this.onItemClick} data-id="3">{getTranslation("products")}</li>
+        var darkWebItem = <li className="headers-li" onClick={this.onItemClick} data-id="4">Websites</li>
 
         if(this.state.selected==="1") {
-            personenItem = <li onClick={this.onItemClick} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
+            personenItem = <li className="headers-li" onClick={this.onItemClick} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
         } else if(this.state.selected==="2"){
-            organizationenItem = <li onClick={this.onItemClick} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
+            organizationenItem = <li className="headers-li" onClick={this.onItemClick} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
         } else if(this.state.selected==="3"){
-            produkteItem = <li onClick={this.onItemClick} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
+            produkteItem = <li className="headers-li" onClick={this.onItemClick} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
         } else if(this.state.selected==="4"){
-            darkWebItem = <li onClick={this.onItemClick} data-id="$"><p><b>Websites</b></p></li>
+            darkWebItem = <li className="headers-li" onClick={this.onItemClick} data-id="$"><p><b>Websites</b></p></li>
         }
 
         if (this.state.loading) {
