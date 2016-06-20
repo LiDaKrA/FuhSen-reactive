@@ -76,6 +76,19 @@ var LangSwitcher = React.createClass({
 
 var SearchForm = React.createClass({
     render: function() {
+        if(this.props.keyword)
+        {
+            return (
+                <form method="get" id={this.props.id_class} role="search" action="/results">
+                    <div>
+                        <label ><span>Search: </span></label>
+                        <input type="search" name="query" placeholder={this.props.keyword}/>&nbsp;
+                        <button type="submit">&nbsp;</button>
+                    </div>
+                </form>
+            );
+        }
+
         return (
             <form method="get" id={this.props.id_class} role="search" action="/results">
                 <div>
