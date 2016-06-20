@@ -35,7 +35,8 @@ class SemanticRankingController extends Controller {
            |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
            |SELECT ?person ?name ?source
            |WHERE {
-           |?person rdf:type foaf:Person .
+           |OPTIONAL { ?person rdf:type foaf:Person . } .
+           |OPTIONAL { ?person rdf:type foaf:Organization . } .
            |?person foaf:name ?name .
            |?person fs:source ?source .
            |}
@@ -47,12 +48,26 @@ class SemanticRankingController extends Controller {
       while(resultSet.hasNext) {
         val result = resultSet.next
         val name = result.getLiteral("name").getString
+        val source = result.getLiteral("source").getString
         val resource = rankForPersonsModel.createResource(result.getResource("person").getURI)
         //2.3 Add rank property value
         if (name.contains(keyword))
-          resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "2")
-        else
-          resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "5")
+          if (source == "GoogleKG")
+            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "1")
+          else if (source == "Twitter")
+            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "2")
+          else if (source == "GooglePlus")
+            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "2")
+          else
+            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "3")
+        else {
+          if (source == "Twitter")
+            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "6")
+          else if (source == "GoogleKG")
+            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "7")
+          else
+            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "5")
+        }
       }
 
       //3 Add ranked triples to the results model
