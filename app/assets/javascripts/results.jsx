@@ -23,6 +23,14 @@ function extractQuery(key) {
 var queryDirty = extractQuery("query");
 var query = queryDirty.replace(new RegExp('\\+', 'g'), ' ');
 
+function compareRank(a,b) {
+    if (a["fs:rank"] < b["fs:rank"])
+        return -1;
+    if (a["fs:rank"] > b["fs:rank"])
+        return 1;
+    return 0;
+}
+
 var ContainerResults = React.createClass({
     // event handler for language switch
     // change dictionary then update state so the page notices the change
@@ -564,7 +572,8 @@ var CSVForm = React.createClass({
 
 var ResultsList = React.createClass({
     render: function () {
-        var resultsNodes = this.props.data["@graph"].map(function (result) {
+        var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
+        var resultsNodes = resultsNodesSorted.map(function (result) {
 
             if(result["@type"] === "foaf:Person"){
                 return (

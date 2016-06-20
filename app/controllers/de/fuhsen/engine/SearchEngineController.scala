@@ -168,7 +168,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |OPTIONAL { ?p fs:occupation ?occupation } .
              |OPTIONAL { ?p fs:birthday ?birthday } .
              |?p fs:rank ?rank .
-             |} ORDER BY ?rank
+             |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "product" =>
