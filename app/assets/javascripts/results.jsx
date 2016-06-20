@@ -566,25 +566,54 @@ var ResultsList = React.createClass({
     render: function () {
         var resultsNodes = this.props.data["@graph"].map(function (result) {
 
-            if(result["fs:source"] === undefined){
+            if(result["@type"] === "foaf:Person"){
                 return (
-                    <ResultElement
+                    <PersonResultElement
                         img={result.image}
-                        webpage={result.url}
                         name={result["fs:title"]}
-                        location=""
-                        alias=""
-                        social_url="/assets/images/datasources/facebook.png">
-                    </ResultElement>
+                        source={result["fs:source"]}
+                        alias={result["fs:alias"]}
+                        location={result["fs:location"]}
+                        label={result["fs:label"]}
+                        comment={result["fs:comment"]}
+                        gender={result["foaf:gender"]}
+                        occupation={result["fs:occupation"]}
+                        birthday={result["fs:birthday"]}
+                        webpage={result.url}>
+                    </PersonResultElement>
                 );
-            } else {
+            } else if(result["@type"] === "foaf:Organization") {
                 return (
-                    <DWResultElement
-                        img="/assets/images/Tor_project_logo_hq.png"
+                    <OrganizationResultElement
+                        img={result.image}
+                        title={result["fs:title"]}
+                        source={result["fs:source"]}
+                        label={result["fs:label"]}
+                        comment={result["fs:comment"]}
+                        webpage={result.url}>
+                    </OrganizationResultElement>
+                );
+            } else if(result["@type"] === "gr:ProductOrService") {
+                return (
+                    <ProductResultElement
+                        img={result.image}
+                        title={result["fs:title"]}
+                        source={result["fs:source"]}
+                        location={result["fs:location"]}
+                        country={result["fs:country"]}
+                        price={result["fs:priceLabel"]}
+                        condition={result["fs:condition"]}
+                        webpage={result.url}>
+                    </ProductResultElement>
+                );
+            } else if(result["@type"] === "foaf:Document") {
+                return (
+                    <WebResultElement
+                        img="/assets/images/datasources/TorLogo.png"
                         onion_url={result.url}
                         comment={result["fs:excerpt"]}
-                        social_url="/assets/images/Tor_logo1.png">
-                    </DWResultElement>
+                        source={result["fs:source"]}>
+                    </WebResultElement>
                 );
             }
         });
@@ -597,7 +626,7 @@ var ResultsList = React.createClass({
     }
 });
 
-var DWResultElement = React.createClass({
+var WebResultElement = React.createClass({
     render: function () {
         return (
             <li className="item bt">
@@ -620,7 +649,7 @@ var DWResultElement = React.createClass({
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={this.props.social_url} alt="Information from FB" height="45" width="45"/>
+                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -629,7 +658,7 @@ var DWResultElement = React.createClass({
     }
 });
 
-var ResultElement = React.createClass({
+var ProductResultElement = React.createClass({
     render: function () {
         return (
             <li className="item bt">
@@ -642,18 +671,91 @@ var ResultElement = React.createClass({
                     <div className="summary-main-wrapper col-md-8">
                         <div className="summary-main">
                             <h2 className="title">
-                                {this.props.name}
+                                {this.props.title}
                             </h2>
                             <div className="subtitle">
-                                <p>{getTranslation("nick")}: {this.props.alias}</p>
-                                <p>{getTranslation("location")}: {this.props.location}</p>
-                                <p>{getTranslation("webpage")}: {this.props.webpage}</p>
+                                { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
+                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
+                                { this.props.price !== undefined ? <p>{getTranslation("price")}: {this.props.price}</p> : null }
+                                { this.props.condition !== undefined ? <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={this.props.social_url} alt="Information from FB" height="45" width="45"/>
+                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+
+var PersonResultElement = React.createClass({
+    render: function () {
+        return (
+            <li className="item bt">
+                <div className="summary row">
+                    <div className="thumbnail-wrapper col-md-2">
+                        <div className="thumbnail">
+                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/> : <img src="/assets/images/datasources/Unknown.png" height="60px" width="75px"/> }
+                        </div>
+                    </div>
+                    <div className="summary-main-wrapper col-md-8">
+                        <div className="summary-main">
+                            <h2 className="title">
+                                {this.props.name}
+                            </h2>
+                            <div className="subtitle">
+                                { this.props.alias !== undefined ? <p>{getTranslation("nick")}: {this.props.alias}</p> : null }
+                                { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
+                                { this.props.gender !== undefined ? <p>{getTranslation("gender")}: {this.props.gender}</p> : null }
+                                { this.props.occupation !== undefined ? <p>{getTranslation("occupation")}: {this.props.occupation}</p> : null }
+                                { this.props.birthday !== undefined ? <p>{getTranslation("birthday")}: {this.props.birthday}</p> : null }
+                                { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
+                                { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="thumbnail-wrapper col-md-1">
+                        <div class="thumbnail">
+                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+
+var OrganizationResultElement = React.createClass({
+    render: function () {
+        return (
+            <li className="item bt">
+                <div className="summary row">
+                    <div className="thumbnail-wrapper col-md-2">
+                        <div className="thumbnail">
+                            <img src={this.props.img} height="60px" width="75px"/>
+                        </div>
+                    </div>
+                    <div className="summary-main-wrapper col-md-8">
+                        <div className="summary-main">
+                            <h2 className="title">
+                                {this.props.title}
+                            </h2>
+                            <div className="subtitle">
+                                { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
+                                { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="thumbnail-wrapper col-md-1">
+                        <div class="thumbnail">
+                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>

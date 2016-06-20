@@ -52,9 +52,10 @@ var dictEng = {
     "birthday":"Birthday",
     "exporttocsv":"Export to CSV",
     "bittewarten":"Searching, please wait ...",
-    "nick":"Nick: ",
-    "location":"Location: ",
-    "webpage":"Webpage: ",
+    "nick":"Nick",
+    "location":"Location",
+    "webpage":"Webpage",
+    "link":"Link",
     "comment":"Comment",
     "resultfilters":"Results filters",
     "occupation":"Occupation",
@@ -64,7 +65,10 @@ var dictEng = {
     "page":"Page",
     "sortedby":"Sorted by frequency",
     "clickhere":"Click here to visit to this webpage.",
-    "checkingfbtoken": "Checking Facebook token ..."
+    "checkingfbtoken": "Checking Facebook token ...",
+    "country": "Country",
+    "price": "Price",
+    "condition": "Condition"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -131,9 +135,10 @@ var dictGer = {
     "birthday":"Geburstag",
     "exporttocsv":"Exportieren als CSV",
     "bittewarten":"Bitte warten Sie, während die Ergebnisse laden...",
-    "nick":"Spitzname: ",
-    "location":"Ort: ",
-    "webpage":"Website: ",
+    "nick":"Spitzname",
+    "location":"Ort",
+    "webpage":"Website",
+    "link":"Link",
     "comment":"Kommentar",
     "resultfilters":"Ergebnisse filtern",
     "occupation":"Beruf",
@@ -143,7 +148,10 @@ var dictGer = {
     "page":"Seite",
     "sortedby":"Sortieren nach Frequenz",
     "clickhere":"Clicken Sie hier um diese WebSite zu besuchen.",
-    "checkingfbtoken": "Überprüfen Facebook Token ..."
+    "checkingfbtoken": "Überprüfen Facebook Token ...",
+    "country": "Land",
+    "price": "Preis",
+    "condition": "Bedingung"
 };
 
 window.dictGer = dictGer;
