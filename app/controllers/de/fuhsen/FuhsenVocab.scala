@@ -37,5 +37,6 @@ object FuhsenVocab {
   val UID = NS + "#" + "uid"
   val QUERY_DATE = NS + "#" + "queryDate"
   val KEYWORD = NS + "#" + "keyword"
+  val RANK = NS + "#" + "rank"
 
 }

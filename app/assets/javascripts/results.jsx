@@ -58,7 +58,7 @@ var ContainerResults = React.createClass({
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <div className="row">
                                         <div className="col-md-10">
-                                            <SearchForm id_class="form-search-header-cus"/>
+                                            <SearchForm id_class="form-search-header"/>
                                         </div>
                                         <div className="col-md-2">
                                             <LangSwitcher onlangselect={this.setLang}/>

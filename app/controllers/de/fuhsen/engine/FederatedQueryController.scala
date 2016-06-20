@@ -22,6 +22,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
 
       Logger.info("Federated Query")
 
+      //ToDo: Replace this with an extension to String class, .toRdfModel
       //Constructing the rdf results graph model
       val textBody = request.body.asText
       val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)

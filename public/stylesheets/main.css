@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-#form-search-header-cus button {
-    background-image: url("../images/icons/small_search_button.jpg");
-    width: 28px;
-    height: 26px;
-}
-
 @font-face {
     font-family: Verdana;
 }
@@ -631,24 +625,11 @@ header .header-spacer,.header .header-spacer {
 .nav form button {
     margin-left:3px;
 }
-#form-search-header button:before,
-.nav form button:before {
-    display: inline-block;
-    content: url("../images/icons/small_search_button.jpg");
-    margin: -0px 0 0 0;
-}
-
-#form-search-header button:hover:before {
-    margin: -200px 0 0 0;
-}
-
 #form-search-header button {
     background-image: url("../images/icons/small_search_button.jpg");
-    background-position-y: 150px;
-}
-
-#form-search-header button:hover {
-    background-position-y: 100px;
+    padding-left: 5px;
+    width: 28px;
+    height: 26px;
 }
 
 #form-search-header .tooltip {

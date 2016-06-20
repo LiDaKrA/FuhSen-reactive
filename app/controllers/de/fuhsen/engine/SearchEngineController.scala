@@ -128,7 +128,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
 
   }
 
-  def getSubModel(entityType :String, model :Model) : Model = {
+  private def getSubModel(entityType :String, model :Model) : Model = {
 
     entityType match {
       case "person" =>
@@ -152,6 +152,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |?p foaf:gender ?gender .
              |?p fs:occupation ?occupation .
              |?p fs:birthday ?birthday .
+             |?p fs:rank ?rank .
              |}
              |WHERE {
              |?p rdf:type foaf:Person .
@@ -166,7 +167,8 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
              |OPTIONAL { ?p foaf:gender ?gender } .
              |OPTIONAL { ?p fs:occupation ?occupation } .
              |OPTIONAL { ?p fs:birthday ?birthday } .
-             |}
+             |?p fs:rank ?rank .
+             |} ORDER BY ?rank
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "product" =>
