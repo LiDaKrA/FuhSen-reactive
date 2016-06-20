@@ -128,6 +128,45 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
 
   }
 
+  def getFacets(uid: String, entityType: String) = Action { request =>
+    Logger.info("Facets for search : " + uid)
+
+    val model = ModelFactory.createDefaultModel()
+
+    entityType match {
+      case "person" =>
+        //Creating fs:Search resource
+        model.createResource(FuhsenVocab.FACET_URI + "Gender")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "gender")
+        model.createResource(FuhsenVocab.FACET_URI + "Birthday")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "birthday")
+        model.createResource(FuhsenVocab.FACET_URI + "Occupation")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "occupation")
+        model.createResource(FuhsenVocab.FACET_URI + "LiveIn")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "livein")
+        model.createResource(FuhsenVocab.FACET_URI + "WorkFor")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "workfor")
+        model.createResource(FuhsenVocab.FACET_URI + "Studies")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "studies")
+      case "organization" =>
+        //Creating fs:Search resource
+        model.createResource(FuhsenVocab.FACET_URI + "Location")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
+      case "product" =>
+        //Creating fs:Search resource
+        model.createResource(FuhsenVocab.FACET_URI + "Price")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "price")
+        model.createResource(FuhsenVocab.FACET_URI + "Country")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
+        model.createResource(FuhsenVocab.FACET_URI + "Location")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
+      case _ =>
+    }
+
+    Ok(RDFUtil.modelToTripleString(model, Lang.JSONLD))
+
+  }
+
   private def getSubModel(entityType :String, model :Model) : Model = {
 
     entityType match {

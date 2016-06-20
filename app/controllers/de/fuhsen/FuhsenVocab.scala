@@ -38,5 +38,8 @@ object FuhsenVocab {
   val QUERY_DATE = NS + "#" + "queryDate"
   val KEYWORD = NS + "#" + "keyword"
   val RANK = NS + "#" + "rank"
+  val FACET_URI = NS + "/" + "facet#"
+  val FACET = NS + "#" + "Facet"
+  val FACET_LABEL = NS + "#" + "facetLabel"
 
 }
