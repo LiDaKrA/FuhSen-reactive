@@ -628,8 +628,8 @@ header .header-spacer,.header .header-spacer {
 #form-search-header button {
     background-image: url("../images/icons/small_search_button.jpg");
     padding-left: 5px;
-    width: 28px;
-    height: 26px;
+    width: 23px;
+    height: 23px;
 }
 
 #form-search-header .tooltip {
