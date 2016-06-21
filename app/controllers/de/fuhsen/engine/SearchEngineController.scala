@@ -129,7 +129,7 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
   }
 
   def getFacets(uid: String, entityType: String) = Action { request =>
-    Logger.info("Facets for search : " + uid)
+    Logger.info("Facets for search : " + uid + " entityType: "+entityType)
 
     val model = ModelFactory.createDefaultModel()
 
@@ -152,6 +152,8 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
         //Creating fs:Search resource
         model.createResource(FuhsenVocab.FACET_URI + "Location")
           .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
+        model.createResource(FuhsenVocab.FACET_URI + "Country")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
       case "product" =>
         //Creating fs:Search resource
         model.createResource(FuhsenVocab.FACET_URI + "Price")

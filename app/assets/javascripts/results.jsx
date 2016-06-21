@@ -1,14 +1,5 @@
 checkLanguage();
 
-var facetsStaticData = [
-    {name:'gender',elements:['male', 'female'],results:[2,8]},
-    {name:'birthday',elements:['1.1.1900'],results:[1]},
-    {name:'occupation',elements:['I am a fresh so yeah'],results:[3]},
-    {name:'livein',elements:['Bonn', 'Koeln'],results:[1,3]},
-    {name:'workfor',elements:['Google', 'Fraunhofer'],results:[1,1]},
-    {name:'studies',elements:['Uni Bonn', 'Uni Berlin'],results:[3,7]}
-];
-
 function extractQuery(key) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
@@ -79,7 +70,7 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container">
-                    <Trigger facetsData={facetsStaticData} url={"/engine/api/searches?query="+query} pollInterval={200000}/>
+                    <Trigger url={"/engine/api/searches?query="+query} pollInterval={200000}/>
                 </div>
             </div>
         );
@@ -110,7 +101,7 @@ var Trigger = React.createClass({
     },
     render: function () {
         if (this.state.keyword) {
-            return ( <Container facetData={this.props.facetsData} keyword={this.state.keyword} searchUid={this.state.searchUid} pollInterval={200000}/>);
+            return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid}/>);
         }
         return <div className="row">
             <div className="col-md-12">
@@ -123,33 +114,44 @@ var Trigger = React.createClass({
 
 var Container = React.createClass({
     loadCommentsFromServer: function () {
-
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType=person";
-
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
             cache: false,
-            success: function (data) {
-                this.setState({data: data});
+            success: function () {
+                this.setState({initData: true});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
             }.bind(this)
         });
     },
-    getInitialState: function () {
-        return {data: null};
-    },
     componentDidMount: function () {
         this.loadCommentsFromServer();
-        setInterval(this.loadCommentsFromServer, this.props.pollInterval);
+    },
+    getInitialState: function () {
+        return {view:"list", entityType:"person", facets:"", initData: false};
+    },
+    onTypeChange: function (event) {
+        var optionSelected = event.currentTarget.dataset.id;
+        var type;
+        if(optionSelected==="1") {
+            type = "person"
+        } else if(optionSelected==="2"){
+            type = "organization"
+        } else if(optionSelected==="3"){
+            type = "product"
+        } else if(optionSelected==="4"){
+            type = "website"
+        }
+        this.setState({entityType : type});
     },
     render: function () {
-        if (this.state.data) {
-            return ( <div class="row search-results-container">
-                <FacetList facetData={this.props.facetData}/>
-                <ResultsContainer data={this.state.data} keyword={this.props.keyword} searchUid={this.props.searchUid}/>
+        if (this.state.initData) {
+            return (<div class="row search-results-container">
+                <FacetList searchUid={this.props.searchUid} keyword={this.props.keyword} entityType={this.state.entityType} />
+                <ResultsContainer searchUid={this.props.searchUid} keyword={this.props.keyword} entityType={this.state.entityType} view={this.state.view} facets={this.state.facets} onTypeChange={this.onTypeChange} />
             </div>);
         }
         return <div className="row">
@@ -211,12 +213,12 @@ var FacetItems = React.createClass({
         }
     },
     render: function () {
-        var propsName = this.props.name.replace(/\s/g, '') ;
+        var propsName = this.props.name;//.replace(/\s/g, '') ;
         return (
             <div className="facets-item bt bb bl br" >
                 <a className="h3" href="#" onClick={this.onClick}>{this.props.name}</a>
                 <div id={""+propsName+""}>
-                    { this.state.showTextBox ? <FacetSubMenuItems elements={this.props.elements} results={this.props.results}/> : null }
+
                 </div>
             </div>
 
@@ -261,112 +263,107 @@ var FacetSubMenuItems = React.createClass({
 
 // inject/ passing data
 var FacetList = React.createClass({
-    render: function () {
-        var MItems = this.props.facetData.map(function(menuItems){
-            return <FacetItems name={getTranslation(menuItems.name)} elements={menuItems.elements} results={menuItems.results}/>
-        });
-        return (
-            <div className="col-md-3 facets-container hidden-phone">
-                <div className="facets-head">
-                    <h3>{getTranslation("resultfilters")}</h3>
-                </div>
-                <div className="js facets-list bt bb">
-                    {MItems}
-                </div>
-            </div>
-        )
-    }
-});
-
-var Facets = React.createClass({
-    render: function () {
-        return (
-            <div className="col-md-3 facets-container hidden-phone">
-                <div className="facets-head">
-                    <h3>Ergebnisse filtern</h3>
-                </div>
-                <div className="js facets-list bt bb">
-                    <div className="facets-item bt bb bl br">
-                        <a className="h3" href="#" data-fctname="person_gender_fct">Geschlecht</a>
-                    </div>
-                    <div className="facets-item bt bb bl br">
-                        <a className="h3" href="#" data-fctname="person_birthday_fct">Geburtstag</a>
-                    </div>
-
-                    <div className="facets-item bt bb bl br">
-                        <a className="h3" href="#" data-fctname="person_occupation_fct">Beruf</a>
-                    </div>
-
-                    <div className="facets-item bt bb bl br">
-                        <a className="h3" href="#" data-fctname="person_livesat_fct">Lebt in</a>
-                    </div>
-
-                    <div className="facets-item bt bb bl br">
-                        <a className="h3" href="#" data-fctname="person_worksat_fct">Arbeitet bei</a>
-                    </div>
-
-                    <div className="facets-item bt bb bl br">
-                        <a className="h3" href="#" data-fctname="person_studiesat_fct">Studium an</a>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-});
-
-//************** End Facets Components *******************
-
-var ResultsContainer = React.createClass({
-    getInitialState: function () {
-        return {new_data:"", selected: "1", loading: false};
-    },
-    onItemClick: function (event) {
-        var optionSelected = event.currentTarget.dataset.id;
-
-        this.setState({new_data : "", selected : optionSelected, loading: true});
-
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType=";
-        var type;
-
-        if(optionSelected==="1") {
-            type = "person"
-        } else if(optionSelected==="2"){
-            type = "organization"
-        } else if(optionSelected==="3"){
-            type = "product"
-        } else if(optionSelected==="4"){
-            type = "website"
-        }
-
-        searchUrl = searchUrl+type
+    loadFacetsFromServer: function (eType) {
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/facets?entityType="+eType;
 
         $.ajax({
             url: searchUrl,
             dataType: 'json',
             cache: false,
             success: function (data) {
-                this.setState({new_data : data, selected : optionSelected, loading: false});
+                this.setState({data: data});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
             }.bind(this)
         });
     },
+    getInitialState: function () {
+        return {data: null};
+    },
+    componentDidMount: function () {
+        this.loadFacetsFromServer(this.props.entityType);
+    },
+    componentWillReceiveProps: function(nextProps){
+        // see if it actually changed
+        if (nextProps.entityType !== this.props.entityType) {
+            this.loadFacetsFromServer(nextProps.entityType);
+        }
+    },
+    render: function () {
+        if (this.state.data && this.state.data["@graph"] !== undefined) {
+            var MItems = this.state.data["@graph"].map( function(menuItems){
+                return <FacetItems name={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}/>
+            });
+            return (
+                <div className="col-md-3 facets-container hidden-phone">
+                    <div className="facets-head">
+                        <h3>{getTranslation("resultfilters")}</h3>
+                    </div>
+                    <div className="js facets-list bt bb">
+                        {MItems}
+                    </div>
+                </div>
+            )
+        }
+        return (
+            <div className="col-md-3 facets-container hidden-phone">
+                <div className="facets-head">
+                    <h3>{getTranslation("resultfilters")}</h3>
+                </div>
+                <div className="js facets-list bt bb">
+                </div>
+            </div>
+        )
+
+    }
+});
+
+//************** End Facets Components *******************
+
+var ResultsContainer = React.createClass({
+    loadDataFromServer: function (eType) {
+        this.setState({selected:eType, loading: true});
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType;
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                this.setState({resultsData : data, selected : eType, loading: false});
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    getInitialState: function () {
+        return {resultsData: "", selected: "person", loading: true};
+    },
+    componentDidMount: function () {
+        this.loadDataFromServer(this.props.entityType);
+    },
+    componentWillReceiveProps: function(nextProps){
+        // see if it actually changed
+        if (nextProps.entityType !== this.props.entityType) {
+            this.loadDataFromServer(nextProps.entityType);
+        }
+    },
     render: function(){
 
-        var personenItem = <li className="headers-li" onClick={this.onItemClick} data-id="1">{getTranslation("people")}</li>
-        var organizationenItem = <li className="headers-li" onClick={this.onItemClick} data-id="2">{getTranslation("organisations")}</li>
-        var produkteItem = <li className="headers-li" onClick={this.onItemClick} data-id="3">{getTranslation("products")}</li>
-        var darkWebItem = <li className="headers-li" onClick={this.onItemClick} data-id="4">Websites</li>
+        var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
+        var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
+        var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
+        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">Websites</li>
 
-        if(this.state.selected==="1") {
-            personenItem = <li className="headers-li" onClick={this.onItemClick} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
-        } else if(this.state.selected==="2"){
-            organizationenItem = <li className="headers-li" onClick={this.onItemClick} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
-        } else if(this.state.selected==="3"){
-            produkteItem = <li className="headers-li" onClick={this.onItemClick} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
-        } else if(this.state.selected==="4"){
-            darkWebItem = <li className="headers-li" onClick={this.onItemClick} data-id="$"><p><b>Websites</b></p></li>
+        if(this.state.selected==="person") {
+            personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
+        } else if(this.state.selected==="organization"){
+            organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
+        } else if(this.state.selected==="product"){
+            produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
+        } else if(this.state.selected==="website"){
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>Websites</b></p></li>
         }
 
         if (this.state.loading) {
@@ -386,7 +383,7 @@ var ResultsContainer = React.createClass({
                             </ul>
                         </div>
                         <div className="col-md-4">
-                            <CSVForm data={final_data}></CSVForm>
+                            <CSVForm data={this.state.resultsData}></CSVForm>
                         </div>
                     </div>
                 </div>
@@ -400,14 +397,9 @@ var ResultsContainer = React.createClass({
             </div>;
         }
 
-        var final_data;
+        var final_data = this.state.resultsData;
 
-        if(this.state.new_data === "") {
-            final_data = this.props.data
-        } else {
-            final_data = this.state.new_data
-        }
-
+        //No results
         if(final_data["@graph"] === undefined)
         {
             return <div className="col-md-9">
@@ -444,8 +436,6 @@ var ResultsContainer = React.createClass({
                 </div>
             </div>
         }
-
-
         return <div className="col-md-9">
             <div id="results-paginator-options" className="results-paginator-options">
                 <div class="off result-pages-count"></div>
@@ -773,4 +763,4 @@ var OrganizationResultElement = React.createClass({
     }
 });
 
-React.render(<ContainerResults facetsData={facetsStaticData} url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));
+React.render(<ContainerResults url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));
