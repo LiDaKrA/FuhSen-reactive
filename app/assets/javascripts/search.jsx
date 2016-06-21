@@ -82,7 +82,7 @@ var SearchForm = React.createClass({
                 <form method="get" id={this.props.id_class} role="search" action="/results">
                     <div>
                         <label ><span>Search: </span></label>
-                        <input type="text" name="query" defaultValue={this.props.keyword}/>&nbsp;
+                        <input type="text" name="query" defaultValue={this.props.keyword} placeholder={getTranslation("yoursearch")}/>&nbsp;
                         <button type="submit">&nbsp;</button>
                     </div>
                 </form>
