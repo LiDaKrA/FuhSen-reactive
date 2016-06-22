@@ -1347,7 +1347,7 @@ button,input[type="button"],input[type="submit"],.button {
     font-size: 0.938em;
     font-weight: bold;
     border: none;
-    background: #7ECC06 url("../images/bg/primaryButtonBg.png") repeat-x bottom center;
+    background: #ffffff url("../images/bg/primaryButtonBg.png") repeat-x bottom center;
     margin: 0;
     padding: 2px 10px;
     cursor: pointer;

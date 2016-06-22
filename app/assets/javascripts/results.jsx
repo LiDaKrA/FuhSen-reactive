@@ -322,161 +322,14 @@ var FacetList = React.createClass({
 //************** End Facets Components *******************
 
 var ResultsContainer = React.createClass({
-    loadDataFromServer: function (eType) {
-        this.setState({selected:eType, loading: true});
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType;
-        $.ajax({
-            url: searchUrl,
-            dataType: 'json',
-            cache: false,
-            success: function (data) {
-                this.setState({resultsData : data, selected : eType, loading: false});
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
+    noData : function() {
+        alert(getTranslation("nodata"));
     },
-    getInitialState: function () {
-        return {resultsData: "", selected: "person", loading: true};
+    underDevelopmentFunction : function() {
+        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: true});
     },
-    componentDidMount: function () {
-        this.loadDataFromServer(this.props.entityType);
-    },
-    componentWillReceiveProps: function(nextProps){
-        // see if it actually changed
-        if (nextProps.entityType !== this.props.entityType) {
-            this.loadDataFromServer(nextProps.entityType);
-        }
-    },
-    render: function(){
-
-        var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
-        var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
-        var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
-        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">Websites</li>
-
-        if(this.state.selected==="person") {
-            personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
-        } else if(this.state.selected==="organization"){
-            organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
-        } else if(this.state.selected==="product"){
-            produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
-        } else if(this.state.selected==="website"){
-            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>Websites</b></p></li>
-        }
-
-        if (this.state.loading) {
-            return <div className="col-md-9">
-                <div id="results-paginator-options" className="results-paginator-options">
-                    <div class="off result-pages-count"></div>
-                    <div className="row">
-                        <div className="col-md-8 tabulator">
-                            <ul className="list-inline">
-                                <li>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
-                                {personenItem}
-                                {organizationenItem}
-                                {produkteItem}
-                                {darkWebItem}
-                            </ul>
-                        </div>
-                        <div className="col-md-4">
-                            <CSVForm data={this.state.resultsData}></CSVForm>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="row">
-                    <div className="col-md-12 text-center">
-                        <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                        <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
-                    </div>
-                </div>
-            </div>;
-        }
-
-        var final_data = this.state.resultsData;
-
-        //No results
-        if(final_data["@graph"] === undefined)
-        {
-            return <div className="col-md-9">
-                <div id="results-paginator-options" className="results-paginator-options">
-                    <div class="off result-pages-count"></div>
-                    <div className="row">
-                        <div className="col-md-8 tabulator">
-                            <ul className="list-inline">
-                                <li>
-                                    <span className="total-results">0</span>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
-                                {personenItem}
-                                {organizationenItem}
-                                {produkteItem}
-                                {darkWebItem}
-                            </ul>
-                        </div>
-                        <div className="col-md-4 text-right">
-                            <CSVForm data={final_data}></CSVForm>
-                        </div>
-                    </div>
-                </div>
-                <div className="search-results-content">
-                    <div className="row">
-                        <div className="col-md-12">
-                            <ul id="search-results" className="search-results">
-                                <ul className="results-list list-unstyled">
-                                    <h1>No results found.</h1>
-                                </ul>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-        return <div className="col-md-9">
-            <div id="results-paginator-options" className="results-paginator-options">
-                <div class="off result-pages-count"></div>
-                <div className="row">
-                    <div className="col-md-8 tabulator">
-                        <ul className="list-inline">
-                            <li>
-                                <span className="total-results">{final_data["@graph"].length}</span>
-                                <span className="total-results-label"> {getTranslation("results")}:</span>
-                            </li>
-                            {personenItem}
-                            {organizationenItem}
-                            {produkteItem}
-                            {darkWebItem}
-                        </ul>
-                    </div>
-                    <div className="col-md-4 text-right">
-                        <CSVForm data={final_data}></CSVForm>
-                    </div>
-                </div>
-            </div>
-            <div className="search-results-content">
-                <div className="row">
-                    <div className="col-md-12">
-                        <ul id="search-results" className="search-results">
-                            <ul className="results-list list-unstyled">
-                                <ResultsList data={final_data}>
-                                </ResultsList>
-                            </ul>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-});
-
-var CSVForm = React.createClass({
-    handleClick: function(e) {
-
-        var JSONData = JSON.stringify(this.props.data["@graph"]);
+    csvFunction : function(e) {
+        var JSONData = JSON.stringify(this.state.resultsData["@graph"]);
         var ReportTitle = "Current results in CSV format"
         var ShowLabel = true;
 
@@ -550,11 +403,211 @@ var CSVForm = React.createClass({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: false});
     },
+    loadDataFromServer: function (eType) {
+        this.setState({selected:eType, loading: true});
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType;
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                this.setState({resultsData : data, selected : eType, loading: false, underDev: false});
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    getInitialState: function () {
+        return {resultsData: "", selected: "person", loading: true, underDev: false};
+    },
+    componentDidMount: function () {
+        this.loadDataFromServer(this.props.entityType);
+    },
+    componentWillReceiveProps: function(nextProps){
+        // see if it actually changed
+        if (nextProps.entityType !== this.props.entityType) {
+            this.loadDataFromServer(nextProps.entityType);
+        }
+    },
+    render: function(){
+
+        var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
+        var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
+        var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
+        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">Websites</li>
+
+        if(this.state.selected==="person") {
+            personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
+        } else if(this.state.selected==="organization"){
+            organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
+        } else if(this.state.selected==="product"){
+            produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
+        } else if(this.state.selected==="website"){
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>Websites</b></p></li>
+        }
+
+        if (this.state.loading) {
+            return <div className="col-md-9">
+                <div id="results-paginator-options" className="results-paginator-options">
+                    <div class="off result-pages-count"></div>
+                    <div className="row">
+                        <div className="col-md-8 tabulator">
+                            <ul className="list-inline">
+                                <li>
+                                    <span className="total-results-label"> {getTranslation("results")}:</span>
+                                </li>
+                                {personenItem}
+                                {organizationenItem}
+                                {produkteItem}
+                                {darkWebItem}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-md-12 text-center">
+                        <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                        <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                    </div>
+                </div>
+            </div>;
+        }
+
+        var final_data = this.state.resultsData;
+
+        //No results
+        if(final_data["@graph"] === undefined)
+        {
+            return <div className="col-md-9">
+                <div id="results-paginator-options" className="results-paginator-options">
+                    <div class="off result-pages-count"></div>
+                    <div className="row">
+                        <div className="col-md-8 tabulator">
+                            <ul className="list-inline">
+                                <li>
+                                    <span className="total-results">0</span>
+                                    <span className="total-results-label"> {getTranslation("results")}:</span>
+                                </li>
+                                {personenItem}
+                                {organizationenItem}
+                                {produkteItem}
+                                {darkWebItem}
+                            </ul>
+                        </div>
+                        <div className="col-md-4 text-right">
+                            <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
+                            <div className="divider"/>
+                            <CustomForm class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
+                            <div className="divider"/>
+                            <CustomForm class_identifier="csv_icon" func={this.noData}></CustomForm>
+                        </div>
+                    </div>
+                </div>
+                <div className="search-results-content">
+                    <div className="row">
+                        <div className="col-md-12">
+                            <ul id="search-results" className="search-results">
+                                <ul className="results-list list-unstyled">
+                                    <h1>No results found.</h1>
+                                </ul>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        if(this.state.underDev)
+        {
+            return <div className="col-md-9">
+                    <div id="results-paginator-options" className="results-paginator-options">
+                        <div class="off result-pages-count"></div>
+                        <div className="row">
+                            <div className="col-md-8 tabulator">
+                                <ul className="list-inline">
+                                    <li>
+                                        <span className="total-results">{final_data["@graph"].length}</span>
+                                        <span className="total-results-label"> {getTranslation("results")}:</span>
+                                    </li>
+                                    {personenItem}
+                                    {organizationenItem}
+                                    {produkteItem}
+                                    {darkWebItem}
+                                </ul>
+                            </div>
+                            <div className="col-md-4 text-right">
+                                <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
+                                <div className="divider"/>
+                                <CustomForm class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
+                                <div className="divider"/>
+                                <CustomForm class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="search-results-content">
+                        <div className="row">
+                            <div className="col-md-12">
+                                <ul id="search-results" className="search-results">
+                                    <ul className="results-list list-unstyled">
+                                        <h1>{getTranslation("underdevelopment")}</h1>
+                                    </ul>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        }
+
+        return <div className="col-md-9">
+            <div id="results-paginator-options" className="results-paginator-options">
+                <div class="off result-pages-count"></div>
+                <div className="row">
+                    <div className="col-md-8 tabulator">
+                        <ul className="list-inline">
+                            <li>
+                                <span className="total-results">{final_data["@graph"].length}</span>
+                                <span className="total-results-label"> {getTranslation("results")}:</span>
+                            </li>
+                            {personenItem}
+                            {organizationenItem}
+                            {produkteItem}
+                            {darkWebItem}
+                        </ul>
+                    </div>
+                    <div className="col-md-4 text-right">
+                        <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
+                        <div className="divider"/>
+                        <CustomForm class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
+                        <div className="divider"/>
+                        <CustomForm class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
+                    </div>
+                </div>
+            </div>
+            <div className="search-results-content">
+                <div className="row">
+                    <div className="col-md-12">
+                        <ul id="search-results" className="search-results">
+                            <ul className="results-list list-unstyled">
+                                <ResultsList data={final_data}>
+                                </ResultsList>
+                            </ul>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+});
+
+var CustomForm = React.createClass({
     render: function() {
         return (
-            <button onClick={this.handleClick}>
-                {getTranslation("exporttocsv")}
+            <button onClick={this.props.func} className={this.props.class_identifier}>
             </button>
         );
     }

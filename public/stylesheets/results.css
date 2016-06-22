@@ -14,6 +14,30 @@
  * limitations under the License.
  */
 
+.divider{
+  width:5px;
+  height:auto;
+  display:inline-block;
+}
+
+.csv_icon {
+  background-image: url("../images/icons/csv-icon.png");
+  width: 25px;
+  height: 25px;
+}
+
+.graph_icon {
+  background-image: url("../images/icons/graph-icon.png");
+  width: 25px;
+  height: 25px;
+}
+
+.map_icon {
+  background-image: url("../images/icons/map-icon.png");
+  width: 25px;
+  height: 25px;
+}
+
 .headers-li {
   cursor: pointer;
 }

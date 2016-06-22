@@ -68,7 +68,9 @@ var dictEng = {
     "checkingfbtoken": "Checking Facebook token ...",
     "country": "Country",
     "price": "Price",
-    "condition": "Condition"
+    "condition": "Condition",
+    "underdevelopment": "Feature under development.",
+    "nodata": "No data to export to CSV."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -151,7 +153,9 @@ var dictGer = {
     "checkingfbtoken": "Überprüfen Facebook Token ...",
     "country": "Land",
     "price": "Preis",
-    "condition": "Bedingung"
+    "condition": "Bedingung",
+    "underdevelopment": "Diese Funktion wird gerade entwickelt.",
+    "nodata": "Es gibt kein data um als CSV zu exportieren"
 };
 
 window.dictGer = dictGer;
