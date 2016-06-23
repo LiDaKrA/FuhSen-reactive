@@ -23,7 +23,6 @@ import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.riot.Lang
 import utils.dataintegration.RDFUtil
 import scala.concurrent.Future
-import play.api.cache._
 import javax.inject.Inject
 import org.apache.jena.rdf.model.{Model, ModelFactory}
 import play.Logger
@@ -31,7 +30,8 @@ import play.api.mvc.{Action, Controller}
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Controller {
+
+class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
   def search(uid: String, entityType: String) = Action.async { request =>
 
@@ -125,47 +125,6 @@ class SearchEngineController @Inject()(ws: WSClient, cache: CacheApi) extends Co
     GraphResultsCache.deleteModel(searchUid)
     Logger.info("Number of searches: "+GraphResultsCache.size)
     Ok
-
-  }
-
-  def getFacets(uid: String, entityType: String) = Action { request =>
-    Logger.info("Facets for search : " + uid + " entityType: "+entityType)
-
-    val model = ModelFactory.createDefaultModel()
-
-    entityType match {
-      case "person" =>
-        //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Gender")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "gender")
-        model.createResource(FuhsenVocab.FACET_URI + "Birthday")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "birthday")
-        model.createResource(FuhsenVocab.FACET_URI + "Occupation")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "occupation")
-        model.createResource(FuhsenVocab.FACET_URI + "LiveIn")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "livein")
-        model.createResource(FuhsenVocab.FACET_URI + "WorkFor")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "workfor")
-        model.createResource(FuhsenVocab.FACET_URI + "Studies")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "studies")
-      case "organization" =>
-        //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Location")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
-        model.createResource(FuhsenVocab.FACET_URI + "Country")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
-      case "product" =>
-        //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Price")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "price")
-        model.createResource(FuhsenVocab.FACET_URI + "Country")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
-        model.createResource(FuhsenVocab.FACET_URI + "Location")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
-      case _ =>
-    }
-
-    Ok(RDFUtil.modelToTripleString(model, Lang.JSONLD))
 
   }
 
