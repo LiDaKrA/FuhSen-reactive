@@ -231,6 +231,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         // There has been an error previously, don't go on.
         Future(error)
       case ApiSuccess(body) =>
+        //print("RESPONSE: "+body)
         handleSilkTransformation(wrapper, body)
     }
   }
@@ -340,6 +341,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     request
         .withQueryString(wrapper.queryParams.toSeq: _*)
         .withQueryString(wrapper.searchQueryAsParam(queryString).toSeq: _*)
+        .withHeaders("Accept" -> "application/json")
   }
 
   /** Signs the request if the [[RestApiOAuthTrait]] is configured. */
@@ -380,7 +382,9 @@ object WrapperController {
     //eCommerce
     "ebay" -> new EBayWrapper(),
     //Darknet
-    "tor2web" -> new Tor2WebWrapper()
+    "tor2web" -> new Tor2WebWrapper(),
+    //Linked leaks
+    "linkedleaks" -> new LinkedLeaksWrapper()
   )
 
   val sortedWrapperIds = wrapperMap.keys.toSeq.sortWith(_ < _)
