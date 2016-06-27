@@ -64,7 +64,7 @@ var dictEng = {
     "studies":"Studies",
     "page":"Page",
     "sortedby":"Sorted by frequency",
-    "clickhere":"Click here to visit to this webpage.",
+    "clickhere":"Click here to visit this webpage.",
     "checkingfbtoken": "Checking Facebook token ...",
     "country": "Country",
     "price": "Price",
@@ -88,7 +88,7 @@ var dictGer = {
     "yoursearch":"Person, Organisation oder Produkt",
     "outof":"von",
     "results":"Ergebnisse",
-    "scrolldown":"Scrollen Sie bis nach unten um weitere Ergebnisse anzuzeigen",
+    "scrolldown":"Scrollen Sie bis nach unten, um weitere Ergebnisse anzuzeigen.",
     "noeligibleresults": "Keine qualifizierten Ergebnisse!",
     "adjustfilters":"Passen Sie die Filter an oder warten Sie auf eingehende Ergebnisse.",
     "activate":"aktivieren",
@@ -126,20 +126,20 @@ var dictGer = {
     "norwegian":"Norwegisch",
     "toolactive":"AKTIVIEREN: Zeigt alle Ergebnisse an, die diese Eigenschaft besitzen (unabhängig von deren Wert).",
     "tooltype":"NACH WERT: Filtert alle Ergebnisse nach dem eingegebenen Begriff.",
-    "toolmostfreq":"AUFLISTUNG: Zeigt die häufgisten Werte dieser Eigenschaft und ermöglicht eine Filterung danach.",
+    "toolmostfreq":"AUFLISTUNG: Zeigt die häufgisten Werte dieser Eigenschaft und ermöglicht eine Filterung nach diesen.",
     "toolminmax":"MIN-MAX: Ermöglich die Eingabe einer Unter- oder Obergrenze für diese Eigenschaft.",
-    "newfbtoken":"Ein neues FB Access Token bekommen",
-    "novalidfbtkfound":"Keine valid FB oken gefunden. Wenn Sie FB ergebnissen nutzen wollen, bitte:",
+    "newfbtoken":"Ein neues FB Access Token bekommen.",
+    "novalidfbtkfound":"Kein gültiges Facebook-Token gefunden. Wenn Sie Facebook-Ergebnissen nutzen wollen, bitte:",
     "hours":"Stunden",
-    "days":"Tagen",
-    "validfbtkfound":"Facebook token gefunden, noch valid für ",
+    "days":"Tage",
+    "validfbtkfound":"Facebook Token gefunden, noch gültig für ",
     "products":"Produkte",
-    "birthday":"Geburstag",
+    "birthday":"Geburtstag",
     "exporttocsv":"Exportieren als CSV",
     "bittewarten":"Bitte warten Sie, während die Ergebnisse laden...",
     "nick":"Spitzname",
     "location":"Ort",
-    "webpage":"Website",
+    "webpage":"Webseite",
     "link":"Link",
     "comment":"Kommentar",
     "resultfilters":"Ergebnisse filtern",
@@ -148,14 +148,14 @@ var dictGer = {
     "workfor":"Arbeitet bei",
     "studies":"Studium an",
     "page":"Seite",
-    "sortedby":"Sortieren nach Frequenz",
-    "clickhere":"Clicken Sie hier um diese WebSite zu besuchen.",
-    "checkingfbtoken": "Überprüfen Facebook Token ...",
+    "sortedby":"Sortiert nach Häufigkeit",
+    "clickhere":"Klicken Sie hier, um diese Webseite zu besuchen.",
+    "checkingfbtoken": "Überprüfe Facebook-Token ...",
     "country": "Land",
     "price": "Preis",
     "condition": "Bedingung",
     "underdevelopment": "Diese Funktion wird gerade entwickelt.",
-    "nodata": "Es gibt kein data um als CSV zu exportieren"
+    "nodata": "Es gibt keine Daten, die als CSV exportiert werden können."
 };
 
 window.dictGer = dictGer;
@@ -193,4 +193,3 @@ function checkLanguage(){
 
 window.getTranslation = getTranslation;
 window.checkLanguage = checkLanguage;
-
