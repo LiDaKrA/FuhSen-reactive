@@ -231,6 +231,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         // There has been an error previously, don't go on.
         Future(error)
       case ApiSuccess(body) =>
+        //print(body)
         handleSilkTransformation(wrapper, body)
     }
   }
@@ -383,7 +384,9 @@ object WrapperController {
     //Darknet
     "tor2web" -> new Tor2WebWrapper(),
     //Linked leaks
-    "linkedleaks" -> new LinkedLeaksWrapper()
+    "linkedleaks" -> new LinkedLeaksWrapper(),
+    //OCCRP
+    "occrp" -> new OCCRPWrapper()
   )
 
   val sortedWrapperIds = wrapperMap.keys.toSeq.sortWith(_ < _)
