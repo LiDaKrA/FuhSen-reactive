@@ -231,7 +231,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         // There has been an error previously, don't go on.
         Future(error)
       case ApiSuccess(body) =>
-        //print("RESPONSE: "+body)
         handleSilkTransformation(wrapper, body)
     }
   }
