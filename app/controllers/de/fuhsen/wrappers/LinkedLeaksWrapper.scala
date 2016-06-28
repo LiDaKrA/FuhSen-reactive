@@ -28,8 +28,8 @@ class LinkedLeaksWrapper extends RestApiWrapperTrait with SilkTransformableTrait
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
-    var sparql_query_template_init = "PREFIX leak: <http://data.ontotext.com/resource/leak/> PREFIX onto: <http://www.ontotext.com/> select * FROM onto:disable-sameAs { ?s leak:name "
-    var sparql_query_template_end = " . } limit 100"
+    var sparql_query_template_init = "PREFIX inst: <http://www.ontotext.com/connectors/lucene/instance#>\nPREFIX lucene: <http://www.ontotext.com/connectors/lucene#>\nPREFIX leak: <http://data.ontotext.com/resource/leak/>\nPREFIX gn: <http://www.geonames.org/ontology#>\nPREFIX dbr: <http://dbpedia.org/resource/>\nPREFIX onto: <http://www.ontotext.com/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nselect ?node_id ?node ?type ?name ?countries ?address ?company_type ?company ?jurisdiction_description ?note ?original_name ?service_provider ?status ?valid_until\nfrom onto:disable-sameAs\n{\n    ?search a inst:all-nodes2;\n              lucene:query '''name:"
+    var sparql_query_template_end = "''' ;\n              lucene:entities ?node .\n    ?node a ?type .\n    ?node leak:name ?name .\n    OPTIONAL { ?node leak:address ?address } .\n    OPTIONAL { ?node leak:node_id ?node_id } .\n    OPTIONAL { ?node leak:company_type ?company_type } .\n    OPTIONAL { ?node leak:countries ?countries } .\n    OPTIONAL { ?node leak:company ?company } .\n    OPTIONAL { ?node leak:jurisdiction_description ?jurisdiction_description } .\n    OPTIONAL { ?node leak:note ?note } .\n    OPTIONAL { ?node leak:original_name ?original_name } .    \n    OPTIONAL { ?node leak:service_provider ?service_provider } .\n    OPTIONAL { ?node leak:status ?status } .\n    OPTIONAL { ?node leak:valid_until ?valid_until } .\n    FILTER(?type IN (leak:Intermediary, leak:Entity, leak:Officer )) .\n}"
     var final_query = sparql_query_template_init + "\"" + queryString + "\""+ sparql_query_template_end
 
     Map("query" -> final_query)
@@ -46,10 +46,10 @@ class LinkedLeaksWrapper extends RestApiWrapperTrait with SilkTransformableTrait
   /** SILK Transformation Trait **/
   override def silkTransformationRequestTasks = Seq(
     SilkTransformationTask(
-      transformationTaskId = "LinkedLeaksTransformation",
+      transformationTaskId = "LinkedLeaksEntityTransformation",
       createSilkTransformationRequestBody(
-        basePath = "doc",
-        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/linkedleaks/{@attributes/docId}"
+        basePath = "results/bindings",
+        uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/linkedleaks/{node_id/value}"
       )
     )
   )
