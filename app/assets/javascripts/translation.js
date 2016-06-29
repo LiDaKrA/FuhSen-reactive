@@ -59,9 +59,9 @@ var dictEng = {
     "comment":"Comment",
     "resultfilters":"Results filters",
     "occupation":"Occupation",
-    "livein":"Location",
-    "workfor":"Work",
-    "studies":"Studies",
+    "liveIn":"Location",
+    "workAt":"Work",
+    "studyAt":"Studies",
     "page":"Page",
     "sortedby":"Sorted by frequency",
     "clickhere":"Click here to visit this webpage.",
@@ -70,7 +70,10 @@ var dictEng = {
     "price": "Price",
     "condition": "Condition",
     "underdevelopment": "Feature under development.",
-    "nodata": "No data to export to CSV."
+    "nodata": "No data to export to CSV.",
+    "csv_icon": "Export results to CSV.",
+    "graph_icon": "View the relations among the results.",
+    "map_icon": "View the results in a Map."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -144,9 +147,9 @@ var dictGer = {
     "comment":"Kommentar",
     "resultfilters":"Ergebnisse filtern",
     "occupation":"Beruf",
-    "livein":"Lebt in",
-    "workfor":"Arbeitet bei",
-    "studies":"Studium an",
+    "liveIn":"Lebt in",
+    "workAt":"Arbeitet bei",
+    "studyAt":"Studium an",
     "page":"Seite",
     "sortedby":"Sortiert nach Häufigkeit",
     "clickhere":"Klicken Sie hier, um diese Webseite zu besuchen.",
@@ -155,7 +158,10 @@ var dictGer = {
     "price": "Preis",
     "condition": "Bedingung",
     "underdevelopment": "Diese Funktion wird gerade entwickelt.",
-    "nodata": "Es gibt keine Daten, die als CSV exportiert werden können."
+    "nodata": "Es gibt keine Daten, die als CSV exportiert werden können.",
+    "csv_icon": "Export results to CSV.",
+    "graph_icon": "View the relations among the results.",
+    "map_icon": "View the results in a Map."
 };
 
 window.dictGer = dictGer;

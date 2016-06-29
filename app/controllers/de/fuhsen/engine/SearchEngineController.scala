@@ -33,7 +33,7 @@ import play.api.libs.json._
 
 class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
-  def search(uid: String, entityType: String) = Action.async { request =>
+  def search(uid: String, entityType: String, facets: Option[String]) = Action.async { request =>
 
     Logger.info("Starting Search Engine Search : "+uid)
 
@@ -152,6 +152,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p foaf:gender ?gender .
              |?p fs:occupation ?occupation .
              |?p fs:birthday ?birthday .
+             |?p fs:country ?country .
              |?p fs:rank ?rank .
              |}
              |WHERE {
@@ -167,6 +168,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p foaf:gender ?gender } .
              |OPTIONAL { ?p fs:occupation ?occupation } .
              |OPTIONAL { ?p fs:birthday ?birthday } .
+             |OPTIONAL { ?p fs:country ?country } .
              |?p fs:rank ?rank .
              |}
           """.stripMargin)
@@ -218,6 +220,8 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:url ?url .
              |?p fs:label ?label .
              |?p fs:comment ?comment .
+             |?p fs:country ?country .
+             |?p fs:condition ?condition .
              |?p fs:source ?source .
              |}
              |WHERE {
@@ -228,6 +232,8 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:url ?url } .
              |OPTIONAL { ?p rdfs:label ?label } .
              |OPTIONAL { ?p rdfs:comment ?comment } .
+             |OPTIONAL { ?p fs:location ?location } .
+             |OPTIONAL { ?p fs:country ?country } .
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()

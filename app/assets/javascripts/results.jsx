@@ -169,16 +169,14 @@ var Container = React.createClass({
 var FacetItems = React.createClass({
     getInitialState: function() {
         arr_ele = [];//fill elements of the sub menu in an array
-        return  { showTextBox: false };
+        return  { showTextBox: false, selected_facets: [] };
     },
     onClick: function() {
-        var propsName = this.props.name.replace(/\s/g, '');
+        var propsName = this.props.name;//.replace(/\s/g, '');
         var propsName_key = arr_ele.indexOf(propsName);
-
         //Check if the menu item is shown
         // if Yes hide it, if No show it
         if(this.state.showTextBox){
-
             //Check if the item is in the array: means you just now clicked it, then hide it by setting the state to false and remove it from the array
             //if not in the array: means it was hidden by showing other item:
             //      - then show it by using normal js
@@ -196,7 +194,6 @@ var FacetItems = React.createClass({
                     document.getElementById(arr_ele[0]).style.display = "none";
                     arr_ele.splice(0, 1);
                 }
-
             }
         }
         else{
@@ -212,25 +209,89 @@ var FacetItems = React.createClass({
             }
         }
     },
-    render: function () {
-        var propsName = this.props.name;//.replace(/\s/g, '') ;
-        return (
-            <div className="facets-item bt bb bl br" >
-                <a className="h3" href="#" onClick={this.onClick}>{this.props.name}</a>
-                <div id={""+propsName+""}>
+    onFacetItemClick: function(eSelectedItem) {
+        var _selectedFacets = this.state.selected_facets;
+        var _index = _selectedFacets.indexOf(eSelectedItem);
+        if (_index < 0) {
+            _selectedFacets.push(eSelectedItem);
+            this.setState({ showTextBox: false, selected_facets: _selectedFacets });
+        }
+    },
+    onFacetItemRemoveClick: function(eSelectedItem) {
+        var _selectedFacets = this.state.selected_facets;
+        var _index = _selectedFacets.indexOf(eSelectedItem);
+        if (_index >= 0) {
+            _selectedFacets.splice(_index, 1);
+            this.setState({ showTextBox: false, selected_facets: _selectedFacets });
+        }
 
+    },
+    render: function () {
+        var selItems = [];
+        var _onFacetItemRemoveClick = this.onFacetItemRemoveClick;
+        if (this.state.selected_facets.length > 0 ) {
+            this.state.selected_facets.map( function(item){
+                selItems.push(<li data-fctvalue={item}> <span title="male" className="facet-value">{item}</span> <a title="Remove" className="facet-remove fr" onClick={_onFacetItemRemoveClick.bind(this, item)}></a></li>);
+            });
+            return (
+            <div className="facets-item bt bb bl br" >
+                <a className="h3" onClick={this.onClick}>{this.props.label}</a>
+                <div id={""+this.props.name+""}>
+                    { this.state.showTextBox ? <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType} facetName={this.props.name} onFacetItemClick={this.onFacetItemClick} /> : null }
+                </div>
+                <div className="flyout-left-container">
+                    <ul className="selected-items unstyled">
+                        {selItems}
+                    </ul>
                 </div>
             </div>
-
+            );
+        }
+        return (
+            <div className="facets-item bt bb bl br" >
+                <a className="h3" onClick={this.onClick}>{this.props.label}</a>
+                <div id={""+this.props.name+""}>
+                    { this.state.showTextBox ? <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType} facetName={this.props.name} onFacetItemClick={this.onFacetItemClick} /> : null }
+                </div>
+            </div>
         );
     }
 });
 
 var FacetSubMenuItems = React.createClass({
+    loadFacetsFromServer: function (eFacet) {
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/facets/"+eFacet+"?entityType="+this.props.entityType;
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                this.setState({data: data});
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    getInitialState: function () {
+        return {data: null};
+    },
+    componentDidMount: function () {
+        this.loadFacetsFromServer(this.props.facetName);
+    },
     render: function () {
         var subMenuEle = [];
-        for (var i = 0; i < this.props.elements.length; i++) {
-            subMenuEle.push(<li ><a href="#" onClick={this.onClick}><span className="sub-item">{this.props.elements[i]}</span><span className="sub-item-result">({this.props.results[i]})</span></a></li>);
+        if (this.state.data && this.state.data["@graph"] !== undefined) {
+            var _onFacetItemClick = this.props.onFacetItemClick;
+            this.state.data["@graph"].map( function(menuItems){
+                if (menuItems["http://vocab.lidakra.de/fuhsen#value"] !== "blank") {
+                    subMenuEle.push(<li ><a href="#" id={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
+                                            onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}><span
+                        className="sub-item">{menuItems["http://vocab.lidakra.de/fuhsen#value"]}</span><span
+                        className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span></a>
+                    </li>);
+                }
+            });
         }
         return (
             <div>
@@ -292,8 +353,10 @@ var FacetList = React.createClass({
     },
     render: function () {
         if (this.state.data && this.state.data["@graph"] !== undefined) {
+            var _searchUid = this.props.searchUid;
+            var _entityType = this.props.entityType;
             var MItems = this.state.data["@graph"].map( function(menuItems){
-                return <FacetItems name={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}/>
+                return <FacetItems searchUid={_searchUid} entityType={_entityType} label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])} name={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}/>
             });
             return (
                 <div className="col-md-3 facets-container hidden-phone">
@@ -607,7 +670,7 @@ var ResultsContainer = React.createClass({
 var CustomForm = React.createClass({
     render: function() {
         return (
-            <button onClick={this.props.func} className={this.props.class_identifier}>
+            <button onClick={this.props.func} className={this.props.class_identifier} title={getTranslation(this.props.class_identifier)}>
             </button>
         );
     }
@@ -631,6 +694,7 @@ var ResultsList = React.createClass({
                         gender={result["foaf:gender"]}
                         occupation={result["fs:occupation"]}
                         birthday={result["fs:birthday"]}
+                        country={result["fs:country"]}
                         webpage={result.url}>
                     </PersonResultElement>
                 );
@@ -642,6 +706,8 @@ var ResultsList = React.createClass({
                         source={result["fs:source"]}
                         label={result["fs:label"]}
                         comment={result["fs:comment"]}
+                        country={result["fs:country"]}
+                        location={result["fs:location"]}
                         webpage={result.url}>
                     </OrganizationResultElement>
                 );
@@ -766,6 +832,7 @@ var PersonResultElement = React.createClass({
                                 { this.props.gender !== undefined ? <p>{getTranslation("gender")}: {this.props.gender}</p> : null }
                                 { this.props.occupation !== undefined ? <p>{getTranslation("occupation")}: {this.props.occupation}</p> : null }
                                 { this.props.birthday !== undefined ? <p>{getTranslation("birthday")}: {this.props.birthday}</p> : null }
+                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
                                 { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
@@ -801,6 +868,8 @@ var OrganizationResultElement = React.createClass({
                             <div className="subtitle">
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
+                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
+                                { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
                                 { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
                             </div>
                         </div>

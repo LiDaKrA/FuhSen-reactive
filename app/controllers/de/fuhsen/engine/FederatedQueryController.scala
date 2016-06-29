@@ -33,13 +33,12 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         Ok(textBody.get)
 
       //Calling the RDF-Wrappers to get the information //engine.microtask.url
-      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds=gkb,gplus,twitter,facebook,ebay,tor2web").get.map {
+      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds="+ConfigFactory.load.getString("engine.enabled.wrappers")).get.map {
         response =>
           val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
           model.add(wrappersResult)
           Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
       }
-
   }
 
   private def getKeywordQuery(model: Model): String = {
