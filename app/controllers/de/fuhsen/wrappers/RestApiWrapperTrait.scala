@@ -30,6 +30,11 @@ trait RestApiWrapperTrait {
   def queryParams: Map[String, String]
 
   /**
+    * Returns the ist of headers pairs (key,value) for the specific API (if needed).
+    */
+  def headersParams: Map[String, String]
+
+  /**
    * The REST endpoint URL
    */
   def apiUrl: String
