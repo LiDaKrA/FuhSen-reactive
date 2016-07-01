@@ -35,8 +35,7 @@ GET     /webjars/*file                                      controllers.WebJarAs
 
 
 # Crawling
-
-GET     /crawling/jobs                                      controllers.de.fuhsen.external.crawling.CrawlerController.crawlJobs
-GET     /crawling/jobs/:crawlId                             controllers.de.fuhsen.external.crawling.CrawlerController.crawlJobsByCrawlId(crawlId: String)
-GET     /crawling/jobs/:crawlId/progress                    controllers.de.fuhsen.external.crawling.CrawlerController.crawlJobProgressByCrawlId(crawlId: String)
-POST    /crawling/jobs/create                               controllers.de.fuhsen.external.crawling.CrawlerController.createCrawlJob
+GET     /crawling/jobs                                      controllers.de.fuhsen.crawling.CrawlerController.crawlJobs
+GET     /crawling/jobs/:crawlId                             controllers.de.fuhsen.crawling.CrawlerController.crawlJobsByCrawlId(crawlId: String)
+GET     /crawling/jobs/:crawlId/progress                    controllers.de.fuhsen.crawling.CrawlerController.crawlJobProgressByCrawlId(crawlId: String)
+POST    /crawling/jobs/create                               controllers.de.fuhsen.crawling.CrawlerController.createCrawlJob

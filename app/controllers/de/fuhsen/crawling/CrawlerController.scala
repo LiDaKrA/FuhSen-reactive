@@ -1,20 +1,26 @@
-package controllers.de.fuhsen.external.crawling
+package controllers.de.fuhsen.crawling
 
-import java.util.concurrent.atomic.{AtomicLong, AtomicInteger}
-import javax.inject.Inject
+import java.util.concurrent.atomic.AtomicLong
+import javax.inject.{Inject, Singleton}
 
+import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
-import play.api.libs.json._
-import play.api.libs.ws.{WSResponse, WSClient}
-import play.api.mvc.{Result, Action, Controller}
+import controllers.de.fuhsen.crawling.CrawlerActor.StartCrawl
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json._
+import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.mvc.{Action, Controller, Result}
+import JsonFormatters._
 
 import scala.concurrent.Future
 
 /**
   * Created on 6/30/16.
   */
-class CrawlerController @Inject()(ws: WSClient) extends Controller {
+@Singleton
+class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Controller {
+  val crawlActor = system.actorOf(CrawlerActor.props(ws), "crawler-actor")
+
   def crawlJobs = Action.async { request =>
     nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
       Ok(response.json)
@@ -36,24 +42,24 @@ class CrawlerController @Inject()(ws: WSClient) extends Controller {
     nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
       response.json match {
         case jobs: JsArray =>
-          val jobsByCrawlId = jobs.value.filter(v => (v \ "crawlId").as[String] == crawlId)
-          val jobsReducedInformation = jobsByCrawlId map { job =>
-            val id = (job \ "id").as[String]
-            val msg = (job \ "msg").as[String]
-            val `type` = (job \ "type").as[String]
-            val status = (job \ "state").as[String]
-            JsObject(Seq(
-              "id" -> JsString(id),
-              "msg" -> JsString(msg),
-              "type" -> JsString(`type`),
-              "status" -> JsString(status)
-            ))
-          }
-          Ok(JsArray(jobsReducedInformation))
+          val jobsReducedInformation = reduceNutchJobsToProgressData(crawlId, jobs)
+          Ok(JsArray(jobsReducedInformation.map(Json.toJson(_))))
         case other =>
           InternalServerError("Expected JSON array from Nutch service. But got " + other.getClass.getName)
       }
     } map pickResult
+  }
+
+  private def reduceNutchJobsToProgressData(crawlId: String, jobs: JsArray): Seq[NutchJobProgress] = {
+    val jobsByCrawlId = jobs.value.filter(v => (v \ "crawlId").as[String] == crawlId)
+    val jobsReducedInformation = jobsByCrawlId map { job =>
+      val id = (job \ "id").as[String]
+      val msg = (job \ "msg").as[String]
+      val `type` = (job \ "type").as[String]
+      val status = (job \ "state").as[String]
+      NutchJobProgress(id, msg, `type`, status)
+    }
+    jobsReducedInformation
   }
 
   private def pickResult(successOrError: Either[Result, Result]): Result = {
@@ -108,23 +114,28 @@ class CrawlerController @Inject()(ws: WSClient) extends Controller {
   }
 
   private def createSeedList(crawlId: String, urls: Seq[String]): Future[Either[String, Result]] = {
-    val postBody = JsObject(Seq(
-      "id" -> JsString(CrawlCounter.seedListIdCounter.getAndIncrement().toString),
-      "name" -> JsString("nutch"),
-      "seedUrls" -> JsArray(urls.zipWithIndex.map { case (url, count) =>
-        JsObject(Seq(
-          "id" -> JsNumber(count + 1),
-          "seedList" -> JsNull,
-          "url" -> JsString(url)
-        ))
-      })
-    ))
+    val createSeedList = seedListRequest(urls)
+    val postBody = Json.toJson(createSeedList)
     nutchPostRequest(
       ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/seed/create",
       postBody
     ) { result =>
       result.body
     }
+  }
+
+  private def seedListRequest(urls: Seq[String]): CreateSeedListBody = {
+    CreateSeedListBody(
+      id = CrawlCounter.seedListIdCounter.getAndIncrement().toString,
+      name = "nutch",
+      seedUrls = urls.zipWithIndex.map { case (url, count) =>
+        SeedUrl(
+          id = count + 1,
+          seedList = null,
+          url = url
+        )
+      }
+    )
   }
 
   /**
@@ -160,6 +171,7 @@ class CrawlerController @Inject()(ws: WSClient) extends Controller {
     createSeedList(crawlId, urls) map { result =>
       result match {
         case Left(seedListPath) =>
+          crawlActor ! StartCrawl(crawlId, seedListPath)
           Created("/crawling/jobs/" + crawlId)
         case Right(failureResult) =>
           failureResult
