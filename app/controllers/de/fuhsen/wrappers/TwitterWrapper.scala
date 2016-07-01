@@ -26,6 +26,9 @@ class TwitterWrapper extends RestApiWrapperTrait with RestApiOAuthTrait with Sil
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map("count" -> "10")
 
+  /** Headers that should be added to the request. */
+  override def headersParams: Map[String, String] = Map()
+
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
     //val query_string: String = queryString.replace(" ", "%20")

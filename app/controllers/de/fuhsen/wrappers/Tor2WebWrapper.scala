@@ -28,6 +28,9 @@ class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
     "key" -> ConfigFactory.load.getString("tor2web.app.key")
   )
 
+  /** Headers that should be added to the request. */
+  override def headersParams: Map[String, String] = Map()
+
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
     Map("q" -> queryString)

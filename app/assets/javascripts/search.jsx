@@ -1,18 +1,15 @@
 checkLanguage();
 
 var ContainerSearch = React.createClass({
-    // event handler for language switch
-    // change dictionary then update state so the page notices the change
-    setLang: function () {
-        var lang = document.getElementById("langselect").value;
-        switch (lang) {
-            case "german":
+    setLang: function() {
+        switch (window.localStorage.getItem("lang")) {
+            case "ger":
                 window.globalDict = dictGer;
                 window.localStorage.lang = "ger";
                 this.setState({dictionary: "ger"});
                 globalFlushFilters();
                 break;
-            case "english":
+            case "eng":
                 window.globalDict = dictEng;
                 window.localStorage.lang = "eng";
                 this.setState({dictionary: "eng"});
@@ -52,23 +49,32 @@ var ContainerSearch = React.createClass({
 
 
 var LangSwitcher = React.createClass({
+    preSetLang: function(lang, e) {
+        window.localStorage.lang = lang
+        this.props.onlangselect()
+    },
     render: function () {
+        let boundClickEng = this.preSetLang.bind(this, 'eng');
+        let boundClickGer = this.preSetLang.bind(this, 'ger');
+
         if(window.localStorage.getItem("lang") === "ger"){
             return (
-                <form action="" id="langselectform">
-                    <select name="lang" id="langselect" onChange={this.props.onlangselect}>
-                        <option value="german" selected>Deutsch</option>
-                        <option value="english">English</option>
-                    </select>
-                </form>)
+                <div>
+                    <button onClick={boundClickGer} className="lang-flags-ger">
+                    </button>
+                    <div className="divider"/>
+                    <button onClick={boundClickEng} className="lang-flags-eng">
+                    </button>
+                </div>)
         } else {
             return (
-                <form action="" id="langselectform">
-                    <select name="lang" id="langselect" onChange={this.props.onlangselect}>
-                        <option value="german">Deutsch</option>
-                        <option value="english" selected>English</option>
-                    </select>
-                </form>)
+                <div>
+                    <button onClick={boundClickGer} className="lang-flags-ger">
+                    </button>
+                    <div className="divider"/>
+                    <button onClick={boundClickEng} className="lang-flags-eng">
+                    </button>
+                </div>)
         }
     }
 });

@@ -341,7 +341,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     request
         .withQueryString(wrapper.queryParams.toSeq: _*)
         .withQueryString(wrapper.searchQueryAsParam(queryString).toSeq: _*)
-        .withHeaders("Accept" -> "application/json")
+        .withHeaders(wrapper.headersParams.toSeq: _*)
   }
 
   /** Signs the request if the [[RestApiOAuthTrait]] is configured. */

@@ -31,6 +31,9 @@ class GoogleKnowledgeGraphWrapper extends RestApiWrapperTrait with SilkTransform
       //("types" -> "Organization") //This does not work only returns organization results
   )
 
+  /** Headers that should be added to the request. */
+  override def headersParams: Map[String, String] = Map()
+
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
     Map("query" -> queryString)

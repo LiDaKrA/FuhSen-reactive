@@ -29,6 +29,8 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map("type" -> "user",
                                                       "fields" -> ConfigFactory.load.getString("facebook.search.fields"))
+  /** Headers that should be added to the request. */
+  override def headersParams: Map[String, String] = Map()
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
