@@ -26,15 +26,14 @@ var ContainerResults = React.createClass({
     // event handler for language switch
     // change dictionary then update state so the page notices the change
     setLang: function () {
-        var lang = document.getElementById("langselect").value;
-        switch (lang) {
-            case "german":
+        switch (window.localStorage.getItem("lang")) {
+            case "ger":
                 window.globalDict = dictGer;
                 window.localStorage.lang = "ger";
                 this.setState({dictionary: "ger"});
                 globalFlushFilters();
                 break;
-            case "english":
+            case "eng":
                 window.globalDict = dictEng;
                 window.localStorage.lang = "eng";
                 this.setState({dictionary: "eng"});
@@ -56,11 +55,9 @@ var ContainerResults = React.createClass({
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <div className="row">
-                                        <div className="col-md-10">
-                                            <SearchForm id_class="form-search-header" keyword={query}/>
-                                        </div>
-                                        <div className="col-md-2">
+                                        <div className="col-md-12">
                                             <LangSwitcher onlangselect={this.setLang}/>
+                                            <SearchForm id_class="form-search-header" keyword={query}/>
                                         </div>
                                     </div>
                                 </div>

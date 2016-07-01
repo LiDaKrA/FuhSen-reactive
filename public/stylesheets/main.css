@@ -27,6 +27,20 @@
     font-weight: bold;
 }
 
+.lang-flags-ger {
+    cursor: pointer;
+    background-image: url("../images/icons/germany-flag-icon.png");
+    width: 25px;
+    height: 25px;
+}
+
+.lang-flags-eng {
+    cursor: pointer;
+    background-image: url("../images/icons/united-kingdom-flag-icon.png");
+    width: 25px;
+    height: 25px;
+}
+
 /*
 * Bootstrap overridden rules
 */
