@@ -6,6 +6,7 @@ import javax.inject.{Inject, Singleton}
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.crawling.CrawlerActor.StartCrawl
+import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSResponse}
@@ -64,17 +65,22 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
     */
     def crawlStatusByCrawlId(crawlId: String) = Action.async { request =>
       handleNutchJobProgress(crawlId) { jobsReducedInformation =>
-        val current = jobsReducedInformation.filter(j => j.`type` == "INDEX" || j.status != "FINISHED").head
-        val currentStatus = (current.`type`, current.status) match {
-          case ("INDEX", "FINISHED") =>
-            "FINISHED"
-          case (_, "FAILED") =>
-            "FAILED"
-          case (_, state) =>
-            state
+        jobsReducedInformation.filter(j => j.`type` == "INDEX" || j.status != "FINISHED").headOption match {
+          case Some(current) =>
+            val currentStatus = (current.`type`, current.status) match {
+              case ("INDEX", "FINISHED") =>
+                "FINISHED"
+              case (_, "FAILED") =>
+                "FAILED"
+              case (_, state) =>
+                state
+            }
+            val crawlStatus = CrawlProgress(crawlId, current.`type`.toString, currentStatus)
+            Ok(Json.toJson(crawlStatus))
+          case _ =>
+            NotFound
         }
-        val crawlStatus = CrawlProgress(crawlId, current.`type`.toString, currentStatus)
-        Ok(Json.toJson(crawlStatus))
+
       }
     }
 
@@ -215,6 +221,7 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
       result match {
         case Left(seedListPath) =>
           crawlActor ! StartCrawl(crawlId, seedListPath)
+          Logger.info(s"Created crawl $crawlId")
           Created("/crawling/jobs/" + crawlId)
         case Right(failureResult) =>
           failureResult
