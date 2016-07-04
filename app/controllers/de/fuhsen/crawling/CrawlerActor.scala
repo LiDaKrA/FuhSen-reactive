@@ -59,10 +59,15 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
     }
   }
 
+  /** Generate the String for the `batch` field */
   private def batch(timestamp: Option[Long]): String = {
     timestamp.get + "-4430"
   }
 
+  /**
+    * Manage the Nutch job. Start next phase if previous one finished. Poll the current phase asynchronously.
+    * @param cnj
+    */
   private def handleCheckJob(cnj: CheckNutchJob): Unit = {
     import cnj._
     val url = ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job/" + jobId
@@ -70,23 +75,30 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
       val state = (response.json \ "state").as[String]
       state match {
         case "FINISHED" =>
-          println(s"Job $jobId has finished!")
+          log.info(s"Job $jobId has finished!")
           nextJob.get(cnj.`type`) match {
             case Some(nextJobType) =>
+              // Start next job
               val (args, newTimestamp) = getJobArgs(cnj, nextJobType)
               self ! CreateNutchJob(crawlId = crawlId, `type` = nextJobType, newTimestamp orElse timestamp, args = args)
             case None =>
             // Crawl job finished
             // TODO: Report to user
           }
-        case state =>
-          println(s"Job $jobId is in state $state")
+        case "FAILED" =>
+          log.error(s"Crawl $crawlId failed in phase ${`type`.toString}. Message: " + response.body)
+          // Don't start next phase, stop crawl.
+        case "STOPPING"|"KILLING"|"KILLED" =>
+          log.warning(s"Crawl job $crawlId has been stopped or killed in phase ${`type`.toString}.")
+        case "RUNNING"|"IDLE"|"ANY" =>
+          log.debug(s"Job $jobId is in state $state")
           getContext().system.scheduler.scheduleOnce(
             500.milliseconds, self, cnj)
       }
     }
   }
 
+  /** Map from current phase to next phase */
   val nextJob = Map[NutchJobType, NutchJobType](
     InjectType -> GenerateType,
     GenerateType -> FetchType,
@@ -96,7 +108,7 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
   )
 
   private def handleStartCrawl(crawlId: String, seedListPath: String): Unit = {
-    println("Start crawl " + crawlId)
+    log.info("Start crawl " + crawlId)
     self ! CreateNutchJob(crawlId = crawlId, `type` = InjectType, timestamp = None, args = InjectArgs(seedListPath))
   }
 
@@ -107,7 +119,7 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
       responseTry match {
         case Success(response) =>
           val jobId = response.body
-          println(s"Created $typ Nutch job: $jobId")
+          log.info(s"Created $typ Nutch job: $jobId")
           self ! CheckNutchJob(crawlId, typ, jobId, timestamp)
         case Failure(e) =>
           log.warning("Error in getting a response: " + e.getMessage)

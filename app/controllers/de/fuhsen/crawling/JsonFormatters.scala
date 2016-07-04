@@ -9,7 +9,7 @@ import play.api.libs.json.Json
 object JsonFormatters {
   implicit val seedUrlFormatter = Json.format[SeedUrl]
   implicit val createSeedListBodyFormatter = Json.format[CreateSeedListBody]
-  implicit val nutchJobProgressFormatter = Json.format[NutchJobProgress]
+  implicit val nutchJobProgressFormatter = Json.format[CrawlJobProgress]
   implicit val injectArgsFormatter = Json.format[InjectArgs]
   implicit val generateArgsFormatter = Json.format[GenerateArgs]
   implicit val fetchArgsFormatter = Json.format[FetchArgs]
@@ -17,4 +17,5 @@ object JsonFormatters {
   implicit val updateDbArgsFormatter = Json.format[UpdateDbArgs]
   implicit val indexArgsFormatter = Json.format[IndexArgs]
   implicit val nutchJobFormatter = Json.format[NutchJob]
+  implicit val crawlProgressFormatter = Json.format[CrawlProgress]
 }
