@@ -1,0 +1,65 @@
+#%RAML 0.8
+displayName: Crawling API
+description: |
+    The Crawling API provides services to manage crawl jobs.
+    
+/jobs:
+  get:
+    description: Get full information about all crawl jobs.
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              !include api-crawling-files/example-jobs.json
+  /create:
+    post:
+      description: Create a crawl job based on seed URLs.
+      body:
+        application/json:
+          example: |
+            { "seedURLs": [
+              "http://blablablablablal.onion",
+              "http://someexampleonion.onion"
+              ]
+            }
+      responses:
+        201:
+          headers:
+            Location:
+              example: /crawling/jobs/crawl-1467627443209-1
+          body:
+            text/plain:
+              example: /crawling/jobs/crawl-1467627443209-1
+  /{crawlId}:
+    get:
+      description: Get full information about all jobs of a specific crawl.
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                !include api-crawling-files/example-jobs-crawl.json
+        404:
+    /progress:
+      get:
+        description: Get progress information for each job of a crawl.
+        responses:
+          200:
+            body:
+              application/json:
+                example:
+                  !include api-crawling-files/example-jobs-progress.json
+    /status:
+      get:
+        description: Get overall status of a crawl. This endpoint should be used to check if a crawl has finished, yet.
+                     If the crawlStatus property of the response reads FINISHED, the crawl has finished and the content
+                     is indexed.
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  {"crawlId": "crawl-1467627443209-1",
+                   "currentJob": "INDEX",
+                   "crawlStatus": "FINISHED"}
