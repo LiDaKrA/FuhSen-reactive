@@ -1,0 +1,131 @@
+[
+    {
+        "args": {
+            "seedDir": "/tmp/1467627443553-0"
+        },
+        "confId": "default",
+        "crawlId": "crawl-1467627443209-1",
+        "id": "crawl-1467627443209-1-default-INJECT-1708995599",
+        "msg": "OK",
+        "result": {
+            "jobs": {
+                "[crawl-1467627443209-1]inject /tmp/1467627443553-0-job_local2005894936_0001": {
+                    "counters": {
+                        "File Input Format Counters ": {
+                            "BYTES_READ": 60
+                        },
+                        "File Output Format Counters ": {
+                            "BYTES_WRITTEN": 0
+                        },
+                        "File System Counters": {
+                            "FILE_BYTES_READ": 608803,
+                            "FILE_BYTES_WRITTEN": 889845,
+                            "FILE_LARGE_READ_OPS": 0,
+                            "FILE_READ_OPS": 0,
+                            "FILE_WRITE_OPS": 0
+                        },
+                        "Map-Reduce Framework": {
+                            "COMMITTED_HEAP_BYTES": 247463936,
+                            "CPU_MILLISECONDS": 0,
+                            "FAILED_SHUFFLE": 0,
+                            "GC_TIME_MILLIS": 0,
+                            "MAP_INPUT_RECORDS": 2,
+                            "MAP_OUTPUT_RECORDS": 2,
+                            "MERGED_MAP_OUTPUTS": 0,
+                            "PHYSICAL_MEMORY_BYTES": 0,
+                            "SPILLED_RECORDS": 0,
+                            "SPLIT_RAW_BYTES": 118,
+                            "VIRTUAL_MEMORY_BYTES": 0
+                        },
+                        "injector": {
+                            "urls_injected": 2
+                        }
+                    },
+                    "jobID": {
+                        "id": 1,
+                        "jtIdentifier": "local2005894936"
+                    },
+                    "jobName": "[crawl-1467627443209-1]inject /tmp/1467627443553-0"
+                }
+            }
+        },
+        "state": "FINISHED",
+        "type": "INJECT"
+    },
+    {
+        "args": {
+            "batch": "1467627445952-4430",
+            "crawlId": "crawl-1467627443209-1",
+            "curTime": 1467627445952,
+            "filter": true,
+            "normalize": false
+        },
+        "confId": "default",
+        "crawlId": "crawl-1467627443209-1",
+        "id": "crawl-1467627443209-1-default-GENERATE-224221369",
+        "msg": "OK",
+        "result": {
+            "generate.batch.id": "1467627445952-4430",
+            "generate.count": 2,
+            "jobs": {
+                "[crawl-1467627443209-1]generate: 1467627445952-4430-job_local27273802_0002": {
+                    "counters": {
+                        "File Input Format Counters ": {
+                            "BYTES_READ": 0
+                        },
+                        "File Output Format Counters ": {
+                            "BYTES_WRITTEN": 0
+                        },
+                        "File System Counters": {
+                            "FILE_BYTES_READ": 2437154,
+                            "FILE_BYTES_WRITTEN": 3562958,
+                            "FILE_LARGE_READ_OPS": 0,
+                            "FILE_READ_OPS": 0,
+                            "FILE_WRITE_OPS": 0
+                        },
+                        "Generator": {
+                            "GENERATE_MARK": 2
+                        },
+                        "Map-Reduce Framework": {
+                            "COMBINE_INPUT_RECORDS": 0,
+                            "COMBINE_OUTPUT_RECORDS": 0,
+                            "COMMITTED_HEAP_BYTES": 624951296,
+                            "CPU_MILLISECONDS": 0,
+                            "FAILED_SHUFFLE": 0,
+                            "GC_TIME_MILLIS": 0,
+                            "MAP_INPUT_RECORDS": 2,
+                            "MAP_OUTPUT_BYTES": 182,
+                            "MAP_OUTPUT_MATERIALIZED_BYTES": 192,
+                            "MAP_OUTPUT_RECORDS": 2,
+                            "MERGED_MAP_OUTPUTS": 1,
+                            "PHYSICAL_MEMORY_BYTES": 0,
+                            "REDUCE_INPUT_GROUPS": 2,
+                            "REDUCE_INPUT_RECORDS": 2,
+                            "REDUCE_OUTPUT_RECORDS": 2,
+                            "REDUCE_SHUFFLE_BYTES": 192,
+                            "SHUFFLED_MAPS": 1,
+                            "SPILLED_RECORDS": 4,
+                            "SPLIT_RAW_BYTES": 947,
+                            "VIRTUAL_MEMORY_BYTES": 0
+                        },
+                        "Shuffle Errors": {
+                            "BAD_ID": 0,
+                            "CONNECTION": 0,
+                            "IO_ERROR": 0,
+                            "WRONG_LENGTH": 0,
+                            "WRONG_MAP": 0,
+                            "WRONG_REDUCE": 0
+                        }
+                    },
+                    "jobID": {
+                        "id": 2,
+                        "jtIdentifier": "local27273802"
+                    },
+                    "jobName": "[crawl-1467627443209-1]generate: 1467627445952-4430"
+                }
+            }
+        },
+        "state": "FINISHED",
+        "type": "GENERATE"
+    }
+]

@@ -1,0 +1,38 @@
+[
+    {
+        "id": "crawl-1467627443209-1-default-UPDATEDB-1888561091",
+        "msg": "OK",
+        "status": "FINISHED",
+        "type": "UPDATEDB"
+    },
+    {
+        "id": "crawl-1467627443209-1-default-INJECT-1708995599",
+        "msg": "OK",
+        "status": "FINISHED",
+        "type": "INJECT"
+    },
+    {
+        "id": "crawl-1467627443209-1-default-FETCH-326147305",
+        "msg": "OK",
+        "status": "FINISHED",
+        "type": "FETCH"
+    },
+    {
+        "id": "crawl-1467627443209-1-default-GENERATE-224221369",
+        "msg": "OK",
+        "status": "FINISHED",
+        "type": "GENERATE"
+    },
+    {
+        "id": "crawl-1467627443209-1-default-INDEX-1990875422",
+        "msg": "OK",
+        "status": "FINISHED",
+        "type": "INDEX"
+    },
+    {
+        "id": "crawl-1467627443209-1-default-PARSE-1015665009",
+        "msg": "OK",
+        "status": "FINISHED",
+        "type": "PARSE"
+    }
+]

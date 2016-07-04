@@ -222,7 +222,8 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
         case Left(seedListPath) =>
           crawlActor ! StartCrawl(crawlId, seedListPath)
           Logger.info(s"Created crawl $crawlId")
-          Created("/crawling/jobs/" + crawlId)
+          val path = "/crawling/jobs/" + crawlId
+          Created(path).withHeaders(LOCATION -> path)
         case Right(failureResult) =>
           failureResult
       }

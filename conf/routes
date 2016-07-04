@@ -38,7 +38,5 @@ GET     /webjars/*file                                      controllers.WebJarAs
 GET     /crawling/jobs                                      controllers.de.fuhsen.crawling.CrawlerController.crawlJobs
 GET     /crawling/jobs/:crawlId                             controllers.de.fuhsen.crawling.CrawlerController.crawlJobsByCrawlId(crawlId: String)
 GET     /crawling/jobs/:crawlId/progress                    controllers.de.fuhsen.crawling.CrawlerController.crawlJobProgressByCrawlId(crawlId: String)
-
-# Return status of crawl by id. Example response: {"crawlId":"crawl-1467620807590-1","currentJob":"INDEX","crawlStatus":"FINISHED"}
 GET     /crawling/jobs/:crawlId/status                      controllers.de.fuhsen.crawling.CrawlerController.crawlStatusByCrawlId(crawlId: String)
 POST    /crawling/jobs/create                               controllers.de.fuhsen.crawling.CrawlerController.createCrawlJob
