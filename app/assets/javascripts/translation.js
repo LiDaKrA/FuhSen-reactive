@@ -59,7 +59,7 @@ var dictEng = {
     "comment":"Comment",
     "resultfilters":"Results filters",
     "occupation":"Occupation",
-    "liveIn":"Location",
+    "liveIn":"Lived In",
     "workAt":"Work",
     "studyAt":"Studies",
     "page":"Page",
