@@ -149,7 +149,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:location ?location .
              |?p fs:label ?label .
              |?p fs:comment ?comment .
-             |?p foaf:gender ?gender .
+             |?p fs:gender ?gender .
              |?p fs:occupation ?occupation .
              |?p fs:birthday ?birthday .
              |?p fs:country ?country .
@@ -188,7 +188,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:url ?url .
              |?p fs:location ?location .
              |?p fs:country ?country .
-             |?p fs:priceLabel ?price .
+             |?p fs:price ?price .
              |?p fs:condition ?condition .
              |?p fs:source ?source .
              |}
