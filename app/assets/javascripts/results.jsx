@@ -110,6 +110,39 @@ var Trigger = React.createClass({
 });
 
 var Container = React.createClass({
+    onFacetSelection: function(facetName, facetValue) {
+        if(this.state.facetsDict[facetName]) {
+            if(this.state.facetsDict[facetName].indexOf(facetValue) === -1) {
+                this.state.facetsDict[facetName].push(facetValue)
+                this.setState({facetsDict: this.state.facetsDict})
+            }
+        } else {
+            this.state.facetsDict[facetName] = [facetValue]
+            this.setState({facetsDict: this.state.facetsDict})
+        }
+
+        // for (var key in this.state.facetsDict) {
+        //     if (this.state.facetsDict.hasOwnProperty(key)) {
+        //         console.log(key, this.state.facetsDict[key]);
+        //     }
+        // }
+    },
+    onFacetRemoval: function(facetName, facetValue) {
+        var index_of =  this.state.facetsDict[facetName].indexOf(facetValue)
+        this.state.facetsDict[facetName].splice(index_of, 1)
+
+        if(this.state.facetsDict[facetName].length === 0){
+            delete this.state.facetsDict[facetName]
+        }
+
+        this.setState({facetsDict: this.state.facetsDict})
+
+        // for (var key in this.state.facetsDict) {
+        //     if (this.state.facetsDict.hasOwnProperty(key)) {
+        //         console.log(key, this.state.facetsDict[key]);
+        //     }
+        // }
+    },
     loadCommentsFromServer: function () {
         var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType;
         $.ajax({
@@ -128,7 +161,7 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view:"list", entityType:"person", facets:"", initData: false};
+        return {view:"list", entityType:"person", facets:"", initData: false, facetsDict:{} };
     },
     onTypeChange: function (event) {
         var optionSelected = event.currentTarget.dataset.id;
@@ -147,9 +180,19 @@ var Container = React.createClass({
     render: function () {
         if (this.state.initData) {
             return (<div class="row search-results-container">
-                <FacetList searchUid={this.props.searchUid} keyword={this.props.keyword} entityType={this.state.entityType} />
-                <ResultsContainer searchUid={this.props.searchUid} keyword={this.props.keyword} entityType={this.state.entityType} view={this.state.view} facets={this.state.facets} onTypeChange={this.onTypeChange} />
-            </div>);
+                        <FacetList searchUid={this.props.searchUid}
+                                   keyword={this.props.keyword}
+                                   entityType={this.state.entityType}
+                                   onFacetSelection={this.onFacetSelection}
+                                   onFacetRemoval={this.onFacetRemoval}/>
+                        <ResultsContainer searchUid={this.props.searchUid}
+                                          keyword={this.props.keyword}
+                                          entityType={this.state.entityType}
+                                          view={this.state.view}
+                                          facets={this.state.facets}
+                                          onTypeChange={this.onTypeChange}
+                                          facetsDict={this.state.facetsDict}/>
+                    </div>);
         }
         return <div className="row">
             <div className="col-md-12 text-center">
@@ -162,6 +205,78 @@ var Container = React.createClass({
 
 
 //************** Begin Facets Components *******************
+
+// inject/ passing data
+var FacetList = React.createClass({
+    onFacetSelection: function(facetName, valueSelected) {
+        this.props.onFacetSelection(facetName, valueSelected)
+    },
+    onFacetRemoval: function(facetName, valueSelected) {
+        this.props.onFacetRemoval(facetName, valueSelected)
+    },
+    loadFacetsFromServer: function (eType) {
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/facets?entityType="+eType;
+
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                this.setState({data: data});
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    getInitialState: function () {
+        return {data: null};
+    },
+    componentDidMount: function () {
+        this.loadFacetsFromServer(this.props.entityType);
+    },
+    componentWillReceiveProps: function(nextProps){
+        // see if it actually changed
+        if (nextProps.entityType !== this.props.entityType) {
+            this.loadFacetsFromServer(nextProps.entityType);
+        }
+    },
+    render: function () {
+
+        if (this.state.data && this.state.data["@graph"] !== undefined) {
+            var _searchUid = this.props.searchUid;
+            var _entityType = this.props.entityType;
+            var MItems = this.state.data["@graph"].map( function(menuItems){
+                return <FacetItems searchUid={_searchUid}
+                                   entityType={_entityType}
+                                   label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}
+                                   name={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}
+                                   onFacetSelection={this.onFacetSelection}
+                                   onFacetRemoval={this.onFacetRemoval}/>
+            }, this);
+            return (
+                <div className="col-md-3 facets-container hidden-phone">
+                    <div className="facets-head">
+                        <h3>{getTranslation("resultfilters")}</h3>
+                    </div>
+                    <div className="js facets-list bt bb">
+                        {MItems}
+                    </div>
+                </div>
+            )
+        }
+        return (
+            <div className="col-md-3 facets-container hidden-phone">
+                <div className="facets-head">
+                    <h3>{getTranslation("resultfilters")}</h3>
+                </div>
+                <div className="js facets-list bt bb">
+                </div>
+            </div>
+        )
+
+    }
+});
 
 var FacetItems = React.createClass({
     getInitialState: function() {
@@ -213,6 +328,8 @@ var FacetItems = React.createClass({
             _selectedFacets.push(eSelectedItem);
             this.setState({ showTextBox: false, selected_facets: _selectedFacets });
         }
+
+        this.props.onFacetSelection(this.props.name, eSelectedItem)
     },
     onFacetItemRemoveClick: function(eSelectedItem) {
         var _selectedFacets = this.state.selected_facets;
@@ -222,13 +339,18 @@ var FacetItems = React.createClass({
             this.setState({ showTextBox: false, selected_facets: _selectedFacets });
         }
 
+        this.props.onFacetRemoval(this.props.name, eSelectedItem)
     },
     render: function () {
         var selItems = [];
         var _onFacetItemRemoveClick = this.onFacetItemRemoveClick;
         if (this.state.selected_facets.length > 0 ) {
             this.state.selected_facets.map( function(item){
-                selItems.push(<li data-fctvalue={item}> <span title="male" className="facet-value">{item}</span> <a title="Remove" className="facet-remove fr" onClick={_onFacetItemRemoveClick.bind(this, item)}></a></li>);
+                selItems.push(<li data-fctvalue={item}>
+                                    <span title="male" className="facet-value">{item}</span>
+                                    <a title="Remove" className="facet-remove fr" onClick={_onFacetItemRemoveClick.bind(this, item)}>
+                                    </a>
+                              </li>);
             });
             return (
             <div className="facets-item bt bb bl br" >
@@ -319,65 +441,7 @@ var FacetSubMenuItems = React.createClass({
     }
 });
 
-// inject/ passing data
-var FacetList = React.createClass({
-    loadFacetsFromServer: function (eType) {
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/facets?entityType="+eType;
 
-        $.ajax({
-            url: searchUrl,
-            dataType: 'json',
-            cache: false,
-            success: function (data) {
-                this.setState({data: data});
-            }.bind(this),
-            error: function (xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
-    },
-    getInitialState: function () {
-        return {data: null};
-    },
-    componentDidMount: function () {
-        this.loadFacetsFromServer(this.props.entityType);
-    },
-    componentWillReceiveProps: function(nextProps){
-        // see if it actually changed
-        if (nextProps.entityType !== this.props.entityType) {
-            this.loadFacetsFromServer(nextProps.entityType);
-        }
-    },
-    render: function () {
-        if (this.state.data && this.state.data["@graph"] !== undefined) {
-            var _searchUid = this.props.searchUid;
-            var _entityType = this.props.entityType;
-            var MItems = this.state.data["@graph"].map( function(menuItems){
-                return <FacetItems searchUid={_searchUid} entityType={_entityType} label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])} name={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}/>
-            });
-            return (
-                <div className="col-md-3 facets-container hidden-phone">
-                    <div className="facets-head">
-                        <h3>{getTranslation("resultfilters")}</h3>
-                    </div>
-                    <div className="js facets-list bt bb">
-                        {MItems}
-                    </div>
-                </div>
-            )
-        }
-        return (
-            <div className="col-md-3 facets-container hidden-phone">
-                <div className="facets-head">
-                    <h3>{getTranslation("resultfilters")}</h3>
-                </div>
-                <div className="js facets-list bt bb">
-                </div>
-            </div>
-        )
-
-    }
-});
 
 //************** End Facets Components *******************
 
@@ -474,7 +538,9 @@ var ResultsContainer = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
-                this.setState({resultsData : data, selected : eType, loading: false, underDev: false});
+                data_to_handle = JSON.parse(JSON.stringify(data))
+                data_to_maintain = JSON.parse(JSON.stringify(data))
+                this.setState({resultsData : data_to_handle, selected : eType, loading: false, underDev: false, originalData : data_to_maintain});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -494,7 +560,6 @@ var ResultsContainer = React.createClass({
         }
     },
     render: function(){
-
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
         var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
@@ -539,6 +604,37 @@ var ResultsContainer = React.createClass({
         }
 
         var final_data = this.state.resultsData;
+
+        if(Object.keys(this.props.facetsDict).length > 0)
+        {
+            final_data["@graph"] = this.state.originalData["@graph"]
+
+            for (var key in this.props.facetsDict) {
+                if (this.props.facetsDict.hasOwnProperty(key)) {
+
+                    var facet_name = "fs:"+key
+                    var facet_values = this.props.facetsDict[key]
+
+                    if(facet_name == "fs:price") {
+                        facet_name = "fs:priceLabel"
+                    }
+
+                    function filterByFacet(obj) {
+                        if (facet_values.indexOf(obj[facet_name]) >= 0) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    var as = final_data["@graph"].filter(filterByFacet)
+                    final_data["@graph"] = JSON.parse(JSON.stringify(as))
+                }
+            }
+        }
+        else {
+            final_data["@graph"] = this.state.originalData["@graph"]
+        }
 
         //No results
         if(final_data["@graph"] === undefined)
