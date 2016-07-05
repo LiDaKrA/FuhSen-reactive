@@ -463,7 +463,7 @@ var ResultsContainer = React.createClass({
         var CSV = '';
         //Set Report title in first row or line
 
-        CSV += ReportTitle + '\r\n\n';
+        //CSV += ReportTitle + '\r\n\n';
 
         //This condition will generate the Label/Header
         if (ShowLabel) {
@@ -608,17 +608,10 @@ var ResultsContainer = React.createClass({
         if(Object.keys(this.props.facetsDict).length > 0)
         {
             final_data["@graph"] = this.state.originalData["@graph"]
-
             for (var key in this.props.facetsDict) {
                 if (this.props.facetsDict.hasOwnProperty(key)) {
-
                     var facet_name = "fs:"+key
                     var facet_values = this.props.facetsDict[key]
-
-                    if(facet_name == "fs:price") {
-                        facet_name = "fs:priceLabel"
-                    }
-
                     function filterByFacet(obj) {
                         if (facet_values.indexOf(obj[facet_name]) >= 0) {
                             return true;
@@ -626,7 +619,6 @@ var ResultsContainer = React.createClass({
                             return false;
                         }
                     }
-
                     var as = final_data["@graph"].filter(filterByFacet)
                     final_data["@graph"] = JSON.parse(JSON.stringify(as))
                 }
@@ -812,7 +804,7 @@ var ResultsList = React.createClass({
                         source={result["fs:source"]}
                         location={result["fs:location"]}
                         country={result["fs:country"]}
-                        price={result["fs:priceLabel"]}
+                        price={result["fs:price"]}
                         condition={result["fs:condition"]}
                         webpage={result.url}>
                     </ProductResultElement>
