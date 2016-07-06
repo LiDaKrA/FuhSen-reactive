@@ -201,6 +201,7 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
     * @return The crawl id of the crawl job.
     */
   def createCrawlJob() = Action.async { request =>
+    Logger.info("Creating crawl jobs...")
     request.body.asJson match {
       case Some(json) =>
         (json \ "seedURLs") match {

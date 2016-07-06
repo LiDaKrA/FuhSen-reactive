@@ -1,5 +1,7 @@
 checkLanguage();
 
+var urlsStaticData = [{ "seedURLs": ["http://torpharmzxholobn.onion/en/product/purchase-viagra-professional.html", "http://eupillu4np223oxe.onion/product-tag/viagra/"]}];
+
 function extractQuery(key) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
@@ -825,6 +827,28 @@ var ResultsList = React.createClass({
 });
 
 var WebResultElement = React.createClass({
+    createCrawlJob: function () {
+        console.info("Creating crawl job task")
+        var createCrawlJobUrl = "/crawling/jobs/create";
+        $.ajax({
+            url: createCrawlJobUrl,
+            data: urlsStaticData,
+            type: "POST",
+            cache: false,
+            success: function () {
+                this.setState({crawlJobCreated: true});
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    onCreateCrawlJobClick: function() {
+        this.createCrawlJob();
+    },
+    getInitialState: function () {
+        return {crawlJobCreated: false};
+    },
     render: function () {
         return (
             <li className="item bt">
@@ -851,7 +875,7 @@ var WebResultElement = React.createClass({
                                 <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;<button>&nbsp;Crawl it!&nbsp;</button>
+                                &nbsp;&nbsp;{this.state.crawlJobCreated===true ? <label>{getTranslation("crawlJobCreated")}</label> : <button onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
                             </div>
                         </div>
                     </div>
