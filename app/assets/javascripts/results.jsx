@@ -130,20 +130,18 @@ var Container = React.createClass({
         // }
     },
     onFacetRemoval: function(facetName, facetValue) {
-        var index_of =  this.state.facetsDict[facetName].indexOf(facetValue)
-        this.state.facetsDict[facetName].splice(index_of, 1)
+        if(facetValue != "all") {
+            var index_of =  this.state.facetsDict[facetName].indexOf(facetValue)
+            this.state.facetsDict[facetName].splice(index_of, 1)
 
-        if(this.state.facetsDict[facetName].length === 0){
+            if(this.state.facetsDict[facetName].length === 0){
+                delete this.state.facetsDict[facetName]
+            }
+        } else {
             delete this.state.facetsDict[facetName]
         }
 
         this.setState({facetsDict: this.state.facetsDict})
-
-        // for (var key in this.state.facetsDict) {
-        //     if (this.state.facetsDict.hasOwnProperty(key)) {
-        //         console.log(key, this.state.facetsDict[key]);
-        //     }
-        // }
     },
     loadCommentsFromServer: function () {
         var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType;
@@ -186,7 +184,8 @@ var Container = React.createClass({
                                    keyword={this.props.keyword}
                                    entityType={this.state.entityType}
                                    onFacetSelection={this.onFacetSelection}
-                                   onFacetRemoval={this.onFacetRemoval}/>
+                                   onFacetRemoval={this.onFacetRemoval}
+                                   currentTab={this.state.entityType}/>
                         <ResultsContainer searchUid={this.props.searchUid}
                                           keyword={this.props.keyword}
                                           entityType={this.state.entityType}
@@ -254,7 +253,8 @@ var FacetList = React.createClass({
                                    label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}
                                    name={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}
                                    onFacetSelection={this.onFacetSelection}
-                                   onFacetRemoval={this.onFacetRemoval}/>
+                                   onFacetRemoval={this.onFacetRemoval}
+                                   currentTab={this.props.currentTab}/>
             }, this);
             return (
                 <div className="col-md-3 facets-container hidden-phone">
@@ -290,6 +290,7 @@ var FacetItems = React.createClass({
         var propsName_key = arr_ele.indexOf(propsName);
         //Check if the menu item is shown
         // if Yes hide it, if No show it
+
         if(this.state.showTextBox){
             //Check if the item is in the array: means you just now clicked it, then hide it by setting the state to false and remove it from the array
             //if not in the array: means it was hidden by showing other item:
@@ -334,14 +335,24 @@ var FacetItems = React.createClass({
         this.props.onFacetSelection(this.props.name, eSelectedItem)
     },
     onFacetItemRemoveClick: function(eSelectedItem) {
-        var _selectedFacets = this.state.selected_facets;
-        var _index = _selectedFacets.indexOf(eSelectedItem);
-        if (_index >= 0) {
-            _selectedFacets.splice(_index, 1);
-            this.setState({ showTextBox: false, selected_facets: _selectedFacets });
+        if(eSelectedItem != "all"){
+            var _selectedFacets = this.state.selected_facets;
+            var _index = _selectedFacets.indexOf(eSelectedItem);
+            if (_index >= 0) {
+                _selectedFacets.splice(_index, 1);
+                this.setState({ showTextBox: false, selected_facets: _selectedFacets });
+            }
+        } else {
+            this.setState({ showTextBox: false, selected_facets: [] });
         }
 
         this.props.onFacetRemoval(this.props.name, eSelectedItem)
+
+    },
+    componentWillUpdate: function (nextProps,  nextState) {
+        if(this.props.currentTab != nextProps.currentTab) {
+            this.onFacetItemRemoveClick("all")
+        }
     },
     render: function () {
         var selItems = [];
@@ -442,8 +453,6 @@ var FacetSubMenuItems = React.createClass({
         );
     }
 });
-
-
 
 //************** End Facets Components *******************
 
