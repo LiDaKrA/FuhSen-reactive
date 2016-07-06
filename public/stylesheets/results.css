@@ -21,7 +21,7 @@
 }
 
 .csv_icon {
-  background-image: url("../images/icons/csv-icon.png");
+  background-image: url("../images/icons/csv-icon2.png");
   width: 25px;
   height: 25px;
 }
@@ -34,6 +34,12 @@
 
 .map_icon {
   background-image: url("../images/icons/map-icon.png");
+  width: 25px;
+  height: 25px;
+}
+
+.crawl_icon {
+  background-image: url("../images/icons/crawl-icon.png");
   width: 25px;
   height: 25px;
 }

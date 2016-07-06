@@ -565,6 +565,7 @@ var ResultsContainer = React.createClass({
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
         var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">Websites</li>
 
+
         if(this.state.selected==="person") {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
         } else if(this.state.selected==="organization"){
@@ -648,11 +649,7 @@ var ResultsContainer = React.createClass({
                             </ul>
                         </div>
                         <div className="col-md-4 text-right">
-                            <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
-                            <div className="divider"/>
-                            <CustomForm class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
-                            <div className="divider"/>
-                            <CustomForm class_identifier="csv_icon" func={this.noData}></CustomForm>
+                            &nbsp;
                         </div>
                     </div>
                 </div>
@@ -689,11 +686,7 @@ var ResultsContainer = React.createClass({
                                 </ul>
                             </div>
                             <div className="col-md-4 text-right">
-                                <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
-                                <div className="divider"/>
-                                <CustomForm class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
-                                <div className="divider"/>
-                                <CustomForm class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
+                                &nbsp;
                             </div>
                         </div>
                     </div>
@@ -728,6 +721,8 @@ var ResultsContainer = React.createClass({
                         </ul>
                     </div>
                     <div className="col-md-4 text-right">
+                        { this.state.selected==="website" ? <CustomForm class_identifier="crawl_icon" func={this.underDevelopmentFunction}></CustomForm> : null }
+                        { this.state.selected==="website" ? <div className="divider"/> : null }
                         <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
                         <div className="divider"/>
                         <CustomForm class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
@@ -850,9 +845,14 @@ var WebResultElement = React.createClass({
                             </div>
                         </div>
                     </div>
-                    <div class="thumbnail-wrapper col-md-1">
-                        <div class="thumbnail">
-                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                    <div>
+                        <div>
+                            <div>
+                                <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            </div>
+                            <div>
+                                &nbsp;&nbsp;<button>&nbsp;Crawl it!&nbsp;</button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -136,7 +136,7 @@ var FacebookForm = React.createClass({
                             <br/>
                             <br/>
                             <form action="/facebook/getToken" method="get">
-                                <button>{getTranslation("newfbtoken")} </button>
+                                <button>&nbsp;{getTranslation("newfbtoken")}&nbsp;</button>
                             </form>
 
                     </div> )

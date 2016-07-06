@@ -73,7 +73,8 @@ var dictEng = {
     "nodata": "No data to export to CSV.",
     "csv_icon": "Export results to CSV.",
     "graph_icon": "View the relations among the results.",
-    "map_icon": "View the results in a Map."
+    "map_icon": "View the results in a Map.",
+    "crawl_icon": "Crawl all the websites."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -161,7 +162,8 @@ var dictGer = {
     "nodata": "Es gibt keine Daten, die als CSV exportiert werden können.",
     "csv_icon": "Export results to CSV.",
     "graph_icon": "View the relations among the results.",
-    "map_icon": "View the results in a Map."
+    "map_icon": "View the results in a Map.",
+    "crawl_icon": "Crawl all the websites."
 };
 
 window.dictGer = dictGer;
