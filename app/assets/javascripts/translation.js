@@ -134,7 +134,7 @@ var dictGer = {
     "tooltype":"NACH WERT: Filtert alle Ergebnisse nach dem eingegebenen Begriff.",
     "toolmostfreq":"AUFLISTUNG: Zeigt die häufgisten Werte dieser Eigenschaft und ermöglicht eine Filterung nach diesen.",
     "toolminmax":"MIN-MAX: Ermöglich die Eingabe einer Unter- oder Obergrenze für diese Eigenschaft.",
-    "newfbtoken":"Ein neues FB Access Token bekommen.",
+    "newfbtoken":"Ein neues FB Access Token bekommen",
     "novalidfbtkfound":"Kein gültiges Facebook-Token gefunden. Wenn Sie Facebook-Ergebnissen nutzen wollen, bitte:",
     "hours":"Stunden",
     "days":"Tage",

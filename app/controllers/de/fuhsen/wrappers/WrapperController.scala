@@ -267,8 +267,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       Logger.info("Executing silk transformation: "+transform.transformationTaskId)
       //val task = silkTransform.silkTransformationRequestTasks.head
       val transformRequest = ws.url(silkTransform.transformationEndpoint(transform.transformationTaskId))
-          .withHeaders("Content-Type" -> "application/xml")
-          .withHeaders("Accept" -> acceptType)
+          .withHeaders("Content-Type" -> "application/xml; charset=utf-8")
+          //.withHeaders("Accept" -> acceptType)
       val response = transformRequest
           .post(transform.silkTransformationRequestBodyGenerator(content))
           .map(convertToApiResponse("Silk transformation endpoint"))

@@ -8,7 +8,7 @@ function extractQuery(key) {
     for (var i = 0; i < vars.length; i++) {
         var pair = vars[i].split("=");
         if (pair[0] == key) {
-            return pair[1];
+            return decodeURIComponent(pair[1]);
         }
     }
     return (false);
@@ -102,10 +102,11 @@ var Trigger = React.createClass({
         if (this.state.keyword) {
             return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid}/>);
         }
+
         return <div className="row">
-            <div className="col-md-12">
-                <h2>Bitte warten Sie, während die Ergebnisse laden...</h2>
+            <div className="col-md-12 text-center">
                 <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
+                <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
             </div>
         </div>;
     }
@@ -771,7 +772,6 @@ var ResultsList = React.createClass({
     render: function () {
         var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
         var resultsNodes = resultsNodesSorted.map(function (result) {
-
             if(result["@type"] === "foaf:Person"){
                 return (
                     <PersonResultElement
