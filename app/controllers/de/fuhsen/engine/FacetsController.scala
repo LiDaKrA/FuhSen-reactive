@@ -38,6 +38,8 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
           .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "workAt")
         model.createResource(FuhsenVocab.FACET_URI + "StudyAt")
           .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "studyAt")
+        model.createResource(FuhsenVocab.FACET_URI + "Source")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "source")
       case "organization" =>
         //Creating fs:Search resource
         model.createResource(FuhsenVocab.FACET_URI + "Location")
@@ -224,6 +226,22 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:studyAt ?studyAt .
                  |} GROUP BY ?studyAt
+          """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+          case "source" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?source) AS ?facet) (COUNT(?source) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type foaf:Person .
+                 |    ?p fs:source ?source .
+                 |} GROUP BY ?source
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results

@@ -1,7 +1,5 @@
 checkLanguage();
 
-var urlsStaticData = [{ "seedURLs": ["http://torpharmzxholobn.onion/en/product/purchase-viagra-professional.html", "http://eupillu4np223oxe.onion/product-tag/viagra/"]}];
-
 function extractQuery(key) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
@@ -841,8 +839,9 @@ var WebResultElement = React.createClass({
         var createCrawlJobUrl = "/crawling/jobs/create";
         $.ajax({
             url: createCrawlJobUrl,
-            data: urlsStaticData,
+            data: { "seedURLs": [ this.props.onion_url ] },
             type: "POST",
+            dataType : "json",
             cache: false,
             success: function () {
                 this.setState({crawlJobCreated: true});

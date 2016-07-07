@@ -22,6 +22,8 @@ var dictEng = {
     "adjustfilters":"Adjust filters or wait for incoming results.",
     "activate":"activate",
     "filterbyvalue":"filter by value",
+    "street":"Street",
+    "source":"Source",
     'german':"German",
     'ghanaian':"Ghanaian",
     'greek':"Greek",
