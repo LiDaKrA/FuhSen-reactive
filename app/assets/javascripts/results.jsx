@@ -462,6 +462,33 @@ var ResultsContainer = React.createClass({
     underDevelopmentFunction : function() {
         this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: true});
     },
+    crawlAll : function() {
+        var JSONData = this.state.resultsData["@graph"];
+
+        var seeds = []
+
+        for(var key in JSONData) {
+            seeds.push(JSONData[key].url)
+        }
+
+        var createCrawlJobUrl = "/crawling/jobs/create";
+
+        $.ajax({
+            url: createCrawlJobUrl,
+            data: JSON.stringify({ "seedURLs": seeds }),
+            type: "POST",
+            dataType : "text",
+            contentType: "application/json; charset=utf-8",
+            cache: false,
+            success: function () {
+                this.setState({crawled :  true });
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+
+    },
     csvFunction : function(e) {
         var JSONData = JSON.stringify(this.state.resultsData["@graph"]);
         var ReportTitle = "Current results in CSV format"
@@ -558,7 +585,7 @@ var ResultsContainer = React.createClass({
         });
     },
     getInitialState: function () {
-        return {resultsData: "", selected: "person", loading: true, underDev: false};
+        return {resultsData: "", selected: "person", loading: true, underDev: false, crawled : false};
     },
     componentDidMount: function () {
         this.loadDataFromServer(this.props.entityType);
@@ -731,7 +758,7 @@ var ResultsContainer = React.createClass({
                         </ul>
                     </div>
                     <div className="col-md-4 text-right">
-                        { this.state.selected==="website" ? <CustomForm class_identifier="crawl_icon" func={this.underDevelopmentFunction}></CustomForm> : null }
+                        { this.state.selected==="website" ? <CustomForm class_identifier="crawl_icon" func={this.crawlAll}></CustomForm> : null }
                         { this.state.selected==="website" ? <div className="divider"/> : null }
                         <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
                         <div className="divider"/>
@@ -746,7 +773,8 @@ var ResultsContainer = React.createClass({
                     <div className="col-md-12">
                         <ul id="search-results" className="search-results">
                             <ul className="results-list list-unstyled">
-                                <ResultsList data={final_data}>
+                                <ResultsList data={final_data}
+                                             crawled={this.state.crawled}>
                                 </ResultsList>
                             </ul>
                         </ul>
@@ -769,6 +797,7 @@ var CustomForm = React.createClass({
 var ResultsList = React.createClass({
     render: function () {
         var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
+        var already_crawled = this.props.crawled
         var resultsNodes = resultsNodesSorted.map(function (result) {
             if(result["@type"] === "foaf:Person"){
                 return (
@@ -819,7 +848,8 @@ var ResultsList = React.createClass({
                         img="/assets/images/datasources/TorLogo.png"
                         onion_url={result.url}
                         comment={result["fs:excerpt"]}
-                        source={result["fs:source"]}>
+                        source={result["fs:source"]}
+                        crawled={already_crawled}>
                     </WebResultElement>
                 );
             }
@@ -837,7 +867,7 @@ var WebResultElement = React.createClass({
     createCrawlJob: function () {
         console.info("Creating crawl job task")
         var createCrawlJobUrl = "/crawling/jobs/create";
-        
+
         $.ajax({
             url: createCrawlJobUrl,
             data: JSON.stringify({ "seedURLs": [ this.props.onion_url ]}),
@@ -885,7 +915,7 @@ var WebResultElement = React.createClass({
                                 <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{this.state.crawlJobCreated===true ? <label>{getTranslation("crawlJobCreated")}</label> : <button onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
+                                &nbsp;&nbsp;{ this.props.crawled==true || this.state.crawlJobCreated===true ? <label>{getTranslation("crawlJobCreated")}</label> : <button onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
                             </div>
                         </div>
                     </div>
