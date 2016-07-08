@@ -837,11 +837,13 @@ var WebResultElement = React.createClass({
     createCrawlJob: function () {
         console.info("Creating crawl job task")
         var createCrawlJobUrl = "/crawling/jobs/create";
+
         $.ajax({
             url: createCrawlJobUrl,
-            data: { "seedURLs": [ this.props.onion_url ] },
+            data: JSON.stringify({ "seedURLs": [ this.props.onion_url ]}),
             type: "POST",
             dataType : "json",
+            contentType: "application/json; charset=utf-8",
             cache: false,
             success: function () {
                 this.setState({crawlJobCreated: true});
