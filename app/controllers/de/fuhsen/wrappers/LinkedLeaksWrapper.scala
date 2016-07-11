@@ -27,7 +27,7 @@ class LinkedLeaksWrapper extends RestApiWrapperTrait with SilkTransformableTrait
   override def queryParams: Map[String, String] = Map()
 
   /** Headers that should be added to the request. */
-  override def headersParams: Map[String, String] = Map()
+  override def headersParams: Map[String, String] = Map("Accept" -> "application/json")
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
