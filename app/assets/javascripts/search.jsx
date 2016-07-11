@@ -29,11 +29,12 @@ var ContainerSearch = React.createClass({
                         <link rel="stylesheet" media="screen" href="/assets/stylesheets/startPage.css">
                         <div className="col-md-12 search-widget">
                             <div class="row">
-                                <img src="/assets/images/logoBig.png" class="bigLogo" alt="Logo_Description"/>
+                                <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
+                                <img src="/assets/images/logoBig.png" className="bigLogo" alt="Logo_Description"/>
                             </div>
-                        <div className="row">
-                            <SearchForm id_class="form-search"/>
-                        </div>
+                            <div className="row">
+                                <SearchForm id_class="form-search"/>
+                            </div>
                         </div>
                         </link>
                         <div className="row">

@@ -48,10 +48,13 @@ var ContainerResults = React.createClass({
                     <div className="row" id="header-main-row">
                         <nav className="widget col-md-12" data-widget="NavigationWidget">
                             <div className="row">
-                                <div className="col-md-7">
+                                <div className="col-md-4">
                                     <a href="/">
                                         <img src="/assets/images/logoBig2.png" class="smallLogo" alt="Logo_Description"/>
                                     </a>
+                                </div>
+                                <div className="col-md-3">
+                                    <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <div className="row">
