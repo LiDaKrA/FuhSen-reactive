@@ -60,20 +60,16 @@ var LangSwitcher = React.createClass({
         if(window.localStorage.getItem("lang") === "ger"){
             return (
                 <div>
-                    <button onClick={boundClickGer} className="lang-flags-ger">
-                    </button>
-                    <div className="divider"/>
-                    <button onClick={boundClickEng} className="lang-flags-eng">
-                    </button>
+                    <b>Deutsch</b>
+                    &#124;
+                    <a onClick={boundClickEng}>English</a>
                 </div>)
         } else {
             return (
                 <div>
-                    <button onClick={boundClickGer} className="lang-flags-ger">
-                    </button>
-                    <div className="divider"/>
-                    <button onClick={boundClickEng} className="lang-flags-eng">
-                    </button>
+                    <a onClick={boundClickGer}>Deutsch</a>
+                    &#124;
+                    <b>English</b>
                 </div>)
         }
     }
