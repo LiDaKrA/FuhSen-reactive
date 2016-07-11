@@ -27,6 +27,11 @@
     font-weight: bold;
 }
 
+.lidakraLogo {
+    width:225px;
+    height: auto;
+}
+
 .lang-flags-ger {
     cursor: pointer;
     background-image: url("../images/icons/germany-flag-icon.png");

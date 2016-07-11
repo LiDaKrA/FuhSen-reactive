@@ -169,17 +169,17 @@ var dictGer = {
     "condition": "Bedingung",
     "underdevelopment": "Diese Funktion wird gerade entwickelt.",
     "nodata": "Es gibt keine Daten, die als CSV exportiert werden können.",
-    "csv_icon": "Export results to CSV.",
-    "graph_icon": "View the relations among the results.",
-    "map_icon": "View the results in a Map.",
-    "crawl_icon": "Crawl all the websites.",
-    "crawlJobCreated": "Crawl Job Created.",
-    "createCrawlJob": "Crawl it!",
-    "documents": "Documents",
-    "websites": "Websites",
-    "language": "Language",
-    "filename": "File name",
-    "filetype": "File type"
+    "csv_icon": "Exportiere die Ergebnisse als CSV-Datei.",
+    "graph_icon": "Verbindungen zwischen den Ergebnissen anzeigen.",
+    "map_icon": "Ergebnisse auf der Karte anzeigen.",
+    "crawl_icon": "Crawle die Webseiten.",
+    "crawlJobCreated": "Crawl-Auftrag erstellt.",
+    "createCrawlJob": "Erstelle einen Crawl-Auftrag!",
+    "documents": "Dokumente",
+    "websites": "Webseiten",
+    "language": "Sprache",
+    "filename": "Dateiname",
+    "filetype": "Dateityp"
 };
 
 window.dictGer = dictGer;
