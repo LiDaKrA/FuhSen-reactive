@@ -56,6 +56,14 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
           .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
         model.createResource(FuhsenVocab.FACET_URI + "Condition")
           .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "condition")
+      case "document" =>
+        //Creating fs:Search resource
+        model.createResource(FuhsenVocab.FACET_URI + "Country")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
+        model.createResource(FuhsenVocab.FACET_URI + "Language")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "language")
+        model.createResource(FuhsenVocab.FACET_URI + "FileType")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "filetype")
       case _ =>
     }
 
@@ -129,7 +137,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p foaf:gender ?gender .
-                 |} GROUP BY ?gender
+                 |} GROUP BY ?gender ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -145,7 +153,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:birthday ?birthday .
-                 |} GROUP BY ?birthday
+                 |} GROUP BY ?birthday ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -161,7 +169,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:location ?location .
-                 |} GROUP BY ?location
+                 |} GROUP BY ?location ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -177,7 +185,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:ocupation ?ocupation .
-                 |} GROUP BY ?ocupation
+                 |} GROUP BY ?ocupation ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -193,7 +201,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:livedAt ?livedAt .
-                 |} GROUP BY ?livedAt
+                 |} GROUP BY ?livedAt ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -209,7 +217,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:workAt ?workAt .
-                 |} GROUP BY ?workAt
+                 |} GROUP BY ?workAt ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -225,7 +233,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:studyAt ?studyAt .
-                 |} GROUP BY ?studyAt
+                 |} GROUP BY ?studyAt ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -241,7 +249,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type foaf:Person .
                  |    ?p fs:source ?source .
-                 |} GROUP BY ?source
+                 |} GROUP BY ?source ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -261,7 +269,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type gr:ProductOrService .
                  |    ?p fs:priceLabel ?price
-                 |} GROUP BY ?price
+                 |} GROUP BY ?price ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -278,7 +286,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type gr:ProductOrService .
                  |    ?p fs:country ?country
-                 |} GROUP BY ?country
+                 |} GROUP BY ?country ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -295,7 +303,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type gr:ProductOrService .
                  |    ?p fs:location ?location
-                 |} GROUP BY ?location
+                 |} GROUP BY ?location ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -312,7 +320,58 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |WHERE {
                  |		?p rdf:type gr:ProductOrService .
                  |    ?p fs:condition ?condition
-                 |} GROUP BY ?condition
+                 |} GROUP BY ?condition ORDER BY DESC(?elems)
+          """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+        }
+      case "document" =>
+        facet match {
+          case "country" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?country) AS ?facet) (COUNT(?country) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type fs:Document .
+                 |    ?p fs:country ?country
+                 |} GROUP BY ?country ORDER BY DESC(?elems)
+                  """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+          case "language" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?language) AS ?facet) (COUNT(?language) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type fs:Document .
+                 |    ?p fs:language ?language
+                 |} GROUP BY ?language ORDER BY DESC(?elems)
+          """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+          case "filetype" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?filetype) AS ?facet) (COUNT(?filetype) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type fs:Document .
+                 |    ?p fs:extension ?filetype
+                 |} GROUP BY ?filetype ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -343,7 +402,4 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     facetsModel
 
   }
-
-
-
 }

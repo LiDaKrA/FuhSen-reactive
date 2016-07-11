@@ -78,7 +78,12 @@ var dictEng = {
     "map_icon": "View the results in a Map.",
     "crawl_icon": "Crawl all the websites.",
     "crawlJobCreated": "Crawl Job Created.",
-    "createCrawlJob": "Crawl it!"
+    "createCrawlJob": "Crawl it!",
+    "documents": "Documents",
+    "websites": "Websites",
+    "language": "Language",
+    "filename": "File name",
+    "filetype": "File type"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -169,7 +174,12 @@ var dictGer = {
     "map_icon": "View the results in a Map.",
     "crawl_icon": "Crawl all the websites.",
     "crawlJobCreated": "Crawl Job Created.",
-    "createCrawlJob": "Crawl it!"
+    "createCrawlJob": "Crawl it!",
+    "documents": "Documents",
+    "websites": "Websites",
+    "language": "Language",
+    "filename": "File name",
+    "filetype": "File type"
 };
 
 window.dictGer = dictGer;

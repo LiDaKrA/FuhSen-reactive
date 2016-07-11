@@ -250,13 +250,46 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:title ?label .
              |?p fs:excerpt ?comment .
              |?p fs:url ?url .
-             |?p fs:source ?source
+             |?p fs:source ?source .
              |}
              |WHERE {
              |?p rdf:type foaf:Document .
              |?p rdfs:label ?label .
              |OPTIONAL { ?p rdfs:comment ?comment } .
              |OPTIONAL { ?p fs:url ?url } .
+             |OPTIONAL { ?p fs:source ?source } .
+             |}
+          """.stripMargin)
+        QueryExecutionFactory.create(query, model).execConstruct()
+      case "document" =>
+        val query = QueryFactory.create(
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |
+             |CONSTRUCT   {
+             |?p rdf:type fs:Document .
+             |?p fs:title ?label .
+             |?p fs:comment ?comment .
+             |?p fs:url ?url .
+             |?p fs:country ?country .
+             |?p fs:language ?language .
+             |?p fs:file_name ?file_name .
+             |?p fs:filetype ?extension .
+             |?p fs:source ?source
+             |}
+             |WHERE {
+             |?p rdf:type fs:Document .
+             |?p rdfs:label ?label .
+             |OPTIONAL { ?p rdfs:comment ?comment } .
+             |OPTIONAL { ?p fs:url ?url } .
+             |OPTIONAL { ?p fs:source ?source } .
+             |OPTIONAL { ?p fs:country ?country } .
+             |OPTIONAL { ?p fs:language ?language } .
+             |OPTIONAL { ?p fs:file_name ?file_name } .
+             |OPTIONAL { ?p fs:extension ?extension } .
              |OPTIONAL { ?p fs:source ?source } .
              |}
           """.stripMargin)

@@ -173,6 +173,8 @@ var Container = React.createClass({
             type = "product"
         } else if(optionSelected==="4"){
             type = "website"
+        } else if(optionSelected==="5"){
+            type = "document"
         }
         this.setState({entityType : type});
     },
@@ -600,7 +602,8 @@ var ResultsContainer = React.createClass({
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
         var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
-        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">Websites</li>
+        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">{getTranslation("websites")}</li>
+        var documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5">{getTranslation("documents")}</li>
 
 
         if(this.state.selected==="person") {
@@ -610,7 +613,9 @@ var ResultsContainer = React.createClass({
         } else if(this.state.selected==="product"){
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
         } else if(this.state.selected==="website"){
-            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>Websites</b></p></li>
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>{getTranslation("websites")}</b></p></li>
+        } else if(this.state.selected==="document"){
+            documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p><b>{getTranslation("documents")}</b></p></li>
         }
 
         if (this.state.loading) {
@@ -627,6 +632,7 @@ var ResultsContainer = React.createClass({
                                 {organizationenItem}
                                 {produkteItem}
                                 {darkWebItem}
+                                {documentItem}
                             </ul>
                         </div>
                     </div>
@@ -683,6 +689,7 @@ var ResultsContainer = React.createClass({
                                 {organizationenItem}
                                 {produkteItem}
                                 {darkWebItem}
+                                {documentItem}
                             </ul>
                         </div>
                         <div className="col-md-4 text-right">
@@ -720,6 +727,7 @@ var ResultsContainer = React.createClass({
                                     {organizationenItem}
                                     {produkteItem}
                                     {darkWebItem}
+                                    {documentItem}
                                 </ul>
                             </div>
                             <div className="col-md-4 text-right">
@@ -755,6 +763,7 @@ var ResultsContainer = React.createClass({
                             {organizationenItem}
                             {produkteItem}
                             {darkWebItem}
+                            {documentItem}
                         </ul>
                     </div>
                     <div className="col-md-4 text-right">
@@ -851,6 +860,19 @@ var ResultsList = React.createClass({
                         source={result["fs:source"]}
                         crawled={already_crawled}>
                     </WebResultElement>
+                );
+            } else if(result["@type"] === "fs:Document") {
+                return (
+                    <DocumentResultElement
+                        label={result["fs:title"]}
+                        comment={result["fs:comment"]}
+                        webpage={result.url}
+                        country={result["fs:country"]}
+                        language={result["fs:language"]}
+                        filename={result["fs:file_name"]}
+                        extension={result["fs:filetype"]}
+                        source={result["fs:source"]}>
+                    </DocumentResultElement>
                 );
             }
         });
@@ -1019,6 +1041,41 @@ var OrganizationResultElement = React.createClass({
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
                                 { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="thumbnail-wrapper col-md-1">
+                        <div class="thumbnail">
+                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+
+var DocumentResultElement = React.createClass({
+    render: function () {
+        return (
+            <li className="item bt">
+                <div className="summary row">
+                    <div className="thumbnail-wrapper col-md-2">
+                        <div className="thumbnail">
+                            <img src={"/assets/images/icons/"+this.props.extension+".png"}height="60px" width="75px"/>
+                        </div>
+                    </div>
+                    <div className="summary-main-wrapper col-md-8">
+                        <div className="summary-main">
+                            <h2 className="title">
+                                {this.props.label}
+                            </h2>
+                            <div className="subtitle">
+                                { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
+                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
+                                { this.props.language !== undefined ? <p>{getTranslation("language")}: {this.props.language}</p> : null }
+                                { this.props.filename !== undefined ? <p>{getTranslation("filename")}: {this.props.filename}</p> : null }
                                 { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
                             </div>
                         </div>
