@@ -166,7 +166,7 @@ var dictGer = {
     "checkingfbtoken": "Überprüfe Facebook-Token ...",
     "country": "Land",
     "price": "Preis",
-    "condition": "Bedingung",
+    "condition": "Zustand",
     "underdevelopment": "Diese Funktion wird gerade entwickelt.",
     "nodata": "Es gibt keine Daten, die als CSV exportiert werden können.",
     "csv_icon": "Exportiere die Ergebnisse als CSV-Datei.",
