@@ -320,8 +320,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
       }
-      //modelToTripleString(model, lang)
-      //modelToTripleString(model, "text/csv")
       modelToTripleString(model, "application/ld+json")
     }
   }
@@ -338,10 +336,19 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   private def addQueryParameters(wrapper: RestApiWrapperTrait,
                                  request: WSRequest,
                                  queryString: String): WSRequest = {
-    request
-        .withQueryString(wrapper.queryParams.toSeq: _*)
-        .withQueryString(wrapper.searchQueryAsParam(queryString).toSeq: _*)
-        .withHeaders(wrapper.headersParams.toSeq: _*)
+
+    var url_with_params = wrapper.apiUrl+"?"
+
+    for ((k,v) <- wrapper.searchQueryAsParam(queryString)){
+      url_with_params = url_with_params.concat(k+"="+v+"&")
+    }
+
+    for ((k,v) <- wrapper.queryParams){
+      url_with_params = url_with_params.concat(k+"="+v+"&")
+    }
+
+    val apiRequest: WSRequest = ws.url(url_with_params.dropRight(1))
+    apiRequest
   }
 
   /** Signs the request if the [[RestApiOAuthTrait]] is configured. */
@@ -353,6 +360,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
             .sign(OAuthCalculator(
               oAuthWrapper.oAuthConsumerKey,
               oAuthWrapper.oAuthRequestToken))
+
       case oAuth2Wrapper: RestApiOAuth2Trait =>
           request.withQueryString("access_token" -> oAuth2Wrapper.oAuth2AccessToken)
       case _ =>
@@ -386,7 +394,9 @@ object WrapperController {
     //Linked leaks
     "linkedleaks" -> new LinkedLeaksWrapper(),
     //OCCRP
-    "occrp" -> new OCCRPWrapper()
+    "occrp" -> new OCCRPWrapper(),
+    //Xing
+    "xing" -> new XingWrapper()
   )
 
   val sortedWrapperIds = wrapperMap.keys.toSeq.sortWith(_ < _)
