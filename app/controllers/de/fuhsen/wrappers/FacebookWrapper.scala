@@ -45,7 +45,7 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
   //RestApiOAuth2Trait implementation:
   override def oAuth2ClientKey : String =  ConfigFactory.load.getString("facebook.app.key")
   override def oAuth2ClientSecret : String =  ConfigFactory.load.getString("facebook.app.secret")
-  override def oAuth2AccessToken : String =  TokenManager.getAccesTokenByProvider("facebook")
+  override def oAuth2AccessToken : String =  TokenManager.getAccessTokenByProvider("facebook").get.access_token
 
   //SilkTransformableTrait implementation:
   override def silkTransformationRequestTasks = Seq(
