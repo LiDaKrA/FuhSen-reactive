@@ -28,7 +28,7 @@ public class Application extends Controller {
     }
 
     public Result TokenLifeLength(String wrapperId) {
-        String life_length = "{ \"life_length\" : \""+TokenManager.getFBTokenLifeLength()+"\" }";
+        String life_length = "{ \"life_length\" : \""+TokenManager.getTokenLifeLength(wrapperId)+"\" }";
         return ok(life_length);
     }
 
