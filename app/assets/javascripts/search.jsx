@@ -38,8 +38,11 @@ var ContainerSearch = React.createClass({
                         </div>
                         </link>
                         <div className="row">
-                            <div className="col-md-12 text-center">
-                                <FacebookForm />
+                            <div className="col-md-6 text-center">
+                                <AccessTokenForm social_network="facebook" />
+                            </div>
+                            <div className="col-md-6 text-center">
+                                <AccessTokenForm social_network="xing" />
                             </div>
                         </div>
                     </div>
@@ -104,10 +107,13 @@ var SearchForm = React.createClass({
     }
 });
 
-var FacebookForm = React.createClass({
+var AccessTokenForm = React.createClass({
     loadTokenLifeLength: function () {
+
+        var social_network_url = "/"+this.props.social_network+"/getTokenLifeLength"
+
         $.ajax({
-            url: "/facebook/getTokenLifeLength",
+            url: social_network_url,
             dataType: 'json',
             cache: false,
             success: function (lifelength) {
@@ -125,36 +131,46 @@ var FacebookForm = React.createClass({
         this.loadTokenLifeLength();
     },
     render: function() {
+
+        var social_net_upper_case = (this.props.social_network).charAt(0).toUpperCase() + (this.props.social_network).slice(1);
+
         if(this.state.token_life_length) {
             if(this.state.token_life_length === "-1") {
                 return (
                     <div align="center">
-                        {getTranslation("novalidfbtkfound")}
+                        {getTranslation("novalidtkfound_pre")+social_net_upper_case+getTranslation("novalidtkfound_post")}
                             <br/>
                             <br/>
-                            <form action="/facebook/getToken" method="get">
-                                <button>&nbsp;{getTranslation("newfbtoken")}&nbsp;</button>
+                            <form action={"/"+this.props.social_network+"/getToken"} method="get">
+                                <button>&nbsp;{getTranslation("newtoken")}&nbsp;</button>
                             </form>
 
                     </div> )
             }
-            else if(this.state.token_life_length < 24) {
+            else if(this.state.token_life_length < 60) {
                 return (
                     <div align="center">
-                        <p>{getTranslation("validfbtkfound")} {this.state.token_life_length} {getTranslation("hours")}.
+                        <p>{social_net_upper_case+getTranslation("validtkfound")} {this.state.token_life_length} {getTranslation("minutes")}.
+                        </p>
+                    </div> )
+            }
+            else if(this.state.token_life_length < 1440) {
+                return (
+                    <div align="center">
+                        <p>{social_net_upper_case+getTranslation("validtkfound")} {this.state.token_life_length} {getTranslation("hours")}.
                         </p>
                     </div> )
             }
             else {
                 return (
                     <div align="center">
-                        <p>{getTranslation("validfbtkfound")} {Math.floor(this.state.token_life_length/24)} {getTranslation("days")}.</p>
+                        <p>{social_net_upper_case+getTranslation("validtkfound")} {Math.floor((this.state.token_life_length/60)/24)} {getTranslation("days")}.</p>
                     </div> )
             }
         }
         return (
             <div align="center">
-                {getTranslation("checkingfbtoken")}
+                {getTranslation("checkingtoken")}
             </div> )
     }
 });
