@@ -27,18 +27,38 @@ import play.api.mvc.{Action, Controller}
 import views.html.index
 
 import scala.collection.mutable.ListBuffer
+import play.api.libs.oauth.ConsumerKey
+import play.api.libs.oauth.ServiceInfo
+import play.api.libs.oauth.OAuth
+import play.api.libs.oauth.RequestToken
 
 /**
   * Created by cmorales on 23.03.2016.
   */
 class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
 
+  val KEY: ConsumerKey = ConsumerKey(ConfigFactory.load.getString("xing.app.key"),ConfigFactory.load.getString("xing.app.secret"))
+  val XING:OAuth = OAuth(ServiceInfo( ConfigFactory.load.getString("xing.request_code.url"),
+    ConfigFactory.load.getString("xing.cod2accestoken.url"),
+    ConfigFactory.load.getString("xing.authorize.url"), KEY))
+
   def getToken(provider:String) = Action { request =>
-    Redirect(ConfigFactory.load.getString("facebook.request_code.url")
-        +"?client_id="+ConfigFactory.load.getString("facebook.app.key")
-        +"&redirect_uri="+ConfigFactory.load.getString("facebook.login.redirect.uri")
-        +"&response_type=code"
-        +"&scope="+ConfigFactory.load.getString("facebook.scope"))
+
+    provider match {
+      case "facebook" =>
+        Redirect(ConfigFactory.load.getString("facebook.request_code.url")
+          +"?client_id="+ConfigFactory.load.getString("facebook.app.key")
+          +"&redirect_uri="+ConfigFactory.load.getString("facebook.login.redirect.uri")
+          +"&response_type=code"
+          +"&scope="+ConfigFactory.load.getString("facebook.scope"))
+      case "xing" =>
+        XING.retrieveRequestToken(ConfigFactory.load.getString("xing.login.redirect.uri")) match {
+          case Right(t) => {
+            Redirect(XING.redirectUrl(t.token)).withSession("token" -> t.token, "secret" -> t.secret)
+          }
+          case Left(e) => throw e
+        }
+    }
   }
 
   def code2token(code:String, wrapperId:String) = Action.async{ request =>
@@ -48,7 +68,7 @@ class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
         (JsPath \ "token_type").read[String] and
         (JsPath \ "expires_in").read[Long] and
         Reads.pure(System.currentTimeMillis()/1000)
-      )(Token.apply _)
+        )(Token.apply _)
 
     val apiResponse: WSRequest = ws.url(ConfigFactory.load.getString("facebook.cod2accestoken.url")
       +"?client_id="+ConfigFactory.load.getString("facebook.app.key")
@@ -63,26 +83,47 @@ class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
           Ok(index.render())
         }
         case e: JsError => {
-          throw new Exception("ERROR: Facebook authentication error.")
+          throw new Exception("ERROR: Authentication error.")
         }
       }
     }
   }
+
+  def code2tokenX(wrapperId:String, oauth_token:String, oauth_verifier:String) = Action {
+    response =>
+      var token = response.session.get("token").get
+      var secret = response.session.get("secret").get
+
+      var tokenObj:RequestToken = new RequestToken(token, secret)
+
+    XING.retrieveAccessToken(tokenObj, oauth_verifier) match {
+      case Right(t) => {
+        System.out.println("t.token: "+t.token)
+        System.out.println("t.secret: "+t.secret)
+        TokenManager.addToken(new Token("xing", t.token, t.secret, 600, System.currentTimeMillis()/1000))
+        Ok(index.render())
+      }
+      case Left(e) => throw e
+    }
+  }
 }
+
+
 
 object TokenManager {
   var token_list = new ListBuffer[Token]()
 
-  def getFBTokenLifeLength(): String = {
-    token_list.find(current_token => current_token.provider == "facebook") match {
+  def getTokenLifeLength(social_network : String): String = {
+    token_list.find(current_token => current_token.provider == social_network) match {
       case matched_token : Some[Token] =>
         val curr_token = matched_token.get
         val now = System.currentTimeMillis / 1000
         val elapsed_time = now - curr_token.received_time_in_secs
 
         elapsed_time match {
-          case x if x >= curr_token.expires_in => "0" //Expired
-          case _ => ( (curr_token.expires_in-elapsed_time)/3600 ).toString //Lifetime in hours.
+          case x if x >= curr_token.expires_in => token_list = new ListBuffer[Token]()//Expired
+                        "-1" //Expired
+          case _ => ( (curr_token.expires_in-elapsed_time)/60 ).toString //Lifetime in minuten.
         }
       case None => "-1" //No Token found
     }
@@ -92,10 +133,10 @@ object TokenManager {
     token_list += token_
   }
 
-  def getAccesTokenByProvider(provider:String):String={
-    token_list.find(current_token => current_token.provider == "facebook") match {
-      case matched_token : Some[Token] => matched_token.get.access_token
-      case None => "" //No Token found
+  def getAccessTokenByProvider(provider:String):Option[Token]={
+    token_list.find(current_token => current_token.provider == provider) match {
+      case matched_token : Some[Token] => matched_token
+      case None =>  None//No Token found
     }
   }
 }
