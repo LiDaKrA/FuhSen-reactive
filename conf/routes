@@ -20,6 +20,10 @@ POST    /engine/api/federatedquery                          controllers.de.fuhse
 POST    /engine/api/entitysummarization                     controllers.de.fuhsen.engine.EntitySummarizationController.execute
 POST    /engine/api/semanticranking                         controllers.de.fuhsen.engine.SemanticRankingController.execute
 
+# Global Schema API routes
+GET     /engine/api/schema/datasources                      controllers.de.fuhsen.engine.SchemaController.getSourceList
+GET     /engine/api/schema/entitytypes                      controllers.de.fuhsen.engine.SchemaController.getEntityTypeList
+
 # REST API Wrappers
 GET     /ldw/restApiWrapper/id/:wrapperId/search            controllers.de.fuhsen.wrappers.WrapperController.search(wrapperId: String, query: String)
 GET     /ldw/restApiWrapper/search                          controllers.de.fuhsen.wrappers.WrapperController.searchMultiple2(query: String, wrapperIds: String)

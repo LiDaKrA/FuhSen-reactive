@@ -62,6 +62,10 @@ object RDFUtil {
     ModelFactory.createDefaultModel().read(new ByteArrayInputStream(body.getBytes("UTF-8")), null, lang.getName)
   }
 
+  def rdfReaderToModel(reader: Reader, lang: Lang): Model = {
+    ModelFactory.createDefaultModel().read(reader, null, lang.getName)
+  }
+
   /** Returns the Jena RDF Lang name for an accept type. Defaults to Turtle */
   def acceptTypeToRdfLang(acceptType: String): String = {
     Option(RDFLanguages.contentTypeToLang(acceptType)).

@@ -50,10 +50,10 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
           val data = RDFUtil.modelToTripleString(model, Lang.TURTLE)
           val microtaskServer = ConfigFactory.load.getString("engine.microtask.url")
           val futureResponse: Future[WSResponse] = for {
-            responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing?query=Diego").post(data)
-            responseTwo <- ws.url(microtaskServer+"/engine/api/federatedquery?query=Diego").post(responseOne.body)
-            responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization?query=Diego").post(responseTwo.body)
-            responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking?query=Diego").post(responseThree.body)
+            responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing").post(data)
+            responseTwo <- ws.url(microtaskServer+"/engine/api/federatedquery").post(responseOne.body)
+            responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization").post(responseTwo.body)
+            responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking").post(responseThree.body)
           } yield responseFour
           //action taken in case of failure
           futureResponse.recover {

@@ -1,0 +1,113 @@
+@prefix fs: <http://vocab.lidakra.de/fuhsen#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix omv: <http://omv.ontoware.org/2005/05/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix gr: <http://purl.org/goodrelations/v1#> .
+@base <http://vocab.lidakra.de/fuhsen#> .
+
+#-------------------------------------------------------------
+# Search entities definition
+#-------------------------------------------------------------
+
+###  http://vocab.cs.uni-bonn.de/eis/fuhsen#SearchableEntity
+fs:SearchableEntity rdf:type owl:Class ;
+					rdfs:label "Suchbares Objekt"@de ,
+                             "Searchable Entity"@en ;
+					rdfs:comment "Abstrakte Repräsentierung von Objekten, die während einer Suche gefunden werden können"@de ,
+                               "Abstract representation of an entity that can be found during a search process"@en .
+
+foaf:Agent rdf:type owl:Class ;
+					rdfs:label "Agent"@de ,
+                             "Agent"@en ;
+					rdfs:subClassOf fs:SearchableEntity ;
+					rdfs:comment "Basisklasse für foaf:Person und org:Organization"@de ,
+                               "Agent is the base class for foaf:Person and org:Organization"@en .
+
+foaf:Person rdf:type owl:Class ;
+					rdfs:label "Person"@de ,
+                             "Person"@en ;
+					fs:key "person";
+					rdfs:subClassOf foaf:Agent;
+					rdfs:comment "Represents a person"@de ,
+                               "Represents a person"@en .
+
+foaf:Organization rdf:type owl:Class ;
+					rdfs:label "Organisation"@de ,
+                             "Organization"@en ;
+					fs:key "organization";
+					rdfs:subClassOf foaf:Agent;
+					rdfs:comment "Represents an organization"@de ,
+                               "Represents an organization"@en .
+
+gr:ProductOrService rdf:type owl:Class ;
+					rdfs:label 	"Produkt"@de ,
+								"Product"@en ;
+					fs:key "product";
+					rdfs:subClassOf fs:SearchableEntity;
+					rdfs:comment	"Represents an product"@de ,
+									"Represents an product"@en .
+
+foaf:Document 	rdf:type owl:Class ;
+				rdfs:label "Website"@de ,
+                           "Website"@en ;
+				fs:key "website";
+				rdfs:subClassOf fs:SearchableEntity;
+				rdfs:comment "Represents a web site on internet"@de ,
+                             "Represents a web site on internet"@en .
+
+fs:Document 	rdf:type owl:Class ;
+				rdfs:label "Dokument"@de ,
+                           "Document"@en ;
+				fs:key "document";
+				rdfs:subClassOf fs:SearchableEntity;
+				rdfs:comment "Represents a text document"@de ,
+                             "Represents a text document"@en .
+
+
+#-------------------------------------------------------------
+# Data sources definition
+#-------------------------------------------------------------
+
+fs:InformationSource 	rdf:type owl:Class ;
+						rdfs:label 	"Information source"@de ,
+									"Information source"@en ;
+						rdfs:comment	"Information source for the federation of FuhSen"@de ,
+										"Information source for the federation of FuhSen"@en .
+
+fs:Facebook rdf:type fs:InformationSource;
+			rdfs:label 	"Facebook";
+			fs:key "facebook" .
+
+fs:Twitter rdf:type fs:InformationSource;
+			rdfs:label 	"Twitter";
+			fs:key "twitter" .
+
+fs:GooglePlus rdf:type fs:InformationSource;
+			rdfs:label 	"Google+";
+			fs:key "gplus" .
+
+fs:eBay rdf:type fs:InformationSource;
+			rdfs:label 	"eBay";
+			fs:key "ebay" .
+
+fs:GoogleKnowledgeGraph rdf:type fs:InformationSource;
+						rdfs:label 	"Google Knowledge Graph";
+						fs:key "gkb" .
+
+fs:LinkedLeaks	rdf:type	fs:InformationSource;
+				rdfs:label 	"Linked Leaks";
+				fs:key "linkedleaks" .
+
+fs:Xing		rdf:type	fs:InformationSource;
+			rdfs:label 	"Xing";
+			fs:key "xing" .
+
+fs:Occrp	rdf:type	fs:InformationSource;
+			rdfs:label 	"OCCRP";
+			fs:key "occrp" .
