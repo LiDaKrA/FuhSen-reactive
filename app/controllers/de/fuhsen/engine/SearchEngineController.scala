@@ -33,7 +33,7 @@ import play.api.libs.json._
 
 class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
-  def search(uid: String, entityType: String, facets: Option[String]) = Action.async { request =>
+  def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String) = Action.async { request =>
 
     Logger.info("Starting Search Engine Search : "+uid)
 
