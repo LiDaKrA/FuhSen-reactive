@@ -15,12 +15,12 @@ class SchemaController extends Controller {
 
   def getSourceList = Action {
     Logger.info("Source List")
-    Ok(RDFUtil.modelToTripleString(JenaGlobalSchema.getDataSources, Lang.JSONLD))
+    Ok(RDFUtil.modelToTripleString(JenaGlobalSchema.getEntityTypes, Lang.JSONLD))
   }
 
   def getEntityTypeList = Action {
     Logger.info("Entity Type List")
-    Ok(RDFUtil.modelToTripleString(JenaGlobalSchema.getEntityTypes, Lang.JSONLD))
+    Ok(RDFUtil.modelToTripleString(JenaGlobalSchema.getDataSources, Lang.JSONLD))
   }
 
 }
