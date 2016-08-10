@@ -32,8 +32,7 @@ public class Application extends Controller {
         return ok(life_length);
     }
 
-    public Result results(String query) {
-        this.keyword = query;
+    public Result results() {
         return ok(results.render());
     }
 
