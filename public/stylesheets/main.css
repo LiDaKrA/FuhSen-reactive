@@ -14,6 +14,71 @@
  * limitations under the License.
  */
 
+p.thick {
+    font-weight: bold;
+}
+
+.separator {
+    padding-right:20px;
+    border-right: 1px solid #ccc;
+}
+
+.sel_button {
+    width: 25px;
+    height: 25px;
+    position: relative;
+    cursor: pointer;
+    float: right;
+    margin: 0px;
+}
+
+div.floatingSelText {
+    width: 506px;
+    /*border:1px solid #ccc;*/
+    text-align:left;
+    position: relative;
+    margin: 0 auto;
+    margin-left: 0;
+    color:#45639A;
+}
+
+div.floatingSelText-header {
+    width: 280px;
+    /*border:1px solid #ccc;*/
+    text-align:left;
+    position: relative;
+    margin: 0 auto;
+    margin-left: 0;
+    color:#45639A;
+}
+
+div.accessTokenDiv {
+    z-index:1;
+    position:static;
+}
+
+.floatingSelChecks {
+    background:#ffffff;
+    padding:10px;
+    border:1px solid #45639A;
+    width: 506px;
+    z-index:999;
+    position:relative;
+    margin: 0 auto;
+    margin-left: 283px;
+}
+
+.floatingSelChecks-header {
+    background:#ffffff;
+    padding:10px;
+    border:1px solid #45639A;
+    width: 506px;
+    z-index:999;
+    position:absolute;
+    margin: 0 auto;
+    margin-left: -75px;
+}
+
 @font-face {
     font-family: Verdana;
 }
@@ -28,7 +93,7 @@
 }
 
 .lidakraLogo {
-    width:225px;
+    width:200px;
     height: auto;
 }
 
@@ -572,6 +637,7 @@ header .header-spacer,.header .header-spacer {
 
 .keep-filters .checkbox {
     display: block;
+    text-align: left;
 }
 
 .keep-filters .checkbox:hover {
