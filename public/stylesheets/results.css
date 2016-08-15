@@ -1001,7 +1001,7 @@ input[type="checkbox"],input[type="radio"] {
   background: #fff;
   padding-left: 10px;
 }
-.role-facet .role-facet-checkbox {    
+.role-facet .role-facet-checkbox {
   position: absolute;
   right: -8px;
   top: 2px;
