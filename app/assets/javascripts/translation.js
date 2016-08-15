@@ -190,13 +190,13 @@ window.dictGer = dictGer;
 window.dictEng = dictEng;
 
 //if(window.globalDict === undefined){
-if(window.localStorage.getItem("lang") === undefined || window.localStorage.getItem("lang") === "ger"){
+if(window.localStorage.getItem("lang") === undefined || window.localStorage.getItem("lang") === "de"){
     window.globalDict = dictGer;
-    window.localStorage.lang = "ger";
+    window.localStorage.lang = "de";
 }
 else{
     window.globalDict = dictEng;
-    window.localStorage.lang = "eng";
+    window.localStorage.lang = "en";
 }
 
 function getTranslation(toTranslate){
@@ -209,12 +209,12 @@ function getTranslation(toTranslate){
 function checkLanguage(){
     if(window.localStorage.getItem("lang") === undefined) {
         window.globalDict = dictGer;
-        window.localStorage.lang = "ger";
+        window.localStorage.lang = "de";
     }
-    else if(window.localStorage.getItem("lang") === "ger") {
+    else if(window.localStorage.getItem("lang") === "de") {
         window.globalDict = dictGer;
     }
-    else if(window.localStorage.getItem("lang") === "eng") {
+    else if(window.localStorage.getItem("lang") === "en") {
         window.globalDict = dictEng;
     }
 }
