@@ -3,16 +3,16 @@ checkLanguage();
 var ContainerSearch = React.createClass({
     setLang: function() {
         switch (window.localStorage.getItem("lang")) {
-            case "ger":
+            case "de":
                 window.globalDict = dictGer;
-                window.localStorage.lang = "ger";
-                this.setState({dictionary: "ger"});
+                window.localStorage.lang = "de";
+                this.setState({dictionary: "de"});
                 globalFlushFilters();
                 break;
-            case "eng":
+            case "en":
                 window.globalDict = dictEng;
-                window.localStorage.lang = "eng";
-                this.setState({dictionary: "eng"});
+                window.localStorage.lang = "en";
+                this.setState({dictionary: "en"});
                 globalFlushFilters();
                 break;
         }
@@ -29,8 +29,7 @@ var ContainerSearch = React.createClass({
                         <link rel="stylesheet" media="screen" href="/assets/stylesheets/startPage.css">
                         <div className="col-md-12 search-widget">
                             <div class="row">
-                                <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
-                                <img src="/assets/images/logoBig.png" className="bigLogo" alt="Logo_Description"/>
+                                <img src="/assets/images/imgpsh_fullsize.png" className="bigLogo" alt="Logo_Description"/>
                             </div>
                             <div className="row">
                                 <SearchForm id_class="form-search"/>
@@ -45,12 +44,15 @@ var ContainerSearch = React.createClass({
                                 <AccessTokenForm social_network="xing" />
                             </div>
                         </div>
+                        <br/>
+                        <div className="row text-right">
+                            <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
+                        </div>
                     </div>
                 </div>
         );
     }
 });
-
 
 var LangSwitcher = React.createClass({
     preSetLang: function(lang, e) {
@@ -58,10 +60,10 @@ var LangSwitcher = React.createClass({
         this.props.onlangselect()
     },
     render: function () {
-        let boundClickEng = this.preSetLang.bind(this, 'eng');
-        let boundClickGer = this.preSetLang.bind(this, 'ger');
+        let boundClickEng = this.preSetLang.bind(this, 'en');
+        let boundClickGer = this.preSetLang.bind(this, 'de');
 
-        if(window.localStorage.getItem("lang") === "ger"){
+        if(window.localStorage.getItem("lang") === "de"){
             return (
                 <div>
                     <b>Deutsch</b>
@@ -79,31 +81,265 @@ var LangSwitcher = React.createClass({
     }
 });
 
-
 var SearchForm = React.createClass({
+    getSelectionLabel: function(){
+        var sources_list = this.getLabelsFromSelectedChecks(this.state.sources)
+        var types_list = this.getLabelsFromSelectedChecks(this.state.types)
+
+        var sources_label = ""
+        var types_label = ""
+
+        if(sources_list.length === 0) {
+            sources_label = "Sources: all."
+        }else if(sources_list.length > 0) {
+            sources_label = "Sources: (" + sources_list + ")."
+        }else{
+            alert("[Error] Well, seems like something went wrong...")
+        }
+
+        if(types_list.length === 0) {
+            types_label = "Types: all."
+        }else if(types_list.length > 0) {
+            types_label = "Types: (" + types_list + ")."
+        }else{
+            alert("[Error] Well, seems like something went wrong...")
+        }
+
+        return sources_label+" "+types_label
+    },
+    getLabelsFromSelectedChecks: function(checks_data) {
+        var keys = [];
+        for(var k in checks_data){
+            if(checks_data[k]["selected"]){
+                keys.push(checks_data[k]["id"])
+            }
+        }
+        return keys
+    },
+    getKeysFromSelectedChecks: function(checks_data) {
+        var keys = [];
+        for(var k in checks_data){
+            if(checks_data[k]["selected"]){
+                keys.push(checks_data[k]["key"])
+            }
+        }
+        return keys
+    },
+    getAllKeysFromChecks: function(checks_data) {
+        var keys = [];
+        for(var k in checks_data){
+            keys.push(checks_data[k]["key"])
+        }
+        return keys
+    },
+    sourcesChanged: function(sources_data) {
+        this.setState({ sources: sources_data, selectionLabel: this.getSelectionLabel()});
+    },
+    typesChanged: function(types_data) {
+        this.setState({ types: types_data, selectionLabel: this.getSelectionLabel()},
+        function () {
+
+        });
+    },
+    onClick: function() {
+        if(this.state.showSourcesTypesDiv) {
+            this.setState({ showSourcesTypesDiv: false});
+        } else {
+            this.setState({ showSourcesTypesDiv: true});
+        }
+    },
+    getInitialState: function() {
+        return { showSourcesTypesDiv: false };
+    },
     render: function() {
+
+        var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources)
+        var selected_types_list = this.getKeysFromSelectedChecks(this.state.types)
+
+        var selected_sources = selected_sources_list.length === 0 ? this.getAllKeysFromChecks(this.state.sources): selected_sources_list
+        var selected_types = selected_types_list.length === 0 ? this.getAllKeysFromChecks(this.state.types): selected_types_list
+
+        var floatingDivStyle = this.state.showSourcesTypesDiv ? "col-md-4 floatingSelChecks text-left" : "col-md-4"
+
+        if(this.props.id_class === "form-search-header"){
+            floatingDivStyle = this.state.showSourcesTypesDiv ? "col-md-4 floatingSelChecks-header text-left" : "col-md-4"
+        }
+
         if(this.props.keyword)
         {
             return (
-                <form method="get" id={this.props.id_class} role="search" action="/results">
-                    <div>
-                        <label ><span>Search: </span></label>
-                        <input type="text" name="query" defaultValue={this.props.keyword} placeholder={getTranslation("yoursearch")}/>&nbsp;
-                        <button type="submit">&nbsp;</button>
+                <div>
+                    <form method="get" id={this.props.id_class} role="search" action="/results">
+                        <div>
+                            <label ><span>Search: </span></label>
+                            <input type="text" name="query" defaultValue={this.props.keyword} placeholder={getTranslation("yoursearch")}/>&nbsp;
+                            <input type="hidden" name="sources" value={selected_sources}/>
+                            <input type="hidden" name="types" value={selected_types}/>
+                            <button type="submit">&nbsp;</button>
+                        </div>
+                        <div>
+                            <div className="floatingSelText-header">
+                                {this.getSelectionLabel()}
+                                <img onClick={this.onClick} className="sel_button" src="/assets/images/icons/arrow_down.png">
+                                </img>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <div className="col-md-3"/>
+                        <div className={floatingDivStyle}>
+                            <div className="row">
+                                <div className="col-md-6 separator">
+                                    <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                </div>
+                                <div className="col-md-6">
+                                    <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-5"/>
                     </div>
-                </form>
+                </div>
+
             );
         }
 
         return (
-            <form method="get" id={this.props.id_class} role="search" action="/results">
-                <div>
-                    <label ><span>Search: </span></label>
-                    <input type="search" name="query" placeholder={getTranslation("yoursearch")}/>&nbsp;
-                    <button type="submit">&nbsp;</button>
+            <div>
+                <form method="get" id={this.props.id_class} role="search" action="/results">
+                    <div>
+                        <label ><span>Search: </span></label>
+                        <input type="search" name="query" placeholder={getTranslation("yoursearch")}/>&nbsp;
+                        <input type="hidden" name="sources" value={selected_sources}/>
+                        <input type="hidden" name="types" value={selected_types}/>
+                        <button type="submit">&nbsp;</button>
+                    </div>
+                    <div>
+                        <div className="floatingSelText">
+                            {this.getSelectionLabel()}
+                            <img onClick={this.onClick} className="sel_button" src="/assets/images/icons/arrow_down.png">
+                            </img>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="row">
+                    <div className="col-md-3"/>
+                        <div className={floatingDivStyle}>
+                            <div className="row">
+                                <div className="col-md-6 separator">
+                                    <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                </div>
+                                <div className="col-md-6">
+                                    <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                </div>
+                            </div>
+                        </div>
+                    <div className="col-md-5"/>
                 </div>
-            </form>
+            </div>
         );
+    }
+});
+
+var FilterCheckList = React.createClass({
+    loadListFromServer: function (filter) {
+
+        var list_url = "/engine/api/schema/"+filter
+
+        var previousDataList = []
+
+        if(this.props.filterType === "datasources") {
+            if (typeof sourcesDirty !== 'undefined') {
+                previousDataList= sourcesDirty.split(',');
+            }
+        }
+
+        if(this.props.filterType === "entitytypes") {
+            if(typeof typesDirty !== 'undefined'){
+                previousDataList= typesDirty.split(',');
+            }
+        }
+
+        $.ajax({
+            url: list_url,
+            dataType: 'json',
+            cache: false,
+            success: function (list_data) {
+                var processed_data = [];
+                for(var k in list_data["@graph"]){
+                    var current_label = list_data["@graph"][k]["rdfs:label"]
+                    var current_key = list_data["@graph"][k]["fs:key"]
+                    var checked = false
+
+                    if(list_data["@graph"].length > previousDataList.length) {
+                        checked = $.inArray(current_key, previousDataList) > -1 ? true : false
+                    }
+
+                    if(Object.prototype.toString.call(current_label) === '[object Array]'){
+                        for(var j in current_label){
+                            if(current_label[j]["@language"] === window.localStorage.getItem("lang")){
+                                processed_data.push({ id: current_label[j]["@value"], selected: checked, key: current_key})
+                            }
+                        }
+                    }else{
+                        processed_data.push({ id: current_label, selected: checked, key: current_key})
+                    }
+                }
+                this.setState({data: processed_data});
+                this.props.onSourceChangedFunction(processed_data)
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(list_url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    componentDidMount: function () {
+        this.loadListFromServer(this.props.filterType);
+    },
+    __changeSelection: function(id) {
+        var state = this.state.data.map(function(d) {
+            return {
+                id: d.id,
+                selected: (d.id === id ? !d.selected : d.selected),
+                key: d.key
+            };
+        });
+        this.props.onSourceChangedFunction(state)
+        this.setState({ data: state });
+    },
+    getInitialState: function() {
+        return { data: undefined };
+    },
+    render: function() {
+        if (this.props.show) {
+            if (this.state.data) {
+                var filter_title = (this.props.filterType).charAt(0).toUpperCase() + (this.props.filterType).slice(1);
+
+                var checks = this.state.data.map(function(d) {
+                    return (
+                        <div>
+                            &emsp;<input type="checkbox" checked={d.selected} onChange={this.__changeSelection.bind(this, d.id)}/>
+                            {d.id}
+                            <br />
+                        </div>
+                    );
+                }.bind(this));
+                return (
+                    <div>
+                        <p className="thick">{filter_title+":"}</p>
+                        {checks}
+                    </div>
+                );
+            }
+            return <div className="row">
+                <div className="col-md-12 text-center">
+                    <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                </div>
+            </div>;
+        }
+
+        return null;
     }
 });
 
@@ -137,7 +373,7 @@ var AccessTokenForm = React.createClass({
         if(this.state.token_life_length) {
             if(this.state.token_life_length === "-1") {
                 return (
-                    <div align="center">
+                    <div className="accessTokenDiv" align="center">
                         {getTranslation("novalidtkfound_pre")+social_net_upper_case+getTranslation("novalidtkfound_post")}
                             <br/>
                             <br/>
