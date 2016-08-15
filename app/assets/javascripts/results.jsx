@@ -22,21 +22,24 @@ function compareRank(a,b) {
     return 0;
 }
 
+var sourcesDirty = extractQuery("sources");
+var typesDirty = extractQuery("types");
+
 var ContainerResults = React.createClass({
     // event handler for language switch
     // change dictionary then update state so the page notices the change
     setLang: function () {
         switch (window.localStorage.getItem("lang")) {
-            case "ger":
+            case "de":
                 window.globalDict = dictGer;
-                window.localStorage.lang = "ger";
-                this.setState({dictionary: "ger"});
+                window.localStorage.lang = "de";
+                this.setState({dictionary: "de"});
                 globalFlushFilters();
                 break;
-            case "eng":
+            case "en":
                 window.globalDict = dictEng;
-                window.localStorage.lang = "eng";
-                this.setState({dictionary: "eng"});
+                window.localStorage.lang = "en";
+                this.setState({dictionary: "en"});
                 globalFlushFilters();
                 break;
         }
@@ -54,7 +57,6 @@ var ContainerResults = React.createClass({
                                     </a>
                                 </div>
                                 <div className="col-md-3">
-                                    <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <div className="row">
@@ -71,6 +73,10 @@ var ContainerResults = React.createClass({
 
                 <div className="row search-results-container">
                     <Trigger url={"/engine/api/searches?query="+query} pollInterval={200000}/>
+                </div>
+                <br/>
+                <div className="row text-right">
+                    <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
                 </div>
             </div>
         );
@@ -124,12 +130,6 @@ var Container = React.createClass({
             this.state.facetsDict[facetName] = [facetValue]
             this.setState({facetsDict: this.state.facetsDict})
         }
-
-        // for (var key in this.state.facetsDict) {
-        //     if (this.state.facetsDict.hasOwnProperty(key)) {
-        //         console.log(key, this.state.facetsDict[key]);
-        //     }
-        // }
     },
     onFacetRemoval: function(facetName, facetValue) {
         if(facetValue != "all") {
@@ -146,7 +146,7 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict})
     },
     loadCommentsFromServer: function () {
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType;
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType+"&sources="+sourcesDirty+"&types="+typesDirty;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -574,7 +574,7 @@ var ResultsContainer = React.createClass({
     },
     loadDataFromServer: function (eType) {
         this.setState({selected:eType, loading: true});
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType;
+        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType+"&sources="+sourcesDirty+"&types="+typesDirty
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -607,7 +607,6 @@ var ResultsContainer = React.createClass({
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
         var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">{getTranslation("websites")}</li>
         var documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5">{getTranslation("documents")}</li>
-
 
         if(this.state.selected==="person") {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
