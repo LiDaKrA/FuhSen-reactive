@@ -35,7 +35,7 @@ class LinkedLeaksWrapper extends RestApiWrapperTrait with SilkTransformableTrait
     var sparql_query_template_end = "''' ;\n              lucene:entities ?node .\n    ?node a ?type .\n    ?node leak:name ?name .\n    OPTIONAL { ?node leak:address ?address } .\n    OPTIONAL { ?node leak:node_id ?node_id } .\n    OPTIONAL { ?node leak:company_type ?company_type } .\n    OPTIONAL { ?node leak:countries ?countries } .\n    OPTIONAL { ?node leak:company ?company } .\n    OPTIONAL { ?node leak:jurisdiction_description ?jurisdiction_description } .\n    OPTIONAL { ?node leak:note ?note } .\n    OPTIONAL { ?node leak:original_name ?original_name } .    \n    OPTIONAL { ?node leak:service_provider ?service_provider } .\n    OPTIONAL { ?node leak:status ?status } .\n    OPTIONAL { ?node leak:valid_until ?valid_until } .\n    FILTER(?type IN (leak:Intermediary, leak:Entity, leak:Officer )) .\n}"
     var final_query = sparql_query_template_init + "\"" + queryString + "\""+ sparql_query_template_end
 
-    Map("query" -> final_query)
+    Map("query" -> java.net.URLEncoder.encode(final_query, "UTF-8"))
   }
 
   /** The REST endpoint URL */
