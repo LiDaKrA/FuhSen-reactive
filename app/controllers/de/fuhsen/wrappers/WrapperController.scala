@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{EntityLinking, SilkConfig, SilkTransformableTrait}
-import controllers.de.fuhsen.wrappers.security.{RestApiOAuthTrait, RestApiOAuth2Trait}
+import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, RestApiOAuthTrait}
 import org.apache.jena.graph.Triple
 import org.apache.jena.query.{Dataset, DatasetFactory}
 import org.apache.jena.rdf.model.ModelFactory
@@ -31,10 +31,10 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsArray, JsString}
 import play.api.libs.oauth.OAuthCalculator
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
-import play.api.mvc.{Result, Action, Controller}
+import play.api.mvc.{Action, Controller, Result}
 import utils.dataintegration.RDFUtil._
 import utils.dataintegration.{RequestMerger, UriTranslator}
-import controllers.de.fuhsen.common.{ApiResponse, ApiSuccess, ApiError}
+import controllers.de.fuhsen.common.{ApiError, ApiResponse, ApiSuccess}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
@@ -101,7 +101,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       Future.sequence(resultFutures) map { results =>
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
-            case ApiSuccess(responseBody) =>
+            case ApiSuccess(responseBody) => print("POST-SILK:"+responseBody)
               val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
               requestMerger.addWrapperResult(model, wrapper.sourceUri)
             case _: ApiError =>
@@ -231,7 +231,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         // There has been an error previously, don't go on.
         Future(error)
       case ApiSuccess(body) =>
-        //print(body)
+        print("PRE-SILK: "+body)
         handleSilkTransformation(wrapper, body)
     }
   }
@@ -348,7 +348,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     }
 
     val apiRequest: WSRequest = ws.url(url_with_params.dropRight(1))
-    apiRequest
+
+    apiRequest.withHeaders(wrapper.headersParams.toSeq: _*)
   }
 
   /** Signs the request if the [[RestApiOAuthTrait]] is configured. */
@@ -396,7 +397,9 @@ object WrapperController {
     //OCCRP
     "occrp" -> new OCCRPWrapper(),
     //Xing
-    "xing" -> new XingWrapper()
+    "xing" -> new XingWrapper(),
+    //Elastic Search
+    "elasticsearch" -> new ElasticSearchWrapper()
   )
 
   val sortedWrapperIds = wrapperMap.keys.toSeq.sortWith(_ < _)
