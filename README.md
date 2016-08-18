@@ -86,6 +86,6 @@ The demo server address is:  http://rdfsearchengine-fuhsen.rhcloud.com/fuhsen/
 #### License
 
 * Copyright (C) 2015-2016 EIS Uni-Bonn
-* Licensed under the Apache License
+* Licensed under the Apache 2.0 License
 
 
