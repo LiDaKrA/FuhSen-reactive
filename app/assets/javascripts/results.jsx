@@ -824,7 +824,13 @@ var ResultsList = React.createClass({
                         occupation={result["fs:occupation"]}
                         birthday={result["fs:birthday"]}
                         country={result["fs:country"]}
-                        webpage={result.url}>
+                        webpage={result.url}
+                        active_email={result["fs:active_email"]}
+                        wants={result["fs:wants"]}
+                        haves={result["fs:haves"]}
+                        top_haves={result["fs:top_haves"]}
+                        interests={result["fs:interests"]}
+                    >
                     </PersonResultElement>
                 );
             } else if(result["@type"] === "foaf:Organization") {
@@ -1009,6 +1015,11 @@ var PersonResultElement = React.createClass({
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
                                 { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                                { this.props.active_email !== undefined ? <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
+                                { this.props.wants !== undefined ? <p><b>{getTranslation("wants")}:</b> {this.props.wants}</p> : null }
+                                { this.props.haves !== undefined ? <p><b>{getTranslation("haves")}:</b> {this.props.haves}</p> : null }
+                                { this.props.top_haves !== undefined && this.props.top_haves !== "null" ? <p><b>{getTranslation("top_haves")}:</b> {this.props.top_haves}</p> : null }
+                                { this.props.interests !== undefined ? <p><b>{getTranslation("interests")}:</b> {this.props.interests}</p> : null }
                             </div>
                         </div>
                     </div>
