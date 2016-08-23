@@ -154,6 +154,11 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:birthday ?birthday .
              |?p fs:country ?country .
              |?p fs:rank ?rank .
+             |?p fs:active_email ?active_email .
+             |?p fs:wants ?wants .
+             |?p fs:haves ?haves .
+             |?p fs:top_haves ?top_haves .
+             |?p fs:interests ?interests .
              |}
              |WHERE {
              |?p rdf:type foaf:Person .
@@ -169,6 +174,11 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:occupation ?occupation } .
              |OPTIONAL { ?p fs:birthday ?birthday } .
              |OPTIONAL { ?p fs:country ?country } .
+             |OPTIONAL { ?p fs:active_email ?active_email } .
+             |OPTIONAL { ?p fs:wants ?wants } .
+             |OPTIONAL { ?p fs:haves ?haves } .
+             |OPTIONAL { ?p fs:top_haves ?top_haves } .
+             |OPTIONAL { ?p fs:interests ?interests } .
              |?p fs:rank ?rank .
              |}
           """.stripMargin)
