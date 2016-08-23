@@ -85,7 +85,12 @@ var dictEng = {
     "websites": "Websites",
     "language": "Language",
     "filename": "File name",
-    "filetype": "File type"
+    "filetype": "File type",
+    "active_email": "Active email",
+    "wants": "Wants",
+    "haves": "Haves",
+    "top_haves": "Top haves",
+    "interests": "Interests"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -183,7 +188,12 @@ var dictGer = {
     "websites": "Webseiten",
     "language": "Sprache",
     "filename": "Dateiname",
-    "filetype": "Dateityp"
+    "filetype": "Dateityp",
+    "active_email": "Active email",
+    "wants": "Wollen",
+    "haves": "Geschick",
+    "top_haves": "Top Geschick",
+    "interests": "Interessen"
 };
 
 window.dictGer = dictGer;
