@@ -1,5 +1,7 @@
 checkLanguage();
 
+var context = $('body').data('context')
+
 function extractQuery(key) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
@@ -52,8 +54,8 @@ var ContainerResults = React.createClass({
                         <nav className="widget col-md-12" data-widget="NavigationWidget">
                             <div className="row">
                                 <div className="col-md-4">
-                                    <a href="/">
-                                        <img src="/assets/images/logoBig2.png" class="smallLogo" alt="Logo_Description"/>
+                                    <a href={context === "" ? "/" : context}>
+                                        <img src={context+"/assets/images/logoBig2.png"} class="smallLogo" alt="Logo_Description"/>
                                     </a>
                                 </div>
                                 <div className="col-md-3">
@@ -72,11 +74,11 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container">
-                    <Trigger url={"/engine/api/searches?query="+query} pollInterval={200000}/>
+                    <Trigger url={context+"/engine/api/searches?query="+query} pollInterval={200000}/>
                 </div>
                 <br/>
                 <div className="row text-right">
-                    <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
+                    <img src={context+"/assets/images/LiDaKrA_Logo.jpg"} className="lidakraLogo"/>
                 </div>
             </div>
         );
@@ -112,8 +114,8 @@ var Trigger = React.createClass({
 
         return <div className="row">
             <div className="col-md-12 text-center">
-                <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                <img className="img-responsive center-block" src={context+"/assets/images/ajaxLoading.gif"} alt="Loading results"/>
+                <h2><img src={context+"/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
             </div>
         </div>;
     }
@@ -146,7 +148,7 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict})
     },
     loadCommentsFromServer: function () {
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType+"&sources="+sourcesDirty+"&types="+typesDirty;
+        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType+"&sources="+sourcesDirty+"&types="+typesDirty;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -201,8 +203,8 @@ var Container = React.createClass({
         }
         return <div className="row">
             <div className="col-md-12 text-center">
-                <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                <img className="img-responsive center-block" src={context+"/assets/images/ajaxLoading.gif"} alt="Loading results"/>
+                <h2><img src={context+"/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
             </div>
         </div>;
     }
@@ -220,7 +222,7 @@ var FacetList = React.createClass({
         this.props.onFacetRemoval(facetName, valueSelected)
     },
     loadFacetsFromServer: function (eType) {
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/facets?entityType="+eType;
+        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/facets?entityType="+eType;
 
         $.ajax({
             url: searchUrl,
@@ -396,7 +398,7 @@ var FacetItems = React.createClass({
 
 var FacetSubMenuItems = React.createClass({
     loadFacetsFromServer: function (eFacet) {
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/facets/"+eFacet+"?entityType="+this.props.entityType;
+        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/facets/"+eFacet+"?entityType="+this.props.entityType;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -476,7 +478,7 @@ var ResultsContainer = React.createClass({
             seeds.push(JSONData[key].url)
         }
 
-        var createCrawlJobUrl = "/crawling/jobs/create";
+        var createCrawlJobUrl = context+"/crawling/jobs/create";
 
         $.ajax({
             url: createCrawlJobUrl,
@@ -574,7 +576,7 @@ var ResultsContainer = React.createClass({
     },
     loadDataFromServer: function (eType) {
         this.setState({selected:eType, loading: true});
-        var searchUrl = "/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType+"&sources="+sourcesDirty+"&types="+typesDirty
+        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType+"&sources="+sourcesDirty+"&types="+typesDirty
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -642,8 +644,8 @@ var ResultsContainer = React.createClass({
 
                 <div className="row">
                     <div className="col-md-12 text-center">
-                        <img className="img-responsive center-block" src="/assets/images/ajaxLoading.gif" alt="Loading results"/>
-                        <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                        <img className="img-responsive center-block" src={context+"/assets/images/ajaxLoading.gif"} alt="Loading results"/>
+                        <h2><img src={context+"/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
                     </div>
                 </div>
             </div>;
@@ -862,7 +864,7 @@ var ResultsList = React.createClass({
             } else if(result["@type"] === "foaf:Document") {
                 return (
                     <WebResultElement
-                        img="/assets/images/datasources/TorLogo.png"
+                        img={context+"/assets/images/datasources/TorLogo.png"}
                         onion_url={result.url}
                         comment={result["fs:excerpt"]}
                         source={result["fs:source"]}
@@ -896,7 +898,7 @@ var ResultsList = React.createClass({
 var WebResultElement = React.createClass({
     createCrawlJob: function () {
         console.info("Creating crawl job task")
-        var createCrawlJobUrl = "/crawling/jobs/create";
+        var createCrawlJobUrl = context+"/crawling/jobs/create";
 
         $.ajax({
             url: createCrawlJobUrl,
@@ -942,7 +944,7 @@ var WebResultElement = React.createClass({
                     <div>
                         <div>
                             <div>
-                                <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                                <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                             </div>
                             <div>
                                 &nbsp;&nbsp;{ this.props.crawled==true || this.state.crawlJobCreated===true ? <label>{getTranslation("crawlJobCreated")}</label> : <button onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
@@ -981,7 +983,7 @@ var ProductResultElement = React.createClass({
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -997,7 +999,7 @@ var PersonResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/> : <img src="/assets/images/datasources/Unknown.png" height="60px" width="75px"/> }
+                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/> : <img src={context+"/assets/images/datasources/Unknown.png"} height="60px" width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1025,7 +1027,7 @@ var PersonResultElement = React.createClass({
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1060,7 +1062,7 @@ var OrganizationResultElement = React.createClass({
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1076,7 +1078,7 @@ var DocumentResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={"/assets/images/icons/"+this.props.extension+".png"}height="60px" width="75px"/>
+                            <img src={context+"/assets/images/icons/"+this.props.extension+".png"}height="60px" width="75px"/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1095,7 +1097,7 @@ var DocumentResultElement = React.createClass({
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1104,4 +1106,4 @@ var DocumentResultElement = React.createClass({
     }
 });
 
-React.render(<ContainerResults url="/keyword" pollInterval={200000}/>, document.getElementById('skeleton'));
+React.render(<ContainerResults url={context+"/keyword"} pollInterval={200000}/>, document.getElementById('skeleton'));
