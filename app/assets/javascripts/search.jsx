@@ -1,5 +1,7 @@
 checkLanguage();
 
+var context = $('body').data('context')
+
 var ContainerSearch = React.createClass({
     setLang: function() {
         switch (window.localStorage.getItem("lang")) {
@@ -26,10 +28,10 @@ var ContainerSearch = React.createClass({
                         </div>
                     </div>
                     <div className="row">
-                        <link rel="stylesheet" media="screen" href="/assets/stylesheets/startPage.css">
+                        <link rel="stylesheet" media="screen" href={context+"/assets/stylesheets/startPage.css"}>
                         <div className="col-md-12 search-widget">
                             <div class="row">
-                                <img src="/assets/images/imgpsh_fullsize.png" className="bigLogo" alt="Logo_Description"/>
+                                <img src={context+"/assets/images/imgpsh_fullsize.png"} className="bigLogo" alt="Logo_Description"/>
                             </div>
                             <div className="row">
                                 <SearchForm id_class="form-search"/>
@@ -46,7 +48,7 @@ var ContainerSearch = React.createClass({
                         </div>
                         <br/>
                         <div className="row text-right">
-                            <img src="/assets/images/LiDaKrA_Logo.jpg" className="lidakraLogo"/>
+                            <img src={context+"/assets/images/LiDaKrA_Logo.jpg"} className="lidakraLogo"/>
                         </div>
                     </div>
                 </div>
@@ -169,7 +171,7 @@ var SearchForm = React.createClass({
         {
             return (
                 <div>
-                    <form method="get" id={this.props.id_class} role="search" action="/results">
+                    <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
                         <div>
                             <label ><span>Search: </span></label>
                             <input type="text" name="query" defaultValue={this.props.keyword} placeholder={getTranslation("yoursearch")}/>&nbsp;
@@ -180,7 +182,7 @@ var SearchForm = React.createClass({
                         <div>
                             <div className="floatingSelText-header">
                                 {this.getSelectionLabel()}
-                                <img onClick={this.onClick} className="sel_button" src="/assets/images/icons/arrow_down.png">
+                                <img onClick={this.onClick} className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
                                 </img>
                             </div>
                         </div>
@@ -206,7 +208,7 @@ var SearchForm = React.createClass({
 
         return (
             <div>
-                <form method="get" id={this.props.id_class} role="search" action="/results">
+                <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
                     <div>
                         <label ><span>Search: </span></label>
                         <input type="search" name="query" placeholder={getTranslation("yoursearch")}/>&nbsp;
@@ -217,12 +219,11 @@ var SearchForm = React.createClass({
                     <div>
                         <div className="floatingSelText">
                             {this.getSelectionLabel()}
-                            <img onClick={this.onClick} className="sel_button" src="/assets/images/icons/arrow_down.png">
+                            <img onClick={this.onClick} className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
                             </img>
                         </div>
                     </div>
                 </form>
-
                 <div class="row">
                     <div className="col-md-3"/>
                         <div className={floatingDivStyle}>
@@ -245,7 +246,7 @@ var SearchForm = React.createClass({
 var FilterCheckList = React.createClass({
     loadListFromServer: function (filter) {
 
-        var list_url = "/engine/api/schema/"+filter
+        var list_url = context+"/engine/api/schema/"+filter
 
         var previousDataList = []
 
@@ -334,7 +335,7 @@ var FilterCheckList = React.createClass({
             }
             return <div className="row">
                 <div className="col-md-12 text-center">
-                    <h2><img src="/assets/images/ajaxLoader.gif"/>{getTranslation("bittewarten")}</h2>
+                    <h2><img src={context+"/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
                 </div>
             </div>;
         }
@@ -346,7 +347,7 @@ var FilterCheckList = React.createClass({
 var AccessTokenForm = React.createClass({
     loadTokenLifeLength: function () {
 
-        var social_network_url = "/"+this.props.social_network+"/getTokenLifeLength"
+        var social_network_url = context+"/"+this.props.social_network+"/getTokenLifeLength"
 
         $.ajax({
             url: social_network_url,
@@ -377,7 +378,7 @@ var AccessTokenForm = React.createClass({
                         {getTranslation("novalidtkfound_pre")+social_net_upper_case+getTranslation("novalidtkfound_post")}
                             <br/>
                             <br/>
-                            <form action={"/"+this.props.social_network+"/getToken"} method="get">
+                            <form action={context+"/"+this.props.social_network+"/getToken"} method="get">
                                 <button>&nbsp;{getTranslation("newtoken")}&nbsp;</button>
                             </form>
 
