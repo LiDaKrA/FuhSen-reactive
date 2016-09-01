@@ -11,7 +11,7 @@
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/results.css")">
     </head>
-    <body>
+    <body data-context="@play.Play.application().configuration().getString("play.http.context")">
         <noscript>
             <div class="container">
                 <div class="row">
