@@ -28,12 +28,15 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)
 
       val keyword = getKeywordQuery(model)
+      val dataSources = getDataSourceQuery(model)
+
+      Logger.info("Selected Sources: "+dataSources)
 
       if (keyword.isEmpty)
         Ok(textBody.get)
 
       //Calling the RDF-Wrappers to get the information //engine.microtask.url
-      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds="+ConfigFactory.load.getString("engine.enabled.wrappers")).get.map {
+      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds="+dataSources).get.map {
         response =>
           val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
           model.add(wrappersResult)
@@ -54,6 +57,27 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
 
     if( resultSet.hasNext )
       resultSet.next.getLiteral("keyword").getString
+    else {
+      //new Exception("No keyword query found in the graph.")
+      Logger.error("No keyword query found in the graph.")
+      ""
+    }
+
+  }
+
+  private def getDataSourceQuery(model: Model): String = {
+
+    val keywordQuery = QueryFactory.create(
+      s"""
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |SELECT ?dataSource WHERE {
+         |?search fs:dataSource ?dataSource .
+         |} limit 10
+      """.stripMargin)
+    val resultSet = QueryExecutionFactory.create(keywordQuery, model).execSelect()
+
+    if( resultSet.hasNext )
+      resultSet.next.getLiteral("dataSource").getString
     else {
       //new Exception("No keyword query found in the graph.")
       Logger.error("No keyword query found in the graph.")

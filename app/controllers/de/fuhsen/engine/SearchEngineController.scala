@@ -36,6 +36,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
   def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String) = Action.async { request =>
 
     Logger.info("Starting Search Engine Search : "+uid)
+    Logger.info("Sources : "+sources+" types: "+types)
 
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
@@ -45,13 +46,15 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
           //Adding query date property
           model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.QUERY_DATE), Calendar.getInstance.getTime.toString)
+          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.DATA_SOURCE), sources)
+
 
           //Micro-task services executed
           val data = RDFUtil.modelToTripleString(model, Lang.TURTLE)
           val microtaskServer = ConfigFactory.load.getString("engine.microtask.url")
           val futureResponse: Future[WSResponse] = for {
             responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing").post(data)
-            responseTwo <- ws.url(microtaskServer+"/engine/api/federatedquery").post(responseOne.body)
+            responseTwo <- ws.url(microtaskServer+"/engine/api/federatedquery?sources:"+sources).post(responseOne.body)
             responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization").post(responseTwo.body)
             responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking").post(responseThree.body)
           } yield responseFour
@@ -62,7 +65,6 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
               //ws.url(exceptionUrl).post(exceptionData)
               Logger.error(exceptionData.toString())
           }
-
           futureResponse.map {
             r =>
               val finalModel = RDFUtil.rdfStringToModel(r.body, Lang.TURTLE)
