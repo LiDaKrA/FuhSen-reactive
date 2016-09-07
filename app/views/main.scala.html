@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String, addHeader: Boolean, scripts: Html)(content: Html)
 
 <!DOCTYPE html>
 
@@ -10,6 +10,7 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/results.css")">
+
     </head>
     <body data-context="@play.Play.application().configuration().getString("play.http.context")">
         <noscript>
@@ -26,12 +27,21 @@
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("JSXTransformer.js"))'></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.fullPath("react", "react.js"))'></script>
 
-        <header class="hidden-phone">
-            <h1 class="invisible-but-readable">ddbnext.Heading_Header</h1>
-        </header>
+        @if(addHeader) {
+            <header class="hidden-phone">
+                <h1 class="invisible-but-readable">ddbnext.Heading_Header</h1>
+            </header>
+        }
+
 
         <div id="main-container" class="container" role="main">
             @content
         </div>
+
+        @scripts
+
+        <div id="logo-mini" title="Sponsored by"></div>
+
+
     </body>
 </html>

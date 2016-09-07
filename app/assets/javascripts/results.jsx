@@ -76,10 +76,6 @@ var ContainerResults = React.createClass({
                 <div className="row search-results-container">
                     <Trigger url={context+"/engine/api/searches?query="+query} pollInterval={200000}/>
                 </div>
-                <br/>
-                <div className="row text-right">
-                    <img src={context+"/assets/images/LiDaKrA_Logo.jpg"} className="lidakraLogo"/>
-                </div>
             </div>
         );
     }

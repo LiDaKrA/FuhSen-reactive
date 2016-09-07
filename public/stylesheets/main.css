@@ -2015,3 +2015,15 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     width: 50px !important;
 }
 /* end - jwplayer fix */
+
+
+#logo-mini {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 183px;
+    height: 65px;
+    background-size: 100%;
+    opacity: 0.5;
+    background-image: url("../images/LiDaKrA_Logo.jpg");
+}

@@ -36,6 +36,10 @@ public class Application extends Controller {
         return ok(results.render());
     }
 
+    public Result details() {
+        return ok(details.render());
+    }
+
     public Result getKeyword(){
         String json_res = "{ \"keyword\" : \""+this.keyword+"\" }";
         return ok(json_res);

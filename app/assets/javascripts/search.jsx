@@ -46,10 +46,6 @@ var ContainerSearch = React.createClass({
                                 <AccessTokenForm social_network="xing" />
                             </div>
                         </div>
-                        <br/>
-                        <div className="row text-right">
-                            <img src={context+"/assets/images/LiDaKrA_Logo.jpg"} className="lidakraLogo"/>
-                        </div>
                     </div>
                 </div>
         );
