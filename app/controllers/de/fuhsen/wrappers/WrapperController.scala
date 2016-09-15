@@ -101,7 +101,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       Future.sequence(resultFutures) map { results =>
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
-            case ApiSuccess(responseBody) => print("POST-SILK:"+responseBody)
+            case ApiSuccess(responseBody) => Logger.debug("POST-SILK:"+responseBody)
               val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
               requestMerger.addWrapperResult(model, wrapper.sourceUri)
             case _: ApiError =>
@@ -231,7 +231,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         // There has been an error previously, don't go on.
         Future(error)
       case ApiSuccess(body) =>
-        print("PRE-SILK: "+body)
+        Logger.debug("PRE-SILK: "+body)
         handleSilkTransformation(wrapper, body)
     }
   }

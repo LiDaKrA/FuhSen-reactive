@@ -29,14 +29,21 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
 
       val keyword = getKeywordQuery(model)
       val dataSources = getDataSourceQuery(model)
+      val entityTypes = getEntityTypeQuery(model)
+      val enabledDataSourcesByTypes = JenaGlobalSchema.getDataSourceByEntityTypes(entityTypes.split(",").map(x => "'"+x+"'").toSet.mkString(","))
+
+      val finalSelectedDataSources = enabledDataSourcesByTypes.intersect(dataSources.split(",").toSet).mkString(",")
 
       Logger.info("Selected Sources: "+dataSources)
+      Logger.info("Selected Entity Types: "+entityTypes)
+      Logger.info("Enabled Data Sources By Entity Types: "+enabledDataSourcesByTypes)
+      Logger.info("Final Data Sources: "+finalSelectedDataSources)
 
       if (keyword.isEmpty)
         Ok(textBody.get)
 
       //Calling the RDF-Wrappers to get the information //engine.microtask.url
-      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds="+dataSources).get.map {
+      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds="+finalSelectedDataSources).get.map {
         response =>
           val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
           model.add(wrappersResult)
@@ -58,15 +65,12 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
     if( resultSet.hasNext )
       resultSet.next.getLiteral("keyword").getString
     else {
-      //new Exception("No keyword query found in the graph.")
       Logger.error("No keyword query found in the graph.")
       ""
     }
-
   }
 
   private def getDataSourceQuery(model: Model): String = {
-
     val keywordQuery = QueryFactory.create(
       s"""
          |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
@@ -79,11 +83,27 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
     if( resultSet.hasNext )
       resultSet.next.getLiteral("dataSource").getString
     else {
-      //new Exception("No keyword query found in the graph.")
-      Logger.error("No keyword query found in the graph.")
+      Logger.error("No data sources found in the graph.")
       ""
     }
+  }
 
+  private def getEntityTypeQuery(model: Model): String = {
+    val keywordQuery = QueryFactory.create(
+      s"""
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |SELECT ?entityType WHERE {
+         |?search fs:entityType ?entityType .
+         |} limit 10
+      """.stripMargin)
+    val resultSet = QueryExecutionFactory.create(keywordQuery, model).execSelect()
+
+    if( resultSet.hasNext )
+      resultSet.next.getLiteral("entityType").getString
+    else {
+      Logger.error("No data sources found in the graph.")
+      ""
+    }
   }
 
 }

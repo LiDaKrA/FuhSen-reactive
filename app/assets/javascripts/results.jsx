@@ -457,7 +457,6 @@ var FacetSubMenuItems = React.createClass({
 });
 
 //************** End Facets Components *******************
-
 var ResultsContainer = React.createClass({
     noData : function() {
         alert(getTranslation("nodata"));

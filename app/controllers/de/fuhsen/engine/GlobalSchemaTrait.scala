@@ -21,6 +21,8 @@ trait GlobalSchemaTrait {
 
   def getEntityTypes() : Model
 
+  def getDataSourceByEntityTypes(entityTypes: String) : Set[String]
+
   def isLoaded(): Boolean
 
 }
@@ -103,6 +105,31 @@ object JenaGlobalSchema extends GlobalSchemaTrait {
          |}
           """.stripMargin)
     QueryExecutionFactory.create(query, model).execConstruct()
+  }
+
+  override def getDataSourceByEntityTypes(entityTypes: String) : Set[String] = {
+    Logger.info("Entity Types: "+entityTypes)
+    val results : scala.collection.mutable.Set[String] = scala.collection.mutable.Set()
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+         |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         |SELECT ?key
+         |WHERE {
+         |?p rdf:type fs:InformationSource .
+         |?p fs:key ?key .
+         |?p fs:finds ?s .
+         |FILTER(?s IN ($entityTypes))
+         |}
+          """.stripMargin)
+    val resultSet = QueryExecutionFactory.create(query, model).execSelect()
+    while (resultSet.hasNext) {
+      val result = resultSet.next
+      results.add(result.getLiteral("key").getString)
+    }
+    results.toSet
   }
 
 }

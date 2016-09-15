@@ -82,32 +82,49 @@ fs:InformationSource 	rdf:type owl:Class ;
 
 fs:Facebook rdf:type fs:InformationSource;
 			rdfs:label 	"Facebook";
+			fs:finds "person";
 			fs:key "facebook" .
 
 fs:Twitter rdf:type fs:InformationSource;
 			rdfs:label 	"Twitter";
+			fs:finds "person";
 			fs:key "twitter" .
 
 fs:GooglePlus rdf:type fs:InformationSource;
 			rdfs:label 	"Google+";
+			fs:finds "person";
+			fs:finds "organization";
 			fs:key "gplus" .
 
 fs:eBay rdf:type fs:InformationSource;
 			rdfs:label 	"eBay";
-			fs:key "ebay" .
+			fs:finds "product";
+			fs:key "ebay".
 
 fs:GoogleKnowledgeGraph rdf:type fs:InformationSource;
 						rdfs:label 	"Google Knowledge Graph";
+						fs:finds "person";
+                        fs:finds "organization";
+                        fs:finds "product";
 						fs:key "gkb" .
 
 fs:LinkedLeaks	rdf:type	fs:InformationSource;
 				rdfs:label 	"Linked Leaks";
+				fs:finds "person";
+                fs:finds "organization";
 				fs:key "linkedleaks" .
 
 fs:Xing		rdf:type	fs:InformationSource;
 			rdfs:label 	"Xing";
+			fs:finds "person";
 			fs:key "xing" .
 
 fs:Occrp	rdf:type	fs:InformationSource;
 			rdfs:label 	"OCCRP";
+			fs:finds "document";
 			fs:key "occrp" .
+
+fs:Tor2Web	rdf:type	fs:InformationSource;
+			rdfs:label 	"Darknet";
+			fs:finds "website";
+			fs:key "tor2web" .

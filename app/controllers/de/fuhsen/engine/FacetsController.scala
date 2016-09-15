@@ -87,7 +87,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
   }
 
   //Construct did not work, I do not understand why. Temporally we are executing select queries //getFacetResultSet
-  private def getSubModelWithFacet(facet: String, entityType :String, model :Model) : Model = {
+  /*private def getSubModelWithFacet(facet: String, entityType :String, model :Model) : Model = {
 
     entityType match {
       case "person" =>
@@ -119,6 +119,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     }
 
   }
+  */
 
   private def getFacetResultSet(facet: String, entityType :String, model :Model) : ResultSet = {
 

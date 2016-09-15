@@ -47,6 +47,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
           //Adding query date property
           model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.QUERY_DATE), Calendar.getInstance.getTime.toString)
           model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.DATA_SOURCE), sources)
+          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.ENTITY_TYPE), types)
 
 
           //Micro-task services executed
@@ -54,7 +55,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
           val microtaskServer = ConfigFactory.load.getString("engine.microtask.url")
           val futureResponse: Future[WSResponse] = for {
             responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing").post(data)
-            responseTwo <- ws.url(microtaskServer+"/engine/api/federatedquery?sources:"+sources).post(responseOne.body)
+            responseTwo <- ws.url(microtaskServer+"/engine/api/federatedquery").post(responseOne.body)
             responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization").post(responseTwo.body)
             responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking").post(responseThree.body)
           } yield responseFour
