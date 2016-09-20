@@ -21,34 +21,77 @@ var ContainerSearch = React.createClass({
     },
     render: function () {
         return (
-                <div>
-                    <div className="row">
-                        <div className="col-md-12 text-right">
-                            <LangSwitcher onlangselect={this.setLang}/>
-                        </div>
+            <div>
+                <div className="row">
+                    <div className="col-md-12 text-right">
+                        <LangSwitcher onlangselect={this.setLang}/>
                     </div>
-                    <div className="row">
-                        <link rel="stylesheet" media="screen" href={context+"/assets/stylesheets/startPage.css"}>
+                </div>
+                <div className="row">
+                    <link rel="stylesheet" media="screen" href={context+"/assets/stylesheets/startPage.css"}>
                         <div className="col-md-12 search-widget">
                             <div class="row">
                                 <img src={context+"/assets/images/imgpsh_fullsize.png"} className="bigLogo" alt="Logo_Description"/>
                             </div>
                             <div className="row">
-                                <SearchForm id_class="form-search"/>
+                                <div className="col-md-12 text-center">
+                                    <SearchForm id_class="form-search"/>
+                                </div>
                             </div>
                         </div>
-                        </link>
-                        <div className="row">
-                            <div className="col-md-6 text-center">
-                                <AccessTokenForm social_network="facebook" />
-                            </div>
-                            <div className="col-md-6 text-center">
-                                <AccessTokenForm social_network="xing" />
-                            </div>
+                    </link>
+                    <div className="row">
+                        <div className="col-md-6 text-center">
+                            <AccessTokenForm social_network="facebook" />
+                        </div>
+                        <div className="col-md-6 text-center">
+                            <AccessTokenForm social_network="xing" />
                         </div>
                     </div>
                 </div>
+            </div>
         );
+    }
+});
+
+var KeywordsFile = React.createClass({
+    getInitialState: function() {
+        return { parallel_searches: undefined };
+    },
+    _handleImageChange: function (evt)
+    {
+        var f = evt.target.files[0];
+
+        var searches_array = []
+
+        if (f) {
+            var r = new FileReader();
+            r.onload = function(e) {
+                var contents = e.target.result;
+                searches_array = contents.split("\n");
+
+                //alert(searches_array)
+
+                for (var i = 0; i < searches_array.length; i++) {
+                 //alert(searches_array[i])
+                 var win = window.open("http://localhost:9000/fuhsen/results?query="+searches_array[i]+"&sources=twitter&types=product%2Cdocument%2Cwebsite%2Corganization%2Cperson",'_blank');
+                 win.focus();
+                 }
+            }
+            r.readAsText(f);
+        } else {
+            alert("Failed to load file");
+        }
+
+        //this.setState({parallel_searches: searches_array})
+        //alert(this.state.parallel_searches)
+    },
+    render: function () {
+        return (
+            <div>
+                <input type="file" onChange={this._handleImageChange} />
+            </div>
+        )
     }
 });
 
@@ -135,9 +178,9 @@ var SearchForm = React.createClass({
     },
     typesChanged: function(types_data) {
         this.setState({ types: types_data, selectionLabel: this.getSelectionLabel()},
-        function () {
+            function () {
 
-        });
+            });
     },
     onClick: function() {
         if(this.state.showSourcesTypesDiv) {
@@ -222,16 +265,21 @@ var SearchForm = React.createClass({
                 </form>
                 <div class="row">
                     <div className="col-md-3"/>
-                        <div className={floatingDivStyle}>
-                            <div className="row">
-                                <div className="col-md-6 separator">
-                                    <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
-                                </div>
-                                <div className="col-md-6">
-                                    <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
-                                </div>
+                    <div className={floatingDivStyle}>
+                        <div className="row">
+                            <div className="col-md-6 separator">
+                                <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                            </div>
+                            <div className="col-md-6">
+                                <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="col-md-3 text-center">
+                        <KeywordsFile />
+                    </div>
+
                     <div className="col-md-5"/>
                 </div>
             </div>
@@ -372,11 +420,11 @@ var AccessTokenForm = React.createClass({
                 return (
                     <div className="accessTokenDiv" align="center">
                         {getTranslation("novalidtkfound_pre")+social_net_upper_case+getTranslation("novalidtkfound_post")}
-                            <br/>
-                            <br/>
-                            <form action={context+"/"+this.props.social_network+"/getToken"} method="get">
-                                <button>&nbsp;{getTranslation("newtoken")}&nbsp;</button>
-                            </form>
+                        <br/>
+                        <br/>
+                        <form action={context+"/"+this.props.social_network+"/getToken"} method="get">
+                            <button>&nbsp;{getTranslation("newtoken")}&nbsp;</button>
+                        </form>
 
                     </div> )
             }

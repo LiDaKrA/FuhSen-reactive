@@ -128,3 +128,8 @@ fs:Tor2Web	rdf:type	fs:InformationSource;
 			rdfs:label 	"Darknet";
 			fs:finds "website";
 			fs:key "tor2web" .
+
+fs:ElasticSearch	rdf:type	fs:InformationSource;
+			        rdfs:label 	"Elastic Search";
+			        fs:finds "website";
+			        fs:key "elasticsearch" .

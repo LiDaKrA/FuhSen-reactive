@@ -857,15 +857,30 @@ var ResultsList = React.createClass({
                     </ProductResultElement>
                 );
             } else if(result["@type"] === "foaf:Document") {
-                return (
-                    <WebResultElement
-                        img={context+"/assets/images/datasources/TorLogo.png"}
-                        onion_url={result.url}
-                        comment={result["fs:excerpt"]}
-                        source={result["fs:source"]}
-                        crawled={already_crawled}>
-                    </WebResultElement>
-                );
+                if(result["fs:source"] === "ELASTIC") {
+                    return (
+                        <ElasticSearchResultElement
+                            img={context+"/assets/images/datasources/Elasticsearch.png"}
+                            content={result["fs:content"]}
+                            label={result["fs:title"]}
+                            onion_url={result["fs:url"]}
+                            entity_url={result["fs:entity_url"]}
+                            entity_dbpedia={result["fs:entity_dbpedia"]}
+                            entity_type={result["fs:entity_type"]}
+                            entity_name={result["fs:entity_name"]}>
+                        </ElasticSearchResultElement>
+                    );
+                } else {
+                    return (
+                        <WebResultElement
+                            img={context+"/assets/images/datasources/TorLogo.png"}
+                            onion_url={result.url}
+                            comment={result["fs:excerpt"]}
+                            source={result["fs:source"]}
+                            crawled={already_crawled}>
+                        </WebResultElement>
+                    );
+                }
             } else if(result["@type"] === "fs:Document") {
                 return (
                     <DocumentResultElement
@@ -1058,6 +1073,42 @@ var OrganizationResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+
+var ElasticSearchResultElement = React.createClass({
+    render: function () {
+        return (
+            <li className="item bt">
+                <div className="summary row">
+                    <div className="thumbnail-wrapper col-md-2">
+                        <div className="thumbnail">
+                            <img src={this.props.img} height="60px" width="75px"/>
+                        </div>
+                    </div>
+                    <div className="summary-main-wrapper col-md-8">
+                        <div className="summary-main">
+                            <h2 className="title">
+                                {this.props.label}
+                            </h2>
+                            <div className="subtitle">
+                                { this.props.content !== undefined ? <p><b>Content: </b>{this.props.content}</p> : null }
+                                { this.props.onion_url !== undefined ? <p><b>Onion Url: </b>{this.props.onion_url}</p> : null }
+                                { this.props.entity_url !== undefined ? <p><b>Entity URL: </b>{this.props.entity_url}</p> : null }
+                                { this.props.entity_dbpedia !== undefined ? <p><b>Entity DBPedia: </b>{this.props.entity_dbpedia}</p> : null }
+                                { this.props.entity_type !== undefined ? <p><b>Entity type: </b>{this.props.entity_type}</p> : null }
+                                { this.props.entity_name !== undefined ? <p><b>Entity name: </b>{this.props.entity_name}</p> : null }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="thumbnail-wrapper col-md-1">
+                        <div class="thumbnail">
+                            <img src={context+"/assets/images/datasources/Elasticsearch.png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
