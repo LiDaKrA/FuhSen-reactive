@@ -154,6 +154,9 @@ var Container = React.createClass({
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
+                alert(getTranslation("server_error"));
+                //Todo remove this hardcoded value
+                window.location.href="/fuhsen";
             }.bind(this)
         });
     },

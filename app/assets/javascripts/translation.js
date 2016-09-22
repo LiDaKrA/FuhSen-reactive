@@ -90,7 +90,8 @@ var dictEng = {
     "wants": "Wants",
     "haves": "Haves",
     "top_haves": "Top haves",
-    "interests": "Interests"
+    "interests": "Interests",
+    "server_error": "There was an error during search... Please try again!"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -193,7 +194,8 @@ var dictGer = {
     "wants": "Wollen",
     "haves": "Geschick",
     "top_haves": "Top Geschick",
-    "interests": "Interessen"
+    "interests": "Interessen",
+    "server_error": "There was an error during search... Please try again!"
 };
 
 window.dictGer = dictGer;
