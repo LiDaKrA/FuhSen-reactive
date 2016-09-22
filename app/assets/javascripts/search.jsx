@@ -55,10 +55,7 @@ var ContainerSearch = React.createClass({
 });
 
 var KeywordsFile = React.createClass({
-    getInitialState: function() {
-        return { parallel_searches: undefined };
-    },
-    _handleImageChange: function (evt)
+    handleFileSelection: function (evt)
     {
         var f = evt.target.files[0];
 
@@ -82,14 +79,13 @@ var KeywordsFile = React.createClass({
         } else {
             alert("Failed to load file");
         }
-
-        //this.setState({parallel_searches: searches_array})
-        //alert(this.state.parallel_searches)
     },
     render: function () {
         return (
             <div>
-                <input type="file" onChange={this._handleImageChange} />
+                <span className="btn btn-default btn-file">
+                    Select file <input type="file" onChange={this.handleFileSelection}></input>
+                </span>
             </div>
         )
     }
@@ -247,24 +243,31 @@ var SearchForm = React.createClass({
 
         return (
             <div>
-                <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
-                    <div>
-                        <label ><span>Search: </span></label>
-                        <input type="search" name="query" placeholder={getTranslation("yoursearch")}/>&nbsp;
-                        <input type="hidden" name="sources" value={selected_sources}/>
-                        <input type="hidden" name="types" value={selected_types}/>
-                        <button type="submit">&nbsp;</button>
-                    </div>
-                    <div>
-                        <div className="floatingSelText">
-                            {this.getSelectionLabel()}
-                            <img onClick={this.onClick} className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
-                            </img>
-                        </div>
-                    </div>
-                </form>
                 <div class="row">
                     <div className="col-md-3"/>
+                    <div className="col-md-6">
+                        <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
+                            <div>
+                                <label ><span>Search: </span></label>
+                                <input type="search" name="query" placeholder={getTranslation("yoursearch")}/>&nbsp;
+                                <input type="hidden" name="sources" value={selected_sources}/>
+                                <input type="hidden" name="types" value={selected_types}/>
+                                <button type="submit">&nbsp;</button>
+                            </div>
+                            <div>
+                                <div className="floatingSelText">
+                                    {this.getSelectionLabel()}
+                                    <img onClick={this.onClick} className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
+                                    </img>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div className="col-md-2">
+                        <KeywordsFile />
+                    </div>
+                </div>
+                <div class="row">
                     <div className={floatingDivStyle}>
                         <div className="row">
                             <div className="col-md-6 separator">
@@ -275,12 +278,6 @@ var SearchForm = React.createClass({
                             </div>
                         </div>
                     </div>
-
-                    <div className="col-md-3 text-center">
-                        <KeywordsFile />
-                    </div>
-
-                    <div className="col-md-5"/>
                 </div>
             </div>
         );
