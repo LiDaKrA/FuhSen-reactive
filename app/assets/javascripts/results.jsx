@@ -648,6 +648,7 @@ var ResultsContainer = React.createClass({
 
         var final_data = this.state.resultsData;
 
+        //Facets filtering algorithm
         if(Object.keys(this.props.facetsDict).length > 0)
         {
             final_data["@graph"] = this.state.originalData["@graph"]
