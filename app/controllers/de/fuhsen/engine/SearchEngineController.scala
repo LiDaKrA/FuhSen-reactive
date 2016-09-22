@@ -87,7 +87,6 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
         Future.successful(InternalServerError("Provided uid has not result model associated."))
     }
 
-
   }
 
   def startSession(query: String) = Action { request =>
@@ -161,7 +160,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:wants ?wants .
              |?p fs:haves ?haves .
              |?p fs:top_haves ?top_haves .
-             |?p fs:interests ?interests .
+             |?p fs:liveIn ?liveInName .
+             |?p fs:workAt ?workedAtName .
+             |?p fs:studyAt ?studyAtName .
              |}
              |WHERE {
              |?p rdf:type foaf:Person .
@@ -182,6 +183,12 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:haves ?haves } .
              |OPTIONAL { ?p fs:top_haves ?top_haves } .
              |OPTIONAL { ?p fs:interests ?interests } .
+             |OPTIONAL { ?p fs:placeLived ?livedAt .
+             |            ?livedAt foaf:name ?liveInName . } .
+             |OPTIONAL { ?p fs:workedAt ?workedAt .
+             |            ?workedAt foaf:name ?workedAtName . } .
+             |OPTIONAL { ?p fs:studiedAt ?studyAt .
+             |            ?studyAt foaf:name ?studyAtName . } .
              |?p fs:rank ?rank .
              |}
           """.stripMargin)

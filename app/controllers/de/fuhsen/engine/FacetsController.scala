@@ -174,7 +174,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
-          case "ocupation" =>
+          case "occupation" =>
             val query = QueryFactory.create(
               s"""
                  |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -182,15 +182,15 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                  |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                  |
-                 |SELECT (SAMPLE(?ocupation) AS ?facet) (COUNT(?ocupation) as ?elems)
+                 |SELECT (SAMPLE(?occupation) AS ?facet) (COUNT(?occupation) as ?elems)
                  |WHERE {
                  |		?p rdf:type foaf:Person .
-                 |    ?p fs:ocupation ?ocupation .
-                 |} GROUP BY ?ocupation ORDER BY DESC(?elems)
+                 |    ?p fs:occupation ?occupation .
+                 |} GROUP BY ?occupation ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
-          case "livein" =>
+          case "liveIn" =>
             val query = QueryFactory.create(
               s"""
                  |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -198,15 +198,16 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                  |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                  |
-                 |SELECT (SAMPLE(?livedAt) AS ?facet) (COUNT(?livedAt) as ?elems)
+                 |SELECT (SAMPLE(?name) AS ?facet) (COUNT(?name) as ?elems)
                  |WHERE {
                  |		?p rdf:type foaf:Person .
-                 |    ?p fs:livedAt ?livedAt .
-                 |} GROUP BY ?livedAt ORDER BY DESC(?elems)
+                 |    ?p fs:placeLived ?livedAt .
+                 |    ?livedAt foaf:name ?name .
+                 |} GROUP BY ?name ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
-          case "workat" =>
+          case "workAt" =>
             val query = QueryFactory.create(
               s"""
                  |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -214,11 +215,12 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                  |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                  |
-                 |SELECT (SAMPLE(?workAt) AS ?facet) (COUNT(?workAt) as ?elems)
+                 |SELECT (SAMPLE(?name) AS ?facet) (COUNT(?name) as ?elems)
                  |WHERE {
                  |		?p rdf:type foaf:Person .
-                 |    ?p fs:workAt ?workAt .
-                 |} GROUP BY ?workAt ORDER BY DESC(?elems)
+                 |    ?p fs:workedAt ?workedAt .
+                 |    ?workedAt foaf:name ?name .
+                 |} GROUP BY ?name ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
@@ -230,11 +232,12 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                  |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                  |
-                 |SELECT (SAMPLE(?studyAt) AS ?facet) (COUNT(?studyAt) as ?elems)
+                 |SELECT (SAMPLE(?name) AS ?facet) (COUNT(?name) as ?elems)
                  |WHERE {
                  |		?p rdf:type foaf:Person .
-                 |    ?p fs:studyAt ?studyAt .
-                 |} GROUP BY ?studyAt ORDER BY DESC(?elems)
+                 |    ?p fs:studiedAt ?studyAt .
+                 |    ?studyAt foaf:name ?name .
+                 |} GROUP BY ?name ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results

@@ -75,6 +75,15 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
         //basePath = "organizations",
         uriPattern = ""
       )
+    ),
+    SilkTransformationTask(
+      transformationTaskId = ConfigFactory.load.getString("silk.transformation.task.gplus.place"),
+      createSilkTransformationRequestBody(
+        basePath = "query/results/json/placesLived",
+        //Replaced by YQL
+        //basePath = "organizations",
+        uriPattern = ""
+      )
     )
   )
 

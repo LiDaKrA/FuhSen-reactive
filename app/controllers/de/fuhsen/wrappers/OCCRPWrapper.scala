@@ -24,7 +24,7 @@ import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, S
 class OCCRPWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
 
   /** Query parameters that should be added to the request. */
-  override def queryParams: Map[String, String] = Map("limit" -> "10")
+  override def queryParams: Map[String, String] = Map("limit" -> "100")
 
   /** Headers that should be added to the request. */
   override def headersParams: Map[String, String] = Map("Accept" -> "application/json",

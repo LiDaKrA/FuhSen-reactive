@@ -656,11 +656,34 @@ var ResultsContainer = React.createClass({
                 if (this.props.facetsDict.hasOwnProperty(key)) {
                     var facet_name = "fs:"+key
                     var facet_values = this.props.facetsDict[key]
+
+                    function containsAll(source,target)
+                    {
+                        var found = false;
+                        for (var i = 0; i < target.length; i++) {
+                            if (source.indexOf(target[i]) > -1) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        return found;
+                    }
+
                     function filterByFacet(obj) {
-                        if (facet_values.indexOf(obj[facet_name]) >= 0) {
-                            return true;
-                        } else {
-                            return false;
+                        //Comparing array of elements
+                        if (Array.isArray(obj[facet_name]))
+                        {
+                            if  (containsAll(obj[facet_name],facet_values))
+                                return true;
+                            else
+                                return false;
+                        }
+                        //Comparing just one element
+                        else {
+                            if (facet_values.indexOf(obj[facet_name]) >= 0)
+                                return true;
+                            else
+                                return false;
                         }
                     }
                     var as = final_data["@graph"].filter(filterByFacet)
