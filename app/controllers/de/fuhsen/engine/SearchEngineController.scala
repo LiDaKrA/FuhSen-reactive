@@ -241,7 +241,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:label ?label .
              |?p fs:comment ?comment .
              |?p fs:country ?country .
-             |?p fs:condition ?condition .
+             |?p fs:location ?location .
              |?p fs:source ?source .
              |}
              |WHERE {
@@ -273,8 +273,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:source ?source .
              |?p fs:content ?content .
              |?p fs:title ?title .
-             |?p fs:entity_url ?entity_url .
-             |?p fs:entity_dbpedia ?entity_dbpedia .
+             |?p fs:entity_url ?annotation .
              |?p fs:entity_type ?entity_type .
              |?p fs:entity_name ?entity_name .
              |}
@@ -286,10 +285,10 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:source ?source } .
              |OPTIONAL { ?p fs:content ?content } .
              |OPTIONAL { ?p fs:title ?title } .
-             |OPTIONAL { ?p fs:entity_url ?entity_url } .
-             |OPTIONAL { ?p fs:entity_dbpedia ?entity_dbpedia } .
-             |OPTIONAL { ?p fs:entity_type ?entity_type } .
-             |OPTIONAL { ?p fs:entity_name ?entity_name } .
+             |OPTIONAL { ?p fs:annotation ?annotation .
+             |           ?annotation fs:entity_type ?entity_type .
+             |           ?annotation fs:entity-name ?entity_name .
+             |         } .
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()

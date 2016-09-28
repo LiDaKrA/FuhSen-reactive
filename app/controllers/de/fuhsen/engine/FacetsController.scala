@@ -64,6 +64,14 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
           .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "language")
         model.createResource(FuhsenVocab.FACET_URI + "FileType")
           .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "filetype")
+      case "website" =>
+        //Creating fs:Search resource
+        model.createResource(FuhsenVocab.FACET_URI + "Person")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "person")
+        model.createResource(FuhsenVocab.FACET_URI + "Product")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "product")
+        model.createResource(FuhsenVocab.FACET_URI + "Organization")
+          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "organization")
       case _ =>
     }
 
@@ -376,6 +384,57 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                  |		?p rdf:type fs:Document .
                  |    ?p fs:extension ?filetype
                  |} GROUP BY ?filetype ORDER BY DESC(?elems)
+          """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+        }
+      case "website" =>
+        facet match {
+          case "person" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?name) AS ?facet) (COUNT(?name) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type fs:Annotation .
+                 |    ?p fs:entity-type <https://schema.org/Person> .
+                 |    ?p fs:entity-name ?name
+                 |} GROUP BY ?name ORDER BY DESC(?elems)
+          """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+          case "organization" =>
+            val query = QueryFactory.create(
+              s"""
+                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?name) AS ?facet) (COUNT(?name) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type fs:Annotation .
+                 |    ?p fs:entity-type <https://schema.org/Organization> .
+                 |    ?p fs:entity-name ?name
+                 |} GROUP BY ?name ORDER BY DESC(?elems)
+          """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+          case "product" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?name) AS ?facet) (COUNT(?name) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type fs:Annotation .
+                 |    ?p fs:entity-type <https://schema.org/Product> .
+                 |    ?p fs:entity-name ?name
+                 |} GROUP BY ?name ORDER BY DESC(?elems)
           """.stripMargin)
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
