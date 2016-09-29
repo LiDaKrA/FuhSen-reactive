@@ -468,6 +468,41 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
             val results = QueryExecutionFactory.create(query, model).execSelect()
             results
         }
+      case "organization" =>
+        facet match {
+          case "country" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?country) AS ?facet) (COUNT(?country) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type foaf:Organization .
+                 |    ?p fs:country ?country
+                 |} GROUP BY ?country ORDER BY DESC(?elems)
+                  """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+          case "location" =>
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |SELECT (SAMPLE(?location) AS ?facet) (COUNT(?location) as ?elems)
+                 |WHERE {
+                 |		?p rdf:type foaf:Organization .
+                 |    ?p fs:location ?location .
+                 |} GROUP BY ?location ORDER BY DESC(?elems)
+          """.stripMargin)
+            val results = QueryExecutionFactory.create(query, model).execSelect()
+            results
+        }
     }
   }
 
