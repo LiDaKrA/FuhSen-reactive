@@ -808,9 +808,12 @@ var ResultsContainer = React.createClass({
                     <div className="col-md-12">
                         <ul id="search-results" className="search-results">
                             <ul className="results-list list-unstyled">
-                                <ResultsList data={final_data}
-                                             crawled={this.state.crawled}>
-                                </ResultsList>
+                                {/*<ResultsList data={final_data}*/}
+                                             {/*crawled={this.state.crawled}>*/}
+                                {/*</ResultsList>*/}
+                                <ResultsTable data={final_data}
+                                             crawled={this.state.crawled} type={this.props.entityType}>
+                                </ResultsTable>
                             </ul>
                         </ul>
                     </div>
