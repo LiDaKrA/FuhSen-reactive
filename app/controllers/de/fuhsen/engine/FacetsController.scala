@@ -20,58 +20,87 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     Logger.info("Facets for search : " + uid + " entityType: "+entityType)
 
     val model = ModelFactory.createDefaultModel()
+    var current_model = ModelFactory.createDefaultModel()
+
+    GraphResultsCache.getModel(uid) match {
+      case Some(model) =>
+        Logger.info("Model size: "+model.size())
+        current_model = model
+      case None =>
+        InternalServerError("Provided uid has not result model associated.")
+    }
 
     entityType match {
       case "person" =>
         //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Gender")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "gender")
-        model.createResource(FuhsenVocab.FACET_URI + "Birthday")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "birthday")
-        model.createResource(FuhsenVocab.FACET_URI + "Location")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
-        model.createResource(FuhsenVocab.FACET_URI + "Occupation")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "occupation")
-        model.createResource(FuhsenVocab.FACET_URI + "LiveIn")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "liveIn")
-        model.createResource(FuhsenVocab.FACET_URI + "WorkAt")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "workAt")
-        model.createResource(FuhsenVocab.FACET_URI + "StudyAt")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "studyAt")
-        model.createResource(FuhsenVocab.FACET_URI + "Source")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "source")
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#gender"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Gender").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "gender")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#birthday"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Birthday").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "birthday")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#location"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Location").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#occupation"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Occupation").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "occupation")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#liveIn"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "LiveIn").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "liveIn")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#workAt"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "WorkAt").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "workAt")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#studyAt"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "StudyAt").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "studyAt")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#source"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Source").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "source")
+        }
       case "organization" =>
         //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Location")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
-        model.createResource(FuhsenVocab.FACET_URI + "Country")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#location"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Location").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#country"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Country").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
+        }
       case "product" =>
         //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Price")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "price")
-        model.createResource(FuhsenVocab.FACET_URI + "Country")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
-        model.createResource(FuhsenVocab.FACET_URI + "Location")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
-        model.createResource(FuhsenVocab.FACET_URI + "Condition")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "condition")
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#price"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Price").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "price")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#country"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Country").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#location"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Location").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "location")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#condition"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Condition").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "condition")
+        }
       case "document" =>
         //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Country")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
-        model.createResource(FuhsenVocab.FACET_URI + "Language")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "language")
-        model.createResource(FuhsenVocab.FACET_URI + "FileType")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "filetype")
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#country"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Country").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "country")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#language"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Language").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "language")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#filetype"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "FileType").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "filetype")
+        }
       case "website" =>
         //Creating fs:Search resource
-        model.createResource(FuhsenVocab.FACET_URI + "Person")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "person")
-        model.createResource(FuhsenVocab.FACET_URI + "Product")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "product")
-        model.createResource(FuhsenVocab.FACET_URI + "Organization")
-          .addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "organization")
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#person"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Person").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "person")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#product"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Product").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "product")
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#organization"))) {
+          model.createResource(FuhsenVocab.FACET_URI + "Organization").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "organization")
+        }
       case _ =>
     }
 
