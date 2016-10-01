@@ -7,6 +7,7 @@ GET     /                                                   controllers.Applicat
 GET     /results                                            controllers.Application.results()
 GET     /details                                            controllers.Application.details()
 GET     /keyword                                            controllers.Application.getKeyword()
+GET    /screenshot                                          controllers.de.fuhsen.engine.ScreenshotController.screenshots(url: String)
 
 # Search Engine API routes
 POST    /engine/api/searches                                controllers.de.fuhsen.engine.SearchEngineController.startSession(query: String)
