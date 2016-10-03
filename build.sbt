@@ -19,7 +19,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "anorm" 				% "2.4.0",
   "org.webjars" 		%% "webjars-play" 		% "2.4.0-1",
-  "org.webjars" 		%  "bootstrap" 			% "3.1.1-2",
+  "org.webjars" % "bootstrap" % "3.3.7",
   "org.webjars"       %  "flat-ui"            % "bcaf2de95e",
   "org.webjars" 		%  "react" 				% "0.13.3",
   "org.webjars" 		%  "marked" 			% "0.3.2"
@@ -32,5 +32,12 @@ enablePlugins(SbtNativePackager)
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
 routesGenerator := InjectedRoutesGenerator
+
+fork in run := true
+
+
+fork in run := true
+
+fork in run := true
 
 fork in run := true

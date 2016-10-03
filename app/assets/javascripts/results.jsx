@@ -824,9 +824,11 @@ var ResultsContainer = React.createClass({
                             </ul>
                     </div>
                         :
-                        <ResultsTable data={final_data}
-                                      crawled={this.state.crawled} type={this.props.entityType}>
-                        </ResultsTable>
+                        <div id="search-results" className="search-results">
+                                <ResultsTable data={final_data}
+                                       crawled={this.state.crawled} type={this.props.entityType}>
+                                </ResultsTable>
+                          </div>
                     }
                 </div>
             </div>
