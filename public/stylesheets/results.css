@@ -38,6 +38,16 @@
   height: 25px;
 }
 
+.table_icon {
+  background-image: url("../images/icons/table_view.png");
+  width: 24px;
+  height: 24px;
+}
+.list_icon {
+  background-image: url("../images/icons/list_view.png");
+  width: 24px;
+  height: 24px;
+}
 .crawl_icon {
   background-image: url("../images/icons/crawl-icon.png");
   width: 25px;

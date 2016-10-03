@@ -464,8 +464,13 @@ var ResultsContainer = React.createClass({
     noData : function() {
         alert(getTranslation("nodata"));
     },
+    toggleResultsView: function(){
+        var view_selector = (this.state.view == "list" ? "table" : "list");
+        //$("#btn_view_selector").toggleClass('table_icon list_icon');
+        this.setState({resultsData : this.state.resultsData,selected : this.state.selected,loading: this.state.loading,underDev: false,view:view_selector});
+    },
     underDevelopmentFunction : function() {
-        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: true});
+        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: true,view:this.state.view});
     },
     crawlAll : function() {
         var JSONData = this.state.resultsData["@graph"];
@@ -570,7 +575,7 @@ var ResultsContainer = React.createClass({
         link.click();
         document.body.removeChild(link);
 
-        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: false});
+        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: false,view:this.state.view});
     },
     loadDataFromServer: function (eType) {
         this.setState({selected:eType, loading: true});
@@ -590,7 +595,7 @@ var ResultsContainer = React.createClass({
         });
     },
     getInitialState: function () {
-        return {resultsData: "", selected: "person", loading: true, underDev: false, crawled : false};
+        return {resultsData: "", selected: "person", loading: true, underDev: false, crawled : false,view: this.props.view};
     },
     componentDidMount: function () {
         this.loadDataFromServer(this.props.entityType);
@@ -793,27 +798,38 @@ var ResultsContainer = React.createClass({
                         </ul>
                     </div>
                     <div className="col-md-4 text-right">
-                        { this.state.selected==="website" ? <CustomForm class_identifier="crawl_icon" func={this.crawlAll}></CustomForm> : null }
+                        { this.state.selected==="website" ? <CustomForm id = "btn_crawl" class_identifier="crawl_icon" func={this.crawlAll}></CustomForm> : null }
                         { this.state.selected==="website" ? <div className="divider"/> : null }
-                        <CustomForm class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
+                        <CustomForm id = "btn_view_selector" class_identifier={(this.state.view == "list"? "table" : "list") + "_icon"} func={this.toggleResultsView}></CustomForm>
                         <div className="divider"/>
-                        <CustomForm class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
+                        <CustomForm id = "btn_map" class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
                         <div className="divider"/>
-                        <CustomForm class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
+                        <CustomForm id = "btn_graph" class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
+                        <div className="divider"/>
+                        <CustomForm id = "btn_csv" class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
                     </div>
                 </div>
             </div>
             <div className="search-results-content">
                 <div className="row">
+                    { this.state.view == "list" ?
                     <div className="col-md-12">
                         <ul id="search-results" className="search-results">
                             <ul className="results-list list-unstyled">
                                 <ResultsList data={final_data}
                                              crawled={this.state.crawled}>
                                 </ResultsList>
+
                             </ul>
-                        </ul>
+                            </ul>
                     </div>
+                        :
+                        <div id="search-results" className="search-results">
+                                <ResultsTable data={final_data}
+                                       crawled={this.state.crawled} type={this.props.entityType}>
+                                </ResultsTable>
+                          </div>
+                    }
                 </div>
             </div>
         </div>
@@ -823,7 +839,7 @@ var ResultsContainer = React.createClass({
 var CustomForm = React.createClass({
     render: function() {
         return (
-            <button onClick={this.props.func} className={this.props.class_identifier} title={getTranslation(this.props.class_identifier)}>
+            <button id={this.props.id} onClick={this.props.func} className={this.props.class_identifier} title={getTranslation(this.props.class_identifier)}>
             </button>
         );
     }
