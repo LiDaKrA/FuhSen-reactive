@@ -249,9 +249,11 @@ var PersonResultRow = React.createClass({
             </td>
 
             <td>{this.props.name}</td>
-            <td>{ this.props.webpage !== undefined ? <p><a href={this.props.webpage}
+            <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
-                                                           target="_blank"></a>
+                                                           target="_blank">
+                <img src={context + "/assets/images/icons/link_icon_0.png"}/>
+            </a>
             </p> : "N/A" }</td>
             <td>
                 <div class="thumbnail">
@@ -295,7 +297,12 @@ var ProductResultRow = React.createClass({
                 </td>
                 <td><img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
                 <td>{this.props.description !== undefined ? <RichText label="Description" text={this.props.description} maxLength={100}/> : "N/A"}</td>
-                <td>{ this.props.webpage !== undefined ? <a href={this.props.webpage} target="_blank"></a> : "N/A" }</td>
+                <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
+
+                                                               target="_blank">
+                    <img src={context + "/assets/images/icons/link_icon_0.png"}/>
+                </a>
+                </p> : "N/A" }</td>
                 <td>{ this.props.location !== undefined ? <p>{this.props.location}</p> : "N/A" }</td>
                 <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : "N/A" }</td>
                 <td>{ this.props.price !== undefined ? <p>{this.props.price}</p> : "N/A" }</td>
@@ -320,7 +327,12 @@ var OrganizationResultRow = React.createClass({
                 <td>
                     <img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
                 <td>{this.props.name}</td>
-                <td>{ this.props.webpage !== undefined ? <a href={this.props.webpage} target="_blank"></a> : "N/A" }</td>
+                <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
+
+                                                               target="_blank">
+                    <img src={context + "/assets/images/icons/link_icon_0.png"}/>
+                </a>
+                </p> : "N/A" }</td>
                 <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
                 <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
                 <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : "N/A" }</td>
@@ -344,7 +356,12 @@ var WebsiteResultRow = React.createClass({
                 <td><img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
                 <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
                 <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
-                <td>{ this.props.webpage !== undefined ? <a href={this.props.webpage} target="_blank"></a> : "N/A" }</td>
+                <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
+
+                                                               target="_blank">
+                    <img src={context + "/assets/images/icons/link_icon_0.png"}/>
+                </a>
+                </p> : "N/A" }</td>
                 <td>{ this.props.content !== undefined ? <p>{this.props.content}</p> : "N/A" }</td>
                 <td>{ this.props.title !== undefined ? <p>{this.props.title}</p> : "N/A" }</td>
                 <td>{ this.props.entity_type !== undefined ? <p>{this.props.entity_type}</p> : "N/A" }</td>
@@ -368,7 +385,12 @@ var DocumentResultRow = React.createClass({
                 <td><img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
                 <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
                 <td>{ this.props.comment !== undefined ? <RichText label="Comment" dialogID = {"model_comment" + this.props.id} text={this.props.comment} maxLength={100}/> : null}</td>
-                <td>{ this.props.webpage !== undefined ? <a href={this.props.webpage} target="_blank"></a> : "N/A" }</td>
+                <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
+
+                                                               target="_blank">
+                    <img src={context + "/assets/images/icons/link_icon_0.png"}/>
+                </a>
+                </p> : "N/A" }</td>
                 <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : "N/A" }</td>
                 <td>{ this.props.language !== undefined ? <p>{this.props.language}</p> : "N/A" }</td>
                 <td>{ this.props.file_name !== undefined ? <p>{this.props.file_name}</p> : "N/A" }</td>
