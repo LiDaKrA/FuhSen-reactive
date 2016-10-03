@@ -70,10 +70,10 @@ var KeywordsFile = React.createClass({
                 //alert(searches_array)
 
                 for (var i = 0; i < searches_array.length; i++) {
-                 //alert(searches_array[i])
-                 var win = window.open("http://localhost:9000/fuhsen/results?query="+searches_array[i]+"&sources=twitter&types=product%2Cdocument%2Cwebsite%2Corganization%2Cperson",'_blank');
-                 win.focus();
-                 }
+                    //alert(searches_array[i])
+                    var win = window.open("http://localhost:9000/fuhsen/results?query="+searches_array[i]+"&sources=twitter&types=product%2Cdocument%2Cwebsite%2Corganization%2Cperson",'_blank');
+                    win.focus();
+                }
             }
             r.readAsText(f);
         } else {
@@ -83,9 +83,13 @@ var KeywordsFile = React.createClass({
     render: function () {
         return (
             <div>
-                <span className="btn btn-default btn-file">
-                    Select file <input type="file" onChange={this.handleFileSelection}></input>
-                </span>
+                <div className="row">
+                    <div className="col-md-12 text-center">
+                        <span className="btn btn-primary btn-file btn-md">
+                            Select file <input type="file" onChange={this.handleFileSelection}></input>
+                        </span>
+                    </div>
+                </div>
             </div>
         )
     }

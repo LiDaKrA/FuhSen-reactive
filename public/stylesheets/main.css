@@ -29,9 +29,20 @@
     filter: alpha(opacity=0);
     opacity: 0;
     outline: none;
-    background: white;
+    background: #195E9D;
     cursor: inherit;
     display: block;
+    color: white
+}
+
+.btn-primary {
+    background: #195E9D;
+    color: #ffffff;
+}
+
+.btn-md {
+    padding: 10px 20px;
+    font-size: 14px;
 }
 
 p.thick {
@@ -41,6 +52,13 @@ p.thick {
 .separator {
     padding-right:20px;
     border-right: 1px solid #ccc;
+}
+
+.sep_Img {
+    width: 10px;
+    height: 40px;
+    margin: 20px;
+    position: relative;
 }
 
 .sel_button {

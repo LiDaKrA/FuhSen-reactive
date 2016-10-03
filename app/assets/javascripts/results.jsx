@@ -1010,6 +1010,32 @@ var WebResultElement = React.createClass({
     }
 });
 
+var SnapshotLink = React.createClass({
+    showPDF: function () {
+        $.ajax({
+            url: context+"/screenshot?url="+this.props.webpage,
+            datatype: "json",
+            success: function(data) {
+                if(JSON.stringify(data).length == 2){
+                    alert("LOADING PDF!")
+                }else if(JSON.stringify(data).length > 2){
+                    var file = new Blob([data], {type: "application/pdf"});
+                    window.open(URL.createObjectURL(file));
+                    this.setState({pdf_data: data});
+                }
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    render: function () {
+        return (
+            <a href="#" onClick={this.showPDF}> --- (See Snapshot!)</a>
+        );
+    }
+});
+
 var ProductResultElement = React.createClass({
     render: function () {
         return (
@@ -1030,7 +1056,7 @@ var ProductResultElement = React.createClass({
                                 { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.price !== undefined ? <p>{getTranslation("price")}: {this.props.price}</p> : null }
                                 { this.props.condition !== undefined ? <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a><SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
                             </div>
                         </div>
                     </div>
@@ -1069,7 +1095,7 @@ var PersonResultElement = React.createClass({
                                 { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a> <SnapshotLink webpage={this.props.webpage}></SnapshotLink> </p> : null }
                                 { this.props.active_email !== undefined ? <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
                                 { this.props.wants !== undefined ? <p><b>{getTranslation("wants")}:</b> {this.props.wants}</p> : null }
                                 { this.props.haves !== undefined ? <p><b>{getTranslation("haves")}:</b> {this.props.haves}</p> : null }
@@ -1109,7 +1135,7 @@ var OrganizationResultElement = React.createClass({
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
                                 { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a><SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
                             </div>
                         </div>
                     </div>
@@ -1180,7 +1206,7 @@ var DocumentResultElement = React.createClass({
                                 { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.language !== undefined ? <p>{getTranslation("language")}: {this.props.language}</p> : null }
                                 { this.props.filename !== undefined ? <p>{getTranslation("filename")}: {this.props.filename}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p> : null }
+                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a><SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
                             </div>
                         </div>
                     </div>

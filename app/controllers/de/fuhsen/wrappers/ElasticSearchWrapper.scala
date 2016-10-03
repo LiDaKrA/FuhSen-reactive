@@ -45,10 +45,17 @@ class ElasticSearchWrapper extends RestApiWrapperTrait with SilkTransformableTra
   /** SILK Transformation Trait **/
   override def silkTransformationRequestTasks = Seq(
     SilkTransformationTask(
-      transformationTaskId = "ElasticSearchHitsTransformation",
+      transformationTaskId = ConfigFactory.load.getString("silk.transformation.task.elasticsearch.hits"),
       createSilkTransformationRequestBody(
         basePath = "hits/hits",
         uriPattern = "http://vocab.cs.uni-bonn.de/fuhsen/search/entity/elasticsearch/{_id}"
+      )
+    ),
+    SilkTransformationTask(
+      transformationTaskId = ConfigFactory.load.getString("silk.transformation.task.elasticsearch.annotations"),
+      createSilkTransformationRequestBody(
+        basePath = "hits/hits/_source/annotations",
+        uriPattern = ""
       )
     )
   )
