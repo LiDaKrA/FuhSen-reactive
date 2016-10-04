@@ -58,20 +58,18 @@ var KeywordsFile = React.createClass({
     handleFileSelection: function (evt)
     {
         var f = evt.target.files[0];
-
         var searches_array = []
-
         if (f) {
             var r = new FileReader();
+
+            r.local_sources = this.props.sources;
+            r.local_types = this.props.types;
+
             r.onload = function(e) {
                 var contents = e.target.result;
                 searches_array = contents.split("\n");
-
-                //alert(searches_array)
-
                 for (var i = 0; i < searches_array.length; i++) {
-                    //alert(searches_array[i])
-                    var win = window.open("http://localhost:9000/fuhsen/results?query="+searches_array[i]+"&sources=twitter&types=product%2Cdocument%2Cwebsite%2Corganization%2Cperson",'_blank');
+                    var win = window.open("http://localhost:9000/fuhsen/results?query="+searches_array[i]+"&sources="+this.local_sources+"&types="+this.local_types,'_blank');
                     win.focus();
                 }
             }
@@ -85,9 +83,9 @@ var KeywordsFile = React.createClass({
             <div>
                 <div className="row">
                     <div className="col-md-12 text-center">
-                        <span className="btn btn-primary btn-file btn-md">
-                            Select file <input type="file" onChange={this.handleFileSelection}></input>
-                        </span>
+                       <span className="btn btn-primary btn-file btn-md">
+                           Select file <input type="file" onChange={this.handleFileSelection}></input>
+                       </span>
                     </div>
                 </div>
             </div>
@@ -268,7 +266,7 @@ var SearchForm = React.createClass({
                         </form>
                     </div>
                     <div className="col-md-2">
-                        <KeywordsFile />
+                        <KeywordsFile sources={selected_sources} types={selected_types}/>
                     </div>
                 </div>
                 <div class="row">

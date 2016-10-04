@@ -1012,22 +1012,8 @@ var WebResultElement = React.createClass({
 
 var SnapshotLink = React.createClass({
     showPDF: function () {
-        $.ajax({
-            url: context+"/screenshot?url="+this.props.webpage,
-            datatype: "json",
-            success: function(data) {
-                if(JSON.stringify(data).length == 2){
-                    alert("LOADING PDF!")
-                }else if(JSON.stringify(data).length > 2){
-                    var file = new Blob([data], {type: "application/pdf"});
-                    window.open(URL.createObjectURL(file));
-                    this.setState({pdf_data: data});
-                }
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
+        var url = context+"/screenshot?url="+this.props.webpage;
+        window.open(url);
     },
     render: function () {
         return (
