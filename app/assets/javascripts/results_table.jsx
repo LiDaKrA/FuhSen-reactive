@@ -23,7 +23,7 @@ var ResultsTable = React.createClass({
                         id = {i}
                         img={result.image}
                         name={result["fs:title"]}
-                        source={result["fs:source"]}
+                        source={result["fs:source"] === "ELASTIC" ? "Elasticsearch" : result["fs:source"]}
                         alias={result["fs:alias"]}
                         location={result["fs:location"]}
                         label={result["fs:label"]}
@@ -51,7 +51,7 @@ var ResultsTable = React.createClass({
                         id = {i}
                         img={result.image}
                         name = {result["fs:title"]}
-                        source={result["fs:source"]}
+                        source={result["fs:source"] === "ELASTIC" ? "Elasticsearch" : result["fs:source"]}
                         label={result["fs:label"]}
                         comment={result["fs:comment"]}
                         country={result["fs:country"]}
@@ -67,7 +67,7 @@ var ResultsTable = React.createClass({
                         id = {i}
                         img={result.image}
                         description = {result["fs:title"]}
-                        source={result["fs:source"]}
+                        source={result["fs:source"] === "ELASTIC" ? "Elasticsearch" : result["fs:source"]}
                         location={result["fs:location"]}
                         country={result["fs:country"]}
                         price={result["fs:price"]}
@@ -81,10 +81,15 @@ var ResultsTable = React.createClass({
                  return (
                         <WebResultRow
                             id = {i}
-                            img={context+"/assets/images/datasources/TorLogo.png"}
+                            img={context+"/assets/images/datasources/"+ (result["fs:source"] === "ELASTIC" ? "Elasticsearch.png": "TorLogo.png")}
                             webpage={result.url}
+                            label={result["fs:title"]}
+                            title={result["fs:title"]}
                             comment={result["fs:excerpt"]}
-                            source={result["fs:source"]}
+                            source={result["fs:source"] === "ELASTIC" ? "Elasticsearch" : result["fs:source"]}
+                            content = {result["fs:content"]}
+                            entity_type={result["fs:entity_type"]}
+                            entity_name={result["fs:entity_name"]}
                             OnCheckBoxChangeHandle = {checkBoxHandle}>
                         </WebResultRow>
                     );
@@ -92,7 +97,6 @@ var ResultsTable = React.createClass({
                  return (
                      <DocumentResultRow
                          id = {i}
-                         img = {context+"/assets/images/icons/" + result["fs:filetype"] + ".png"}
                          label={result["fs:title"]}
                          comment={result["fs:comment"]}
                          webpage={result.url}
@@ -100,7 +104,7 @@ var ResultsTable = React.createClass({
                          language={result["fs:language"]}
                          filename={result["fs:file_name"]}
                          extension={result["fs:filetype"]}
-                         source={result["fs:source"]}
+                         source={result["fs:source"] === "ELASTIC" ? "Elasticsearch" : result["fs:source"]}
                          OnCheckBoxChangeHandle = {checkBoxHandle}>
                      </DocumentResultRow>
                  );
@@ -244,7 +248,7 @@ var PersonResultRow = React.createClass({
             <td>
                 <div className="thumbnail">
                 { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
-                        <img src={context + "/assets/images/datasources/Unknown.png"} className="thumbnail" height="60px" width="75px"/> }
+                        <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                 </div>
             </td>
 
@@ -295,7 +299,12 @@ var ProductResultRow = React.createClass({
                 <td>
                     <input type="checkbox" id={"check"+this.props.id} className="checkBoxClass" onChange={this.props.OnCheckBoxChangeHandle} />
                 </td>
-                <td><img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
+                <td>
+                    <div className="thumbnail">
+                        { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
+                            <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                    </div>
+                </td>
                 <td>{this.props.description !== undefined ? <RichText label="Description" text={this.props.description} maxLength={100}/> : "N/A"}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
@@ -325,7 +334,11 @@ var OrganizationResultRow = React.createClass({
                     <input type="checkbox" id={"check"+this.props.id} className="checkBoxClass" onChange={this.props.OnCheckBoxChangeHandle} />
                 </td>
                 <td>
-                    <img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
+                    <div className="thumbnail">
+                        { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
+                            <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                    </div>
+                </td>
                 <td>{this.props.name}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
@@ -346,14 +359,19 @@ var OrganizationResultRow = React.createClass({
         );
     }
 });
-var WebsiteResultRow = React.createClass({
+var WebResultRow = React.createClass({
     render: function () {
         return (
             <tr id={"row"+this.props.id}>
                 <td>
                     <input type="checkbox" id={"check"+this.props.id} className="checkBoxClass" onChange={this.props.OnCheckBoxChangeHandle} />
                 </td>
-                <td><img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
+                <td>
+                    <div className="thumbnail">
+                        { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
+                            <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                    </div>
+                </td>
                 <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
                 <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
@@ -364,8 +382,8 @@ var WebsiteResultRow = React.createClass({
                 </p> : "N/A" }</td>
                 <td>{ this.props.content !== undefined ? <p>{this.props.content}</p> : "N/A" }</td>
                 <td>{ this.props.title !== undefined ? <p>{this.props.title}</p> : "N/A" }</td>
-                <td>{ this.props.entity_type !== undefined ? <p>{this.props.entity_type}</p> : "N/A" }</td>
-                <td>{ this.props.entity_name !== undefined ? <p>{this.props.entity_name}</p> : "N/A" }</td>
+                <td>{ this.props.entity_type !== undefined ? <p>{JSON.stringify(this.props.entity_type)}</p> : "N/A" }</td>
+                <td>{ this.props.entity_name !== undefined ? <p>{JSON.stringify(this.props.entity_name)}</p> : "N/A" }</td>
                 <td>
                     <div class="thumbnail">
                         <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
@@ -382,9 +400,14 @@ var DocumentResultRow = React.createClass({
                 <td>
                     <input type="checkbox" id={"check"+this.props.id} className="checkBoxClass" onChange={this.props.OnCheckBoxChangeHandle} />
                 </td>
-                <td><img src={this.props.img} className="thumbnail" height="60px" width="75px"/></td>
+                <td>
+                    <div className="thumbnail">
+                        { this.props.extension !== undefined ? <img src={context + "/assets/images/icons/" + this.props.extension + ".png"} height="60px" width="75px"/>:
+                            <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                    </div>
+                </td>
                 <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
-                <td>{ this.props.comment !== undefined ? <RichText label="Comment" dialogID = {"model_comment" + this.props.id} text={this.props.comment} maxLength={100}/> : null}</td>
+                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
                                                                target="_blank">
