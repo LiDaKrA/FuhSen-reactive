@@ -169,11 +169,11 @@ var TableHeader = React.createClass({
                     <th></th>
                     <th>Description</th>
                     <th>{getTranslation("link")}</th>
+                    <th>{getTranslation("source")}</th>
                     <th>{getTranslation("location")}</th>
                     <th>{getTranslation("country")}</th>
                     <th>{getTranslation("price")}</th>
                     <th>{getTranslation("condition")}</th>
-                    <th>{getTranslation("source")}</th>
                 </tr>
             );
         }
@@ -187,11 +187,11 @@ var TableHeader = React.createClass({
                     <th></th>
                     <th>Name</th>
                     <th>{getTranslation("link")}</th>
+                    <th>{getTranslation("source")}</th>
                     <th>Label</th>
                     <th>Comment</th>
                     <th>{getTranslation("country")}</th>
                     <th>{getTranslation("location")}</th>
-                    <th>{getTranslation("source")}</th>
                 </tr>
             );
         }
@@ -206,11 +206,12 @@ var TableHeader = React.createClass({
                     <th>Label</th>
                     <th>Comment</th>
                     <th>{getTranslation("link")}</th>
+                    <th>{getTranslation("source")}</th>
                     <th>{getTranslation("content")}</th>
                     <th>{getTranslation("title")}</th>
                     <th>Entity Type</th>
                     <th>Entity Name</th>
-                    <th>{getTranslation("source")}</th>
+
                 </tr>
             );
         }
@@ -225,11 +226,11 @@ var TableHeader = React.createClass({
                     <th>Label</th>
                     <th>Comment</th>
                     <th>{getTranslation("link")}</th>
+                    <th>{getTranslation("source")}</th>
                     <th>{getTranslation("country")}</th>
                     <th>{getTranslation("language")}</th>
                     <th>{getTranslation("filename")}</th>
                     <th>Extension</th>
-                    <th>{getTranslation("source")}</th>
                 </tr>
             );
         }
@@ -248,7 +249,7 @@ var PersonResultRow = React.createClass({
             <td>
                 <div className="thumbnail">
                 { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
-                        <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                        <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/> }
                 </div>
             </td>
 
@@ -258,35 +259,35 @@ var PersonResultRow = React.createClass({
                                                            target="_blank">
                 <img src={context + "/assets/images/icons/link_icon_0.png"}/>
             </a>
-            </p> : "N/A" }</td>
+            </p> : null }</td>
             <td>
                 <div class="thumbnail">
                     <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                 </div>
             </td>
 
-            <td>{ this.props.alias !== undefined ? <p>{this.props.alias}</p> : "N/A" }</td>
+            <td>{ this.props.alias !== undefined ? <p>{this.props.alias}</p> : null }</td>
             <td>{ this.props.location !== undefined ?
-                <p>{this.props.location}</p> : "N/A" }</td>
-            <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
-            <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
-            <td>{ this.props.gender !== undefined ? <p>{this.props.gender}</p> : "N/A" }</td>
+                <p>{this.props.location}</p> : null }</td>
+            <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : null }</td>
+            <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : null}</td>
+            <td>{ this.props.gender !== undefined ? <p>{this.props.gender}</p> : null }</td>
             <td>{ this.props.occupation !== undefined ?
-                <p>{this.props.occupation}</p> : "N/A" }</td>
+                <p>{this.props.occupation}</p> : null }</td>
             <td>{ this.props.birthday !== undefined ?
-                <p>{this.props.birthday}</p> : "N/A" }</td>
+                <p>{this.props.birthday}</p> : null }</td>
             <td>{ this.props.country !== undefined ?
-                <p>{this.props.country}</p> : "N/A" }</td>
+                <p>{this.props.country}</p> : null }</td>
 
 
             <td>{ this.props.active_email !== undefined ?
-                <p>{this.props.active_email}</p> : "N/A" }</td>
+                <p>{this.props.active_email}</p> : null }</td>
             <td>{ this.props.liveInName !== undefined ?
-                <p>{JSON.stringify(this.props.liveInName)}</p> : "N/A" }</td>
+                <p>{JSON.stringify(this.props.liveInName).replace(/(\[|\{|\]|\}|")/g,'')}</p> : null }</td>
             <td>{ this.props.workedAtName !== undefined ?
-                <p>{JSON.stringify(this.props.workedAtName)}</p> : "N/A" }</td>
+                <p>{JSON.stringify(this.props.workedAtName).replace(/(\[|\{|\]|\}|")/g,'')}</p> : null }</td>
             <td>{ this.props.studyAtName !== undefined ?
-                <p>{JSON.stringify(this.props.studyAtName)}</p> : "N/A" }</td>
+                <p>{JSON.stringify(this.props.studyAtName).replace(/(\[|\{|\]|\}|")/g,'')}</p> : null }</td>
 
         </tr>
         );
@@ -305,22 +306,22 @@ var ProductResultRow = React.createClass({
                             <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                     </div>
                 </td>
-                <td>{this.props.description !== undefined ? <RichText label="Description" text={this.props.description} maxLength={100}/> : "N/A"}</td>
+                <td>{this.props.description !== undefined ? <RichText label="Description" text={this.props.description} maxLength={100}/> : null}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
                                                                target="_blank">
                     <img src={context + "/assets/images/icons/link_icon_0.png"}/>
                 </a>
-                </p> : "N/A" }</td>
-                <td>{ this.props.location !== undefined ? <p>{this.props.location}</p> : "N/A" }</td>
-                <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : "N/A" }</td>
-                <td>{ this.props.price !== undefined ? <p>{this.props.price}</p> : "N/A" }</td>
-                <td>{ this.props.condition !== undefined ? <p>{this.props.condition}</p> : "N/A" }</td>
+                </p> : null }</td>
                 <td>
                     <div class="thumbnail">
                         <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                     </div>
                 </td>
+                <td>{ this.props.location !== undefined ? <p>{this.props.location}</p> : null }</td>
+                <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : null }</td>
+                <td>{ this.props.price !== undefined ? <p>{this.props.price}</p> : null }</td>
+                <td>{ this.props.condition !== undefined ? <p>{this.props.condition}</p> : null }</td>
             </tr>
         );
     }
@@ -345,16 +346,16 @@ var OrganizationResultRow = React.createClass({
                                                                target="_blank">
                     <img src={context + "/assets/images/icons/link_icon_0.png"}/>
                 </a>
-                </p> : "N/A" }</td>
-                <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
-                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
-                <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : "N/A" }</td>
-                <td>{ this.props.location !== undefined ? <p>{this.props.location}</p> : "N/A" }</td>
+                </p> : null }</td>
                 <td>
                     <div class="thumbnail">
                         <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                     </div>
                 </td>
+                <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : null }</td>
+                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : null}</td>
+                <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : null }</td>
+                <td>{ this.props.location !== undefined ? <p>{this.props.location}</p> : null }</td>
             </tr>
         );
     }
@@ -372,23 +373,23 @@ var WebResultRow = React.createClass({
                             <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                     </div>
                 </td>
-                <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
-                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
+                <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : null }</td>
+                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : null}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
                                                                target="_blank">
                     <img src={context + "/assets/images/icons/link_icon_0.png"}/>
                 </a>
-                </p> : "N/A" }</td>
-                <td>{ this.props.content !== undefined ? <p>{this.props.content}</p> : "N/A" }</td>
-                <td>{ this.props.title !== undefined ? <p>{this.props.title}</p> : "N/A" }</td>
-                <td>{ this.props.entity_type !== undefined ? <p>{JSON.stringify(this.props.entity_type)}</p> : "N/A" }</td>
-                <td>{ this.props.entity_name !== undefined ? <p>{JSON.stringify(this.props.entity_name)}</p> : "N/A" }</td>
+                </p> : null }</td>
                 <td>
                     <div class="thumbnail">
                         <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                     </div>
                 </td>
+                <td>{ this.props.content !== undefined ? <p>{this.props.content}</p> : null }</td>
+                <td>{ this.props.title !== undefined ? <p>{this.props.title}</p> : null }</td>
+                <td>{ this.props.entity_type !== undefined ? <p>{JSON.stringify(this.props.entity_type).replace(/(\[|\{|\]|\}|")/g,'')}</p> : null }</td>
+                <td>{ this.props.entity_name !== undefined ? <p>{JSON.stringify(this.props.entity_name).replace(/(\[|\{|\]|\}|")/g,'')}</p> : null }</td>
             </tr>
         );
     }
@@ -406,23 +407,23 @@ var DocumentResultRow = React.createClass({
                             <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                     </div>
                 </td>
-                <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : "N/A" }</td>
-                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : "N/A"}</td>
+                <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : null }</td>
+                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : null}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
                                                                target="_blank">
                     <img src={context + "/assets/images/icons/link_icon_0.png"}/>
                 </a>
-                </p> : "N/A" }</td>
-                <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : "N/A" }</td>
-                <td>{ this.props.language !== undefined ? <p>{this.props.language}</p> : "N/A" }</td>
-                <td>{ this.props.file_name !== undefined ? <p>{this.props.file_name}</p> : "N/A" }</td>
-                <td>{ this.props.extension !== undefined ? <p>{this.props.extension}</p> : "N/A" }</td>
+                </p> : null }</td>
                 <td>
                     <div class="thumbnail">
                         <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
                     </div>
                 </td>
+                <td>{ this.props.country !== undefined ? <p>{this.props.country}</p> : null }</td>
+                <td>{ this.props.language !== undefined ? <p>{this.props.language}</p> : null }</td>
+                <td>{ this.props.file_name !== undefined ? <p>{this.props.file_name}</p> : null }</td>
+                <td>{ this.props.extension !== undefined ? <p>{this.props.extension}</p> : null }</td>
             </tr>
         );
     }
