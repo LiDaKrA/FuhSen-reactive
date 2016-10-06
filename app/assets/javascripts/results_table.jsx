@@ -3,6 +3,15 @@
  */
 var ResultsTable = React.createClass({
     OnCheckBoxChange : function (id) {
+        var index = this.state.checkedRows.indexOf(id)
+        if(index > -1) {
+            this.state.checkedRows.splice(index, 1)
+        }else{
+            this.state.checkedRows.push(id)
+        }
+
+        this.props.checksListener(this.state.checkedRows)
+
         var checkBox = document.getElementById("check"+ id);
         var currentRow = checkBox.parentNode.parentNode;
         if(checkBox.checked)
@@ -11,7 +20,7 @@ var ResultsTable = React.createClass({
             currentRow.removeAttribute("class");
     },
     getInitialState : function () {
-      return {dialogID : "model_comment"};
+      return {dialogID : "model_comment", checkedRows:[]};
     },
     render: function () {
         var resultsNodesSorted = this.props.data["@graph"].sort(compareRank);

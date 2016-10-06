@@ -461,13 +461,17 @@ var FacetSubMenuItems = React.createClass({
 
 //************** End Facets Components *******************
 var ResultsContainer = React.createClass({
+    checksListener : function(listOfSelectedRows) {
+        this.setState({selectedChecks : listOfSelectedRows})
+    },
     noData : function() {
         alert(getTranslation("nodata"));
     },
     toggleResultsView: function(){
         var view_selector = (this.state.view == "list" ? "table" : "list");
         //$("#btn_view_selector").toggleClass('table_icon list_icon');
-        this.setState({resultsData : this.state.resultsData,selected : this.state.selected,loading: this.state.loading,underDev: false,view:view_selector});
+
+        this.setState({resultsData : this.state.resultsData,selected : this.state.selected,loading: this.state.loading,underDev: false,view:view_selector, selectedChecks: [] });
     },
     underDevelopmentFunction : function() {
         this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: true,view:this.state.view});
@@ -531,17 +535,19 @@ var ResultsContainer = React.createClass({
 
         //1st loop is to extract each row
         for (var i = 0; i < arrData.length; i++) {
-            var row = "";
+            if(this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1 ){
+                var row = "";
 
-            //2nd loop will extract each column and convert it in string comma-seprated
-            for (var index in arrData[i]) {
-                row += '"' + arrData[i][index] + '",';
+                //2nd loop will extract each column and convert it in string comma-seprated
+                for (var index in arrData[i]) {
+                    row += '"' + arrData[i][index] + '",';
+                }
+
+                row.slice(0, row.length - 1);
+
+                //add a line break after each row
+                CSV += row + '\r\n';
             }
-
-            row.slice(0, row.length - 1);
-
-            //add a line break after each row
-            CSV += row + '\r\n';
         }
 
         if (CSV == '') {
@@ -595,7 +601,7 @@ var ResultsContainer = React.createClass({
         });
     },
     getInitialState: function () {
-        return {resultsData: "", selected: "person", loading: true, underDev: false, crawled : false,view: this.props.view};
+        return {resultsData: "", selected: "person", loading: true, underDev: false, crawled : false,view: this.props.view, selectedChecks : []};
     },
     componentDidMount: function () {
         this.loadDataFromServer(this.props.entityType);
@@ -826,7 +832,10 @@ var ResultsContainer = React.createClass({
                         :
                         <div id="search-results" className="search-results">
                                 <ResultsTable data={final_data}
-                                       crawled={this.state.crawled} type={this.props.entityType}>
+                                              crawled={this.state.crawled}
+                                              type={this.props.entityType}
+                                              checksListener={this.checksListener}
+                                >
                                 </ResultsTable>
                           </div>
                     }
