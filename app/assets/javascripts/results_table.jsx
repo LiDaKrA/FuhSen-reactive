@@ -16,8 +16,10 @@ var ResultsTable = React.createClass({
         var currentRow = checkBox.parentNode.parentNode;
         if(checkBox.checked)
             currentRow.setAttribute("class","info");
-        else
+        else{
             currentRow.removeAttribute("class");
+			$("#selectall").prop("checked",false);
+		}
     },
     getInitialState : function () {
       return {dialogID : "model_comment", checkedRows:[]};
@@ -26,7 +28,7 @@ var ResultsTable = React.createClass({
         var resultsNodesSorted = this.props.data["@graph"].sort(compareRank);
         var resultsNodes = resultsNodesSorted.map(function (result,i) {
             var checkBoxHandle = this.OnCheckBoxChange.bind(this,i);
-            if (result["@type"] === "foaf:Person") {
+			if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultRow
                         id = {i}
@@ -136,7 +138,10 @@ var ResultsTable = React.createClass({
 });
 var TableHeader = React.createClass({
     OnClickCheckBox: function(){
-        $(".checkBoxClass").click();
+        $(".checkBoxClass").each(function(idx) {
+			if( $("#check" + idx).prop("checked") !== $("#selectall").prop("checked"))
+				$("#check" + idx).click();
+		})
     },
     render: function () {
 
