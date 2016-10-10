@@ -25,7 +25,8 @@ var ResultsTable = React.createClass({
       return {dialogID : "model_comment", checkedRows:[]};
     },
     render: function () {
-        var resultsNodesSorted = this.props.data["@graph"].sort(compareRank);
+        var resultsNodesSorted = this.props.data; //.sort(compareRank)
+        //var resultsNodesSorted = this.props.data["@graph"].sort(compareRank);
         var resultsNodes = resultsNodesSorted.map(function (result,i) {
             var checkBoxHandle = this.OnCheckBoxChange.bind(this,i);
 			if (result["@type"] === "foaf:Person") {

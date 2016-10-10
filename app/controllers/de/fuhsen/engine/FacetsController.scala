@@ -33,10 +33,10 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     entityType match {
       case "person" =>
         //Creating fs:Search resource
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#gender"))) {
+        if(current_model.contains(null, model.createProperty("http://xmlns.com/foaf/0.1/gender"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Gender").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "gender")
         }
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#birthday"))) {
+        if(current_model.contains(null, model.createProperty("http://xmlns.com/foaf/0.1/birthday"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Birthday").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "birthday")
         }
         if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#location"))) {
@@ -45,13 +45,13 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
         if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#occupation"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Occupation").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "occupation")
         }
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#liveIn"))) {
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#placeLived"))) {
           model.createResource(FuhsenVocab.FACET_URI + "LiveIn").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "liveIn")
         }
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#workAt"))) {
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#workedAt"))) {
           model.createResource(FuhsenVocab.FACET_URI + "WorkAt").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "workAt")
         }
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#studyAt"))) {
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#studiedAt"))) {
           model.createResource(FuhsenVocab.FACET_URI + "StudyAt").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "studyAt")
         }
         if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#source"))) {
@@ -92,15 +92,15 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
         }
       case "website" =>
         //Creating fs:Search resource
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#person"))) {
+        //if(current_model.contains(null, model.createProperty("https://schema.org/Person"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Person").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "person")
-        }
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#product"))) {
+        //}
+        //if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#product"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Product").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "product")
-        }
-        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#organization"))) {
+        //}
+        //if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#organization"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Organization").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "organization")
-        }
+        //}
       case _ =>
     }
 
