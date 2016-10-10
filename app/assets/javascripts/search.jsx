@@ -80,15 +80,11 @@ var KeywordsFile = React.createClass({
     },
     render: function () {
         return (
-            <div>
-                <div className="row">
-                    <div className="col-md-12 text-center">
+                    <div className="text-center">
                        <span className="btn btn-primary btn-file btn-md">
                            Select file <input type="file" onChange={this.handleFileSelection}></input>
                        </span>
                     </div>
-                </div>
-            </div>
         )
     }
 });
@@ -245,7 +241,7 @@ var SearchForm = React.createClass({
 
         return (
             <div>
-                <div class="row">
+                <div className="row">
                     <div className="col-md-3"/>
                     <div className="col-md-6">
                         <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
@@ -265,7 +261,8 @@ var SearchForm = React.createClass({
                             </div>
                         </form>
                     </div>
-                    <div className="col-md-2">
+                    <div className="col-md-1 vertical-separator" title="Search with 1 keyword <- OR ->Search with 1 or more keywords"/>
+                    <div className="col-md-1 ">
                         <KeywordsFile sources={selected_sources} types={selected_types}/>
                     </div>
                 </div>
