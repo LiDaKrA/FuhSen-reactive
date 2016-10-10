@@ -25,7 +25,32 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
         Logger.info("Model size: "+model.size())
-        current_model = model
+
+        val typeEntity = entityType match {
+          case "person" => "foaf:Person"
+          case "organization" => "foaf:Organization"
+          case "product" => "gr:ProductOrService"
+          case "document" => "fs:Document"
+          case "website" => "fs:Annotation"
+        }
+
+        val query = s"""
+                       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                       PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                       PREFIX gr: <http://purl.org/goodrelations/v1#>
+
+                       CONSTRUCT   {
+                        ?s ?p ?o .
+                       }
+                       WHERE {
+                          ?s ?p ?o .
+                       		?s rdf:type $typeEntity .
+                       }
+                    """
+        current_model = QueryExecutionFactory.create(query, model).execConstruct()
+        Logger.info(current_model.toString)
       case None =>
         InternalServerError("Provided uid has not result model associated.")
     }
@@ -92,15 +117,15 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
         }
       case "website" =>
         //Creating fs:Search resource
-        //if(current_model.contains(null, model.createProperty("https://schema.org/Person"))) {
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#entity-type"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Person").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "person")
-        //}
-        //if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#product"))) {
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#entity-type"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Product").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "product")
-        //}
-        //if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#organization"))) {
+        }
+        if(current_model.contains(null, model.createProperty("http://vocab.lidakra.de/fuhsen#entity-type"))) {
           model.createResource(FuhsenVocab.FACET_URI + "Organization").addProperty(model.createProperty(FuhsenVocab.FACET_LABEL), "organization")
-        //}
+        }
       case _ =>
     }
 

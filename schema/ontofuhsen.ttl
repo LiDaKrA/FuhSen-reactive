@@ -105,7 +105,6 @@ fs:GoogleKnowledgeGraph rdf:type fs:InformationSource;
 						rdfs:label 	"Google Knowledge Graph";
 						fs:finds "person";
                         fs:finds "organization";
-                        fs:finds "product";
 						fs:key "gkb" .
 
 fs:LinkedLeaks	rdf:type	fs:InformationSource;
