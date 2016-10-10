@@ -422,7 +422,7 @@ var DocumentResultRow = React.createClass({
                     </div>
                 </td>
                 <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : null }</td>
-                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : null}</td>
+                <td>{ this.props.comment !== undefined ? <p> {this.props.comment} </p> : null}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
                                                                target="_blank">
