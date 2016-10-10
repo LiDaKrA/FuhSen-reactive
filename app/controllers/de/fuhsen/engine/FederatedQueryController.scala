@@ -9,6 +9,8 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, Controller}
 import utils.dataintegration.RDFUtil
 import javax.inject.Inject
+
+import controllers.de.fuhsen.wrappers.security.TokenManager
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 /**
@@ -32,12 +34,25 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       val entityTypes = getEntityTypeQuery(model)
       val enabledDataSourcesByTypes = JenaGlobalSchema.getDataSourceByEntityTypes(entityTypes.split(",").map(x => "'"+x+"'").toSet.mkString(","))
 
-      val finalSelectedDataSources = enabledDataSourcesByTypes.intersect(dataSources.split(",").toSet).mkString(",")
+      var finalSelectedDataSources = enabledDataSourcesByTypes.intersect(dataSources.split(",").toSet).mkString(",")
 
       Logger.info("Selected Sources: "+dataSources)
       Logger.info("Selected Entity Types: "+entityTypes)
       Logger.info("Enabled Data Sources By Entity Types: "+enabledDataSourcesByTypes)
       Logger.info("Final Data Sources: "+finalSelectedDataSources)
+
+
+      if(finalSelectedDataSources.indexOf("facebook") > -1 && TokenManager.getTokenLifeLength("facebook") == "-1"){
+        var sources_list = finalSelectedDataSources.split(",")
+        sources_list = sources_list.filter(_ != "facebook")
+        finalSelectedDataSources = sources_list.mkString(",")
+      }
+
+      if(finalSelectedDataSources.indexOf("xing") > -1 && TokenManager.getTokenLifeLength("xing") == "-1"){
+        var sources_list = finalSelectedDataSources.split(",")
+        sources_list = sources_list.filter(_ != "xing")
+        finalSelectedDataSources = sources_list.mkString(",")
+      }
 
       if (keyword.isEmpty)
         Ok(textBody.get)

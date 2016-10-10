@@ -91,7 +91,7 @@ var dictEng = {
     "haves": "Haves",
     "top_haves": "Top haves",
     "interests": "Interests",
-    "server_error": "There was an error during search... Please try again!"
+    "server_error": "There was an error during search or no active tokens where available... Please try again!"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -195,7 +195,7 @@ var dictGer = {
     "haves": "Geschick",
     "top_haves": "Top Geschick",
     "interests": "Interessen",
-    "server_error": "There was an error during search... Please try again!"
+    "server_error": "There was an error during search or no active tokens where available... Please try again!"
 };
 
 window.dictGer = dictGer;
