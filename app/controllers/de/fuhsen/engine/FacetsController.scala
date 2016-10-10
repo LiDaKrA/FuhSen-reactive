@@ -50,7 +50,6 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                        }
                     """
         current_model = QueryExecutionFactory.create(query, model).execConstruct()
-        Logger.info(current_model.toString)
       case None =>
         InternalServerError("Provided uid has not result model associated.")
     }
