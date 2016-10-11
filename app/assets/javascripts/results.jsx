@@ -624,7 +624,7 @@ var ResultsContainer = React.createClass({
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
         var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
-        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">{getTranslation("websites")}</li>
+        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">{getTranslation("tor_websites")}</li>
         var documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5">{getTranslation("documents")}</li>
 
         if(this.state.selected==="person") {
@@ -634,7 +634,7 @@ var ResultsContainer = React.createClass({
         } else if(this.state.selected==="product"){
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
         } else if(this.state.selected==="website"){
-            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>{getTranslation("websites")}</b></p></li>
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>{getTranslation("tor_websites")}</b></p></li>
         } else if(this.state.selected==="document"){
             documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p><b>{getTranslation("documents")}</b></p></li>
         }

@@ -92,7 +92,8 @@ var dictEng = {
     "top_haves": "Top haves",
     "interests": "Interests",
     "server_error": "There was an error during search or no active tokens where available... Please try again!",
-    "no_results": "No results found."
+    "no_results": "No results found.",
+    "tor_websites": "Onion web sites"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -185,7 +186,7 @@ var dictGer = {
     "map_icon": "Ergebnisse auf der Karte anzeigen.",
     "crawl_icon": "Crawle die Webseiten.",
     "crawlJobCreated": "Crawl-Auftrag erstellt.",
-    "createCrawlJob": "Erstelle einen Crawl-Auftrag!",
+    "createCrawlJob": "Crawl-Auftrag!",
     "documents": "Dokumente",
     "websites": "Webseiten",
     "language": "Sprache",
@@ -197,7 +198,8 @@ var dictGer = {
     "top_haves": "Top Kompetenzen",
     "interests": "Interessen",
     "server_error": "Es gab ein Serverproblem während der Suche oder es konnte kein gültiges Token gefunden werden... Bitte versuchen Sie es erneut!",
-    "no_results": "Es konnten keine Ergebnisse gefunden werden."
+    "no_results": "Es konnten keine Ergebnisse gefunden werden.",
+    "tor_websites": "Onion Webseiten"
 };
 
 window.dictGer = dictGer;
