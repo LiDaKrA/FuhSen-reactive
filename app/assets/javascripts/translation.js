@@ -93,7 +93,8 @@ var dictEng = {
     "interests": "Interests",
     "server_error": "There was an error during search or no active tokens where available... Please try again!",
     "no_results": "No results found.",
-    "tor_websites": "Onion web sites"
+    "tor_websites": "Onion web sites",
+    "select_file": "Select file"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -199,7 +200,8 @@ var dictGer = {
     "interests": "Interessen",
     "server_error": "Es gab ein Serverproblem während der Suche oder es konnte kein gültiges Token gefunden werden... Bitte versuchen Sie es erneut!",
     "no_results": "Es konnten keine Ergebnisse gefunden werden.",
-    "tor_websites": "Onion Webseiten"
+    "tor_websites": "Webseiten",
+    "select_file": "Datei aussuchen"
 };
 
 window.dictGer = dictGer;

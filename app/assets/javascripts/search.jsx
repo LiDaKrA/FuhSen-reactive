@@ -82,7 +82,7 @@ var KeywordsFile = React.createClass({
         return (
                     <div className="text-center">
                        <span className="btn btn-primary btn-file btn-md">
-                           Select file <input type="file" onChange={this.handleFileSelection}></input>
+                           {getTranslation("select_file")} <input type="file" onChange={this.handleFileSelection}></input>
                        </span>
                     </div>
         )
@@ -125,17 +125,17 @@ var SearchForm = React.createClass({
         var types_label = ""
 
         if(sources_list.length === 0) {
-            sources_label = "Sources: all."
+            sources_label = "Datenquellen: alle."
         }else if(sources_list.length > 0) {
-            sources_label = "Sources: (" + sources_list + ")."
+            sources_label = "Datenquellen: (" + sources_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
 
         if(types_list.length === 0) {
-            types_label = "Types: all."
+            types_label = "Typen: alle."
         }else if(types_list.length > 0) {
-            types_label = "Types: (" + types_list + ")."
+            types_label = "Typen: (" + types_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }

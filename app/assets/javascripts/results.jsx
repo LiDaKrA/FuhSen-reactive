@@ -595,8 +595,15 @@ var ResultsContainer = React.createClass({
                 //alert(JSON.stringify(data_to_handle));
                 if (data_to_handle["@graph"] !== undefined)
                     data_to_handle = data_to_handle["@graph"].sort(compareRank);
-                else
-                    data_to_handle = undefined;
+                else {
+                    if (data_to_handle["fs:rank"] !== undefined) {
+                        data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
+                        data_to_handle = data_to_handle["@graph"].sort(compareRank);
+                    }
+                    else
+                        data_to_handle = undefined;
+                }
+
                 data_to_maintain = data_to_handle;
                 //alert(JSON.stringify(data_to_handle));
                 //data_to_handle = JSON.parse(JSON.stringify(data))
