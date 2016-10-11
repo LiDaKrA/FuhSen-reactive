@@ -87,7 +87,8 @@ The demo server address is:  http://rdfsearchengine-fuhsen.rhcloud.com/fuhsen/
 
 1. Find JAVA_HOME. Its can be found with: readlink -f /usr/bin/java | sed "s:bin/java::"
 2. Copy ./certs/data.occrp.org.cer to JAVA_HOME/jre/lib/security
-3. Go to JAVA_HOME/jre/lib/security and import the certificate into the cacerts keystore:
+3. Go to JAVA_HOME/jre/lib/security and import the certificate into the cacerts keystore
+
 
     $ keytool -importcert -alias occrp -keystore cacerts -storepass changeit -file data.occrp.org.cer -noprompt
 
