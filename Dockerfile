@@ -14,7 +14,7 @@
 # already available or a small one like alpine (a small Linux version) mapping the config file in the host to the 
 # config file in the container.
 # 
-#    $ docker run -d -v /home/lidakra/application.conf:/home/lidakra/fuhsen-1.0.4.4/conf/application.conf:ro \
+#    $ docker run -d -v /home/lidakra/application.conf:/home/lidakra/fuhsen-1.1.0/conf/application.conf:ro \
 #                                         --name fuhsen-conf alpine echo "Fuhsen Config File"
 #
 # 4) Start a container with Fuhsen using the config file in the data volume
@@ -40,16 +40,21 @@ RUN apt-get update && \
 # Define JAVA_HOME environment variable
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
-# Install Fuhsen release from Github in /home/lidakra/
-#WORKDIR /home/lidakra
-#RUN wget https://github.com/LiDaKrA/FuhSen-reactive/releases/download/v1.0.5/fuhsen-1.0.4.4.tgz && \
-#    tar xvf fuhsen-1.0.4.4.tgz
+# Copy OCCRP SSL Certificate
+COPY  certs/data.occrp.org.cer $JAVA_HOME/jre/lib/security/
+
+# Install the OCCRP SSL certificate
+WORKDIR $JAVA_HOME/jre/lib/security/
+RUN keytool -importcert -alias occrp -keystore cacerts -storepass changeit -file data.occrp.org.cer -noprompt
 
 #Install Fuhsen package from the project folder (create a package using "sbt universal:package-zip-tarball" command)
-COPY target/universal/fuhsen-1.0.4.4.tgz /home/lidakra/
+COPY target/universal/fuhsen-1.1.0.tgz /home/lidakra/
 WORKDIR /home/lidakra/
-RUN tar xvf fuhsen-1.0.4.4.tgz  
+RUN tar xvf fuhsen-1.1.0.tgz  
 
+# Copy the schema folder (as sbt universal package does not include it by default)
+COPY schema/ /home/lidakra/fuhsen-1.1.0/schema/
+ 
 # Start Fuhsen
-WORKDIR /home/lidakra/fuhsen-1.0.4.4
+WORKDIR /home/lidakra/fuhsen-1.1.0
 CMD ./bin/fuhsen
