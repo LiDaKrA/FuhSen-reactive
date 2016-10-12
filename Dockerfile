@@ -44,6 +44,10 @@ RUN apt-get update && \
 # Define JAVA_HOME environment variable
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
+# Install vi for editing
+RUN apt-get update && \
+    apt-get install -y vim
+
 # Copy OCCRP SSL Certificate
 COPY  certs/data.occrp.org.cer $JAVA_HOME/jre/lib/security/
 
