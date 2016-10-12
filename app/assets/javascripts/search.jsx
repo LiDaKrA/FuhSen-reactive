@@ -69,7 +69,7 @@ var KeywordsFile = React.createClass({
                 var contents = e.target.result;
                 searches_array = contents.split("\n");
                 for (var i = 0; i < searches_array.length; i++) {
-                    var win = window.open("http://localhost:9000/fuhsen/results?query="+searches_array[i]+"&sources="+this.local_sources+"&types="+this.local_types,'_blank');
+                    var win = window.open(context+"/results?query="+searches_array[i]+"&sources="+this.local_sources+"&types="+this.local_types,'_blank');
                     win.focus();
                 }
             }
