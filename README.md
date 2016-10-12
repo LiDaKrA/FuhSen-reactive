@@ -55,15 +55,21 @@ A Docker image containing Fuhsen can be built from the Docker file or pulled fro
 Once the image has been downloaded or created the configuration file in conf/application.conf must be changed in order to provide
 the keys for the data sources used by Fuhsen and also to update the url of the Silk Workbench.
 The config file must be provided in a Docker data volume loaded with the config file. As an example copy the config file in 
-a folder in the server host (e.g. /home/lidakra/application.conf) then create or run a container using an image
+a folder in the server host (e.g. /home/lidakra/application.conf) then run a container using an image
 already available or a small one like alpine (a small Linux version) mapping the config file in the host with the keys to the config file in the container
 
-    $ docker run -d --net none -v /home/lidakra/application.conf:/home/lidakra/fuhsen-1.0.4.4/conf/application.conf:ro \
-                                         --name fuhsen-conf alpine echo "Fuhsen Config File"
+    $ docker run -it -v /home/lidakra/application.conf:/home/lidakra/fuhsen-1.1.0/conf/application.conf:ro \
+                                         --name fuhsen-conf alpine /bin/sh
 
+From within the volume container check that the config file is present. Detach from the volume container with Ctrl-p Ctrl-q.
 Start a container with Fuhsen using the config file in the data volume
 
-    $ docker run -d -p 9000:9000 --volumes-from fuhsen-conf --name fuhsen lidakra/fuhsen
+    $ docker run -it -p 9000:9000 --volumes-from fuhsen-conf --name fuhsen lidakra/fuhsen:v1.1.0
+
+From within the Fuhsen container check in the /conf folder that the config file is present and up to date and then start Fuhsen
+
+    #./bin/fuhsen 
+
 
 ### Run
 Fuhsen can be started using Sbt or the Typesafe activator.
@@ -87,8 +93,13 @@ The demo server address is:  http://rdfsearchengine-fuhsen.rhcloud.com/fuhsen/
 
 1. Find JAVA_HOME. Its can be found with: readlink -f /usr/bin/java | sed "s:bin/java::"
 2. Copy ./certs/data.occrp.org.cer to JAVA_HOME/jre/lib/security
-3. Go to JAVA_HOME/jre/lib/security and import the certificate into the cacerts keystore: keytool -keystore cacerts -importcert -alias occrp -file data.occrp.org.cer
-(It will ask for the keystore password, cacerts default password is: changeit)
+3. Go to JAVA_HOME/jre/lib/security and import the certificate into the cacerts keystore
+
+
+    $ keytool -importcert -alias occrp -keystore cacerts -storepass changeit -file data.occrp.org.cer -noprompt
+
+
+(The keystore cacerts default password is: changeit)
 
 #### License
 

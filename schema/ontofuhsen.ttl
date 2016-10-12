@@ -105,7 +105,6 @@ fs:GoogleKnowledgeGraph rdf:type fs:InformationSource;
 						rdfs:label 	"Google Knowledge Graph";
 						fs:finds "person";
                         fs:finds "organization";
-                        fs:finds "product";
 						fs:key "gkb" .
 
 fs:LinkedLeaks	rdf:type	fs:InformationSource;
@@ -125,11 +124,11 @@ fs:Occrp	rdf:type	fs:InformationSource;
 			fs:key "occrp" .
 
 fs:Tor2Web	rdf:type	fs:InformationSource;
-			rdfs:label 	"Darknet";
+			rdfs:label 	"Onion websites";
 			fs:finds "website";
 			fs:key "tor2web" .
 
 fs:ElasticSearch	rdf:type	fs:InformationSource;
-			        rdfs:label 	"Elastic Search";
+			        rdfs:label 	"Crawled Onion websites";
 			        fs:finds "website";
 			        fs:key "elasticsearch" .

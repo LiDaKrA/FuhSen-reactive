@@ -91,7 +91,10 @@ var dictEng = {
     "haves": "Haves",
     "top_haves": "Top haves",
     "interests": "Interests",
-    "server_error": "There was an error during search or no active tokens where available... Please try again!"
+    "server_error": "There was an error during search or no active tokens where available... Please try again!",
+    "no_results": "No results found.",
+    "tor_websites": "Onion web sites",
+    "select_file": "Select file"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -184,18 +187,21 @@ var dictGer = {
     "map_icon": "Ergebnisse auf der Karte anzeigen.",
     "crawl_icon": "Crawle die Webseiten.",
     "crawlJobCreated": "Crawl-Auftrag erstellt.",
-    "createCrawlJob": "Erstelle einen Crawl-Auftrag!",
+    "createCrawlJob": "Crawl-Auftrag!",
     "documents": "Dokumente",
     "websites": "Webseiten",
     "language": "Sprache",
     "filename": "Dateiname",
     "filetype": "Dateityp",
-    "active_email": "Active email",
-    "wants": "Wollen",
-    "haves": "Geschick",
-    "top_haves": "Top Geschick",
+    "active_email": "E-Mail",
+    "wants": "Wünsche",
+    "haves": "Kompetenzen",
+    "top_haves": "Top Kompetenzen",
     "interests": "Interessen",
-    "server_error": "There was an error during search or no active tokens where available... Please try again!"
+    "server_error": "Es gab ein Serverproblem während der Suche oder es konnte kein gültiges Token gefunden werden... Bitte versuchen Sie es erneut!",
+    "no_results": "Es konnten keine Ergebnisse gefunden werden.",
+    "tor_websites": "Webseiten",
+    "select_file": "Datei aussuchen"
 };
 
 window.dictGer = dictGer;

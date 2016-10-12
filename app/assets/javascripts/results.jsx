@@ -228,7 +228,7 @@ var FacetList = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
-                this.setState({data: data});
+                this.setState({data: data["@graph"]});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -249,10 +249,10 @@ var FacetList = React.createClass({
     },
     render: function () {
 
-        if (this.state.data && this.state.data["@graph"] !== undefined) {
+        if (this.state.data && this.state.data !== undefined) {
             var _searchUid = this.props.searchUid;
             var _entityType = this.props.entityType;
-            var MItems = this.state.data["@graph"].map( function(menuItems){
+            var MItems = this.state.data.map( function(menuItems){
                 return <FacetItems searchUid={_searchUid}
                                    entityType={_entityType}
                                    label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}
@@ -403,7 +403,7 @@ var FacetSubMenuItems = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
-                this.setState({data: data});
+                this.setState({data: data["@graph"]});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -418,9 +418,9 @@ var FacetSubMenuItems = React.createClass({
     },
     render: function () {
         var subMenuEle = [];
-        if (this.state.data && this.state.data["@graph"] !== undefined) {
+        if (this.state.data && this.state.data !== undefined) {
             var _onFacetItemClick = this.props.onFacetItemClick;
-            this.state.data["@graph"].map( function(menuItems){
+            this.state.data.map( function(menuItems){
                 if (menuItems["http://vocab.lidakra.de/fuhsen#value"] !== "blank") {
                     subMenuEle.push(<li ><a href="#" id={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
                                             onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}><span
@@ -477,7 +477,7 @@ var ResultsContainer = React.createClass({
         this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: true,view:this.state.view});
     },
     crawlAll : function() {
-        var JSONData = this.state.resultsData["@graph"];
+        var JSONData = this.state.resultsData;
 
         var seeds = []
 
@@ -504,7 +504,7 @@ var ResultsContainer = React.createClass({
 
     },
     csvFunction : function(e) {
-        var JSONData = JSON.stringify(this.state.resultsData["@graph"]);
+        var JSONData = JSON.stringify(this.state.resultsData);
         var ReportTitle = "Current results in CSV format"
         var ShowLabel = true;
 
@@ -591,8 +591,23 @@ var ResultsContainer = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
-                data_to_handle = JSON.parse(JSON.stringify(data))
-                data_to_maintain = JSON.parse(JSON.stringify(data))
+                data_to_handle = JSON.parse(JSON.stringify(data));
+                //alert(JSON.stringify(data_to_handle));
+                if (data_to_handle["@graph"] !== undefined)
+                    data_to_handle = data_to_handle["@graph"].sort(compareRank);
+                else {
+                    if (data_to_handle["fs:rank"] !== undefined) {
+                        data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
+                        data_to_handle = data_to_handle["@graph"].sort(compareRank);
+                    }
+                    else
+                        data_to_handle = undefined;
+                }
+
+                data_to_maintain = data_to_handle;
+                //alert(JSON.stringify(data_to_handle));
+                //data_to_handle = JSON.parse(JSON.stringify(data))
+                //data_to_maintain = JSON.parse(JSON.stringify(data))
                 this.setState({resultsData : data_to_handle, selected : eType, loading: false, underDev: false, originalData : data_to_maintain});
             }.bind(this),
             error: function (xhr, status, err) {
@@ -616,7 +631,7 @@ var ResultsContainer = React.createClass({
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
         var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
-        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">{getTranslation("websites")}</li>
+        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">{getTranslation("tor_websites")}</li>
         var documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5">{getTranslation("documents")}</li>
 
         if(this.state.selected==="person") {
@@ -626,7 +641,7 @@ var ResultsContainer = React.createClass({
         } else if(this.state.selected==="product"){
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
         } else if(this.state.selected==="website"){
-            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>{getTranslation("websites")}</b></p></li>
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>{getTranslation("tor_websites")}</b></p></li>
         } else if(this.state.selected==="document"){
             documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p><b>{getTranslation("documents")}</b></p></li>
         }
@@ -665,7 +680,7 @@ var ResultsContainer = React.createClass({
         //Facets filtering algorithm
         if(Object.keys(this.props.facetsDict).length > 0)
         {
-            final_data["@graph"] = this.state.originalData["@graph"]
+            final_data = this.state.originalData
             for (var key in this.props.facetsDict) {
                 if (this.props.facetsDict.hasOwnProperty(key)) {
                     var facet_name = "fs:"+key
@@ -700,17 +715,17 @@ var ResultsContainer = React.createClass({
                                 return false;
                         }
                     }
-                    var as = final_data["@graph"].filter(filterByFacet)
-                    final_data["@graph"] = JSON.parse(JSON.stringify(as))
+                    var as = final_data.filter(filterByFacet);
+                    final_data = JSON.parse(JSON.stringify(as));
                 }
             }
         }
         else {
-            final_data["@graph"] = this.state.originalData["@graph"]
+            final_data = this.state.originalData;
         }
 
         //No results
-        if(final_data["@graph"] === undefined)
+        if(final_data === undefined)
         {
             return <div className="col-md-9">
                 <div id="results-paginator-options" className="results-paginator-options">
@@ -739,7 +754,7 @@ var ResultsContainer = React.createClass({
                         <div className="col-md-12">
                             <ul id="search-results" className="search-results">
                                 <ul className="results-list list-unstyled">
-                                    <h1>No results found.</h1>
+                                    <h1>{getTranslation("no_results")}</h1>
                                 </ul>
                             </ul>
                         </div>
@@ -757,7 +772,7 @@ var ResultsContainer = React.createClass({
                             <div className="col-md-8 tabulator">
                                 <ul className="list-inline">
                                     <li>
-                                        <span className="total-results">{final_data["@graph"].length}</span>
+                                        <span className="total-results">{final_data.length}</span>
                                         <span className="total-results-label"> {getTranslation("results")}:</span>
                                     </li>
                                     {personenItem}
@@ -793,7 +808,7 @@ var ResultsContainer = React.createClass({
                     <div className="col-md-8 tabulator">
                         <ul className="list-inline">
                             <li>
-                                <span className="total-results">{final_data["@graph"].length}</span>
+                                <span className="total-results">{final_data.length}</span>
                                 <span className="total-results-label"> {getTranslation("results")}:</span>
                             </li>
                             {personenItem}
@@ -856,7 +871,10 @@ var CustomForm = React.createClass({
 
 var ResultsList = React.createClass({
     render: function () {
-        var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
+
+        var resultsNodesSorted = this.props.data; //.sort(compareRank)
+        //var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
+
         var already_crawled = this.props.crawled
         var resultsNodes = resultsNodesSorted.map(function (result) {
             if(result["@type"] === "foaf:Person"){

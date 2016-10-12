@@ -80,15 +80,11 @@ var KeywordsFile = React.createClass({
     },
     render: function () {
         return (
-            <div>
-                <div className="row">
-                    <div className="col-md-12 text-center">
+                    <div className="text-center">
                        <span className="btn btn-primary btn-file btn-md">
-                           Select file <input type="file" onChange={this.handleFileSelection}></input>
+                           {getTranslation("select_file")} <input type="file" onChange={this.handleFileSelection}></input>
                        </span>
                     </div>
-                </div>
-            </div>
         )
     }
 });
@@ -129,17 +125,17 @@ var SearchForm = React.createClass({
         var types_label = ""
 
         if(sources_list.length === 0) {
-            sources_label = "Sources: all."
+            sources_label = "Datenquellen: alle."
         }else if(sources_list.length > 0) {
-            sources_label = "Sources: (" + sources_list + ")."
+            sources_label = "Datenquellen: (" + sources_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
 
         if(types_list.length === 0) {
-            types_label = "Types: all."
+            types_label = "Typen: alle."
         }else if(types_list.length > 0) {
-            types_label = "Types: (" + types_list + ")."
+            types_label = "Typen: (" + types_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
@@ -245,7 +241,7 @@ var SearchForm = React.createClass({
 
         return (
             <div>
-                <div class="row">
+                <div className="row">
                     <div className="col-md-3"/>
                     <div className="col-md-6">
                         <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
@@ -265,7 +261,8 @@ var SearchForm = React.createClass({
                             </div>
                         </form>
                     </div>
-                    <div className="col-md-2">
+                    <div className="col-md-1 vertical-separator" title="Search with 1 keyword <- OR ->Search with 1 or more keywords"/>
+                    <div className="col-md-1 ">
                         <KeywordsFile sources={selected_sources} types={selected_types}/>
                     </div>
                 </div>

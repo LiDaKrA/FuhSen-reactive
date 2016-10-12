@@ -16,17 +16,20 @@ var ResultsTable = React.createClass({
         var currentRow = checkBox.parentNode.parentNode;
         if(checkBox.checked)
             currentRow.setAttribute("class","info");
-        else
+        else{
             currentRow.removeAttribute("class");
+			$("#selectall").prop("checked",false);
+		}
     },
     getInitialState : function () {
       return {dialogID : "model_comment", checkedRows:[]};
     },
     render: function () {
-        var resultsNodesSorted = this.props.data["@graph"].sort(compareRank);
+        var resultsNodesSorted = this.props.data; //.sort(compareRank)
+        //var resultsNodesSorted = this.props.data["@graph"].sort(compareRank);
         var resultsNodes = resultsNodesSorted.map(function (result,i) {
             var checkBoxHandle = this.OnCheckBoxChange.bind(this,i);
-            if (result["@type"] === "foaf:Person") {
+			if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultRow
                         id = {i}
@@ -136,7 +139,10 @@ var ResultsTable = React.createClass({
 });
 var TableHeader = React.createClass({
     OnClickCheckBox: function(){
-        $(".checkBoxClass").click();
+        $(".checkBoxClass").each(function(idx) {
+			if( $("#check" + idx).prop("checked") !== $("#selectall").prop("checked"))
+				$("#check" + idx).click();
+		})
     },
     render: function () {
 
@@ -417,7 +423,7 @@ var DocumentResultRow = React.createClass({
                     </div>
                 </td>
                 <td>{ this.props.label !== undefined ? <p>{this.props.label}</p> : null }</td>
-                <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : null}</td>
+                <td>{ this.props.comment !== undefined ? <p> {this.props.comment} </p> : null}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
                                                                target="_blank">

@@ -94,7 +94,18 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
 
   // Returns a JSON array of person objects
   override def customResponseHandling(implicit ws: WSClient) = Some(apiResponse => {
-    val people = (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
+
+    val people = {
+      try
+        {
+          (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
+        }catch {
+          case e: Exception => List[Person]((Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[Person]) //
+      }
+    }
+
+
+
     //Replaced by YQL
     //val people = (Json.parse(apiResponse) \ "items").as[List[Person]]
     //val pages = people.filter(_.objectType == "page")
