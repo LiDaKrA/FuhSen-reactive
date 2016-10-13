@@ -78,6 +78,8 @@ var dictEng = {
     "csv_icon": "Export results to CSV.",
     "graph_icon": "View the relations among the results.",
     "map_icon": "View the results in a Map.",
+    "table_icon": "View the results in a Table.",
+    "list_icon": "View the results in a List.",
     "crawl_icon": "Crawl all the websites.",
     "crawlJobCreated": "Crawl Job Created.",
     "createCrawlJob": "Crawl it!",
