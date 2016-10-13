@@ -927,7 +927,7 @@ input[type="checkbox"],input[type="radio"] {
   margin-bottom:2px;
   line-height: 15px;
   min-width: 250px;/** AAA **/
-  height: 25px; /** AAA **/
+  min-height: 25px; /** AAA **/
 }
 .flyout-right-body.body-extender .left-col >li {
   margin-right: 5px;
@@ -948,7 +948,6 @@ input[type="checkbox"],input[type="radio"] {
   float: left;
 }
 .flyout-right-body .left-col >li .sub-item-result span, .right-col >li .sub-item-result span {
-  float: right;
   direction: rtl;
 }
 
