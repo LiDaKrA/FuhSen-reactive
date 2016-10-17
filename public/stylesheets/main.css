@@ -2074,6 +2074,6 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     float: right;
     background: #ADADAD;
     margin: 0 20px;
-    height: 80px;
+    height: 50px;
     width: 2px;
 }
