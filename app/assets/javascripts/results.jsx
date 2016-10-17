@@ -437,9 +437,10 @@ var FacetSubMenuItems = React.createClass({
             this.state.data.map( function(menuItems){
                 if (menuItems["http://vocab.lidakra.de/fuhsen#value"] !== "blank") {
                     subMenuEle.push(<li ><a href="#" id={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
-                                            onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}><span
-                        className="sub-item">{menuItems["http://vocab.lidakra.de/fuhsen#value"]}</span><span
-                        className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span></a>
+                                            onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}>
+                       <span
+                        className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span>
+                        {menuItems["http://vocab.lidakra.de/fuhsen#value"]}</a>
                     </li>);
                 }
             });
