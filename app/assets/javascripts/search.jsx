@@ -183,6 +183,24 @@ var SearchForm = React.createClass({
             this.setState({ showSourcesTypesDiv: true});
         }
     },
+    OnDocumentClick: function(e){
+        if(e.target.className == "sel_button"){
+            this.onClick();
+        }
+        else{
+            if($("#filterList").has(e.target).length == 0) {
+                if(this.state.showSourcesTypesDiv)
+                    this.setState({ showSourcesTypesDiv: false});
+            }
+        }
+
+    },
+    componentDidMount: function(){
+      document.addEventListener('click',this.OnDocumentClick);
+    },
+    componentWillUnmount: function() {
+        document.removeEventListener('click', this.OnDocumentClick);
+    },
     getInitialState: function() {
         return { showSourcesTypesDiv: false };
     },
@@ -215,7 +233,7 @@ var SearchForm = React.createClass({
                         <div>
                             <div className="floatingSelText-header">
                                 {this.getSelectionLabel()}
-                                <img onClick={this.onClick} className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
+                                <img className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
                                 </img>
                             </div>
                         </div>
@@ -223,7 +241,7 @@ var SearchForm = React.createClass({
                     <div class="row">
                         <div className="col-md-3"/>
                         <div className={floatingDivStyle}>
-                            <div className="row">
+                            <div className="row" id="filterList">
                                 <div className="col-md-6 separator">
                                     <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
@@ -255,7 +273,7 @@ var SearchForm = React.createClass({
                             <div>
                                 <div className="floatingSelText">
                                     {this.getSelectionLabel()}
-                                    <img onClick={this.onClick} className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
+                                    <img className="sel_button" src={context+"/assets/images/icons/arrow_down.png"}>
                                     </img>
                                 </div>
                             </div>
@@ -268,7 +286,7 @@ var SearchForm = React.createClass({
                 </div>
                 <div class="row">
                     <div className={floatingDivStyle}>
-                        <div className="row">
+                        <div className="row" id="filterList">
                             <div className="col-md-6 separator">
                                 <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>

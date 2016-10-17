@@ -403,7 +403,21 @@ var FacetSubMenuItems = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
-                this.setState({data: data["@graph"]});
+                var facetsValues = data["@graph"];
+                if( facetsValues !== undefined) {
+                    facetsValues.sort(function (a, b) {
+                        var count_a = parseInt(a["http://vocab.lidakra.de/fuhsen#count"]);
+                        var count_b = parseInt(b["http://vocab.lidakra.de/fuhsen#count"]);
+                        if(isNaN(count_a) || isNaN(count_b))
+                            return 0;
+                        if ( count_a < count_b)
+                            return 1;
+                        if (count_a > count_b)
+                            return -1;
+                        return 0;
+                    });
+                }
+                this.setState({data: facetsValues});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -423,9 +437,10 @@ var FacetSubMenuItems = React.createClass({
             this.state.data.map( function(menuItems){
                 if (menuItems["http://vocab.lidakra.de/fuhsen#value"] !== "blank") {
                     subMenuEle.push(<li ><a href="#" id={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
-                                            onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}><span
-                        className="sub-item">{menuItems["http://vocab.lidakra.de/fuhsen#value"]}</span><span
-                        className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span></a>
+                                            onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}>
+                       <span
+                        className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span>
+                        {menuItems["http://vocab.lidakra.de/fuhsen#value"]}</a>
                     </li>);
                 }
             });
@@ -469,8 +484,6 @@ var ResultsContainer = React.createClass({
     },
     toggleResultsView: function(){
         var view_selector = (this.state.view == "list" ? "table" : "list");
-        //$("#btn_view_selector").toggleClass('table_icon list_icon');
-
         this.setState({resultsData : this.state.resultsData,selected : this.state.selected,loading: this.state.loading,underDev: false,view:view_selector, selectedChecks: [] });
     },
     underDevelopmentFunction : function() {
