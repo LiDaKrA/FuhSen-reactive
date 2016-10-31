@@ -44,6 +44,12 @@ RUN apt-get update && \
 # Define JAVA_HOME environment variable
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
+# Install  network tools (ifconfig, netstat, ping, ip)
+RUN apt-get update && \
+    apt-get install -y net-tools && \
+    apt-get install -y iputils-ping && \
+    apt-get install -y iproute2
+
 # Install vi for editing
 RUN apt-get update && \
     apt-get install -y vim
@@ -59,6 +65,9 @@ RUN keytool -importcert -alias occrp -keystore cacerts -storepass changeit -file
 COPY target/universal/fuhsen-1.1.0.tgz /home/lidakra/
 WORKDIR /home/lidakra/
 RUN tar xvf fuhsen-1.1.0.tgz  
+
+# Copy the activator
+COPY 
 
 # Copy the schema folder (as sbt universal package does not include it by default)
 COPY schema/ /home/lidakra/fuhsen-1.1.0/schema/
