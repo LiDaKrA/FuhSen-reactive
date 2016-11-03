@@ -16,7 +16,7 @@ function extractQuery(key) {
 var queryDirty = extractQuery("query");
 var query = queryDirty.replace(new RegExp('\\+', 'g'), ' ');
 
-function compareRank(a,b) {
+function compareRank(a, b) {
     if (a["fs:rank"] < b["fs:rank"])
         return -1;
     if (a["fs:rank"] > b["fs:rank"])
@@ -55,7 +55,8 @@ var ContainerResults = React.createClass({
                             <div className="row">
                                 <div className="col-md-4">
                                     <a href={context === "" ? "/" : context}>
-                                        <img src={context+"/assets/images/logoBig2.png"} class="smallLogo" alt="Logo_Description"/>
+                                        <img src={context + "/assets/images/logoBig2.png"} class="smallLogo"
+                                             alt="Logo_Description"/>
                                     </a>
                                 </div>
                                 <div className="col-md-3">
@@ -74,7 +75,7 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container">
-                    <Trigger url={context+"/engine/api/searches?query="+query} pollInterval={200000}/>
+                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000}/>
                 </div>
             </div>
         );
@@ -89,7 +90,7 @@ var Trigger = React.createClass({
             type: "POST",
             cache: false,
             success: function (kw) {
-                this.setState({keyword: kw["keyword"], searchUid:kw["uid"]});
+                this.setState({keyword: kw["keyword"], searchUid: kw["uid"]});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -110,17 +111,18 @@ var Trigger = React.createClass({
 
         return <div className="row">
             <div className="col-md-12 text-center">
-                <img className="img-responsive center-block" src={context+"/assets/images/ajaxLoading.gif"} alt="Loading results"/>
-                <h2><img src={context+"/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
+                <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
+                     alt="Loading results"/>
+                <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
             </div>
         </div>;
     }
 });
 
 var Container = React.createClass({
-    onFacetSelection: function(facetName, facetValue) {
-        if(this.state.facetsDict[facetName]) {
-            if(this.state.facetsDict[facetName].indexOf(facetValue) === -1) {
+    onFacetSelection: function (facetName, facetValue) {
+        if (this.state.facetsDict[facetName]) {
+            if (this.state.facetsDict[facetName].indexOf(facetValue) === -1) {
                 this.state.facetsDict[facetName].push(facetValue)
                 this.setState({facetsDict: this.state.facetsDict})
             }
@@ -129,12 +131,12 @@ var Container = React.createClass({
             this.setState({facetsDict: this.state.facetsDict})
         }
     },
-    onFacetRemoval: function(facetName, facetValue) {
-        if(facetValue != "all") {
-            var index_of =  this.state.facetsDict[facetName].indexOf(facetValue)
+    onFacetRemoval: function (facetName, facetValue) {
+        if (facetValue != "all") {
+            var index_of = this.state.facetsDict[facetName].indexOf(facetValue)
             this.state.facetsDict[facetName].splice(index_of, 1)
 
-            if(this.state.facetsDict[facetName].length === 0){
+            if (this.state.facetsDict[facetName].length === 0) {
                 delete this.state.facetsDict[facetName]
             }
         } else {
@@ -144,7 +146,7 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict})
     },
     loadCommentsFromServer: function () {
-        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/results?entityType="+this.state.entityType+"&sources="+sourcesDirty+"&types="+typesDirty;
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -156,7 +158,7 @@ var Container = React.createClass({
                 console.error(this.props.url, status, err.toString());
                 alert(getTranslation("server_error"));
                 //Todo remove this hardcoded value
-                window.location.href="/fuhsen";
+                window.location.href = "/fuhsen";
             }.bind(this)
         });
     },
@@ -164,46 +166,47 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view:"list", entityType:"person", facets:"", initData: false, facetsDict:{} };
+        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}};
     },
     onTypeChange: function (event) {
         var optionSelected = event.currentTarget.dataset.id;
         var type;
-        if(optionSelected==="1") {
+        if (optionSelected === "1") {
             type = "person"
-        } else if(optionSelected==="2"){
+        } else if (optionSelected === "2") {
             type = "organization"
-        } else if(optionSelected==="3"){
+        } else if (optionSelected === "3") {
             type = "product"
-        } else if(optionSelected==="4"){
+        } else if (optionSelected === "4") {
             type = "website"
-        } else if(optionSelected==="5"){
+        } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType : type});
+        this.setState({entityType: type});
     },
     render: function () {
         if (this.state.initData) {
             return (<div class="row search-results-container">
-                        <FacetList searchUid={this.props.searchUid}
-                                   keyword={this.props.keyword}
-                                   entityType={this.state.entityType}
-                                   onFacetSelection={this.onFacetSelection}
-                                   onFacetRemoval={this.onFacetRemoval}
-                                   currentTab={this.state.entityType}/>
-                        <ResultsContainer searchUid={this.props.searchUid}
-                                          keyword={this.props.keyword}
-                                          entityType={this.state.entityType}
-                                          view={this.state.view}
-                                          facets={this.state.facets}
-                                          onTypeChange={this.onTypeChange}
-                                          facetsDict={this.state.facetsDict}/>
-                    </div>);
+                <FacetList searchUid={this.props.searchUid}
+                           keyword={this.props.keyword}
+                           entityType={this.state.entityType}
+                           onFacetSelection={this.onFacetSelection}
+                           onFacetRemoval={this.onFacetRemoval}
+                           currentTab={this.state.entityType}/>
+                <ResultsContainer searchUid={this.props.searchUid}
+                                  keyword={this.props.keyword}
+                                  entityType={this.state.entityType}
+                                  view={this.state.view}
+                                  facets={this.state.facets}
+                                  onTypeChange={this.onTypeChange}
+                                  facetsDict={this.state.facetsDict}/>
+            </div>);
         }
         return <div className="row">
             <div className="col-md-12 text-center">
-                <img className="img-responsive center-block" src={context+"/assets/images/ajaxLoading.gif"} alt="Loading results"/>
-                <h2><img src={context+"/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
+                <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
+                     alt="Loading results"/>
+                <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
             </div>
         </div>;
     }
@@ -214,14 +217,14 @@ var Container = React.createClass({
 
 // inject/ passing data
 var FacetList = React.createClass({
-    onFacetSelection: function(facetName, valueSelected) {
+    onFacetSelection: function (facetName, valueSelected) {
         this.props.onFacetSelection(facetName, valueSelected)
     },
-    onFacetRemoval: function(facetName, valueSelected) {
+    onFacetRemoval: function (facetName, valueSelected) {
         this.props.onFacetRemoval(facetName, valueSelected)
     },
     loadFacetsFromServer: function (eType) {
-        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/facets?entityType="+eType;
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType;
 
         $.ajax({
             url: searchUrl,
@@ -241,7 +244,7 @@ var FacetList = React.createClass({
     componentDidMount: function () {
         this.loadFacetsFromServer(this.props.entityType);
     },
-    componentWillReceiveProps: function(nextProps){
+    componentWillReceiveProps: function (nextProps) {
         // see if it actually changed
         if (nextProps.entityType !== this.props.entityType) {
             this.loadFacetsFromServer(nextProps.entityType);
@@ -252,7 +255,7 @@ var FacetList = React.createClass({
         if (this.state.data && this.state.data !== undefined) {
             var _searchUid = this.props.searchUid;
             var _entityType = this.props.entityType;
-            var MItems = this.state.data.map( function(menuItems){
+            var MItems = this.state.data.map(function (menuItems) {
                 return <FacetItems searchUid={_searchUid}
                                    entityType={_entityType}
                                    label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}
@@ -262,7 +265,7 @@ var FacetList = React.createClass({
                                    currentTab={this.props.currentTab}/>
             }, this);
             return (
-                <div className="col-md-3 facets-container hidden-phone">
+                <div id="facetsDiv" className="col-md-3 facets-container hidden-phone">
                     <div className="facets-head">
                         <h3>{getTranslation("resultfilters")}</h3>
                     </div>
@@ -286,109 +289,131 @@ var FacetList = React.createClass({
 });
 
 var FacetItems = React.createClass({
-    getInitialState: function() {
+    getInitialState: function () {
         arr_ele = [];//fill elements of the sub menu in an array
-        return  { showTextBox: false, selected_facets: [] };
+        return {showTextBox: false, selected_facets: []};
     },
-    onClick: function() {
+    onClick: function () {
         var propsName = this.props.name;//.replace(/\s/g, '');
         var propsName_key = arr_ele.indexOf(propsName);
         //Check if the menu item is shown
         // if Yes hide it, if No show it
 
-        if(this.state.showTextBox){
+        if (this.state.showTextBox) {
             //Check if the item is in the array: means you just now clicked it, then hide it by setting the state to false and remove it from the array
             //if not in the array: means it was hidden by showing other item:
             //      - then show it by using normal js
             //      - set the state to true
             //      - hide and remove all others
-            if( propsName_key >= 0 ){
-                this.setState({ showTextBox: false });
+            if (propsName_key >= 0) {
+                this.setState({showTextBox: false});
                 arr_ele.splice(propsName_key, 1);
             }
-            else{
-                this.setState({ showTextBox: true });
+            else {
+                this.setState({showTextBox: true});
                 arr_ele.push(propsName);
                 document.getElementById(propsName).style.display = "inline";
-                if(arr_ele[0] != propsName){
+                if (arr_ele[0] != propsName) {
                     document.getElementById(arr_ele[0]).style.display = "none";
                     arr_ele.splice(0, 1);
                 }
             }
         }
-        else{
-            this.setState({ showTextBox: true });
-            if(propsName_key < 0){
+        else {
+            this.setState({showTextBox: true});
+            if (propsName_key < 0) {
                 arr_ele.push(propsName);
             }
-            for(var i = 0; i<arr_ele.length-1; i++){
-                if (arr_ele[i] != propsName){
+            for (var i = 0; i < arr_ele.length - 1; i++) {
+                if (arr_ele[i] != propsName) {
                     document.getElementById(arr_ele[i]).style.display = "none";
                     arr_ele.splice(arr_ele[i], 1);
                 }
             }
         }
     },
-    onFacetItemClick: function(eSelectedItem) {
+    onFacetItemClick: function (eSelectedItem) {
         var _selectedFacets = this.state.selected_facets;
         var _index = _selectedFacets.indexOf(eSelectedItem);
         if (_index < 0) {
             _selectedFacets.push(eSelectedItem);
-            this.setState({ showTextBox: false, selected_facets: _selectedFacets });
+            this.setState({showTextBox: false, selected_facets: _selectedFacets});
         }
 
         this.props.onFacetSelection(this.props.name, eSelectedItem)
     },
-    onFacetItemRemoveClick: function(eSelectedItem) {
-        if(eSelectedItem != "all"){
+    onFacetItemRemoveClick: function (eSelectedItem) {
+        if (eSelectedItem != "all") {
             var _selectedFacets = this.state.selected_facets;
             var _index = _selectedFacets.indexOf(eSelectedItem);
             if (_index >= 0) {
                 _selectedFacets.splice(_index, 1);
-                this.setState({ showTextBox: false, selected_facets: _selectedFacets });
+                this.setState({showTextBox: false, selected_facets: _selectedFacets});
             }
         } else {
-            this.setState({ showTextBox: false, selected_facets: [] });
+            this.setState({showTextBox: false, selected_facets: []});
         }
 
         this.props.onFacetRemoval(this.props.name, eSelectedItem)
 
     },
-    componentWillUpdate: function (nextProps,  nextState) {
-        if(this.props.currentTab != nextProps.currentTab) {
+    componentWillUpdate: function (nextProps, nextState) {
+        if (this.props.currentTab != nextProps.currentTab) {
             this.onFacetItemRemoveClick("all")
         }
+    },
+    OnDocumentClick: function (e) {
+        if ($("#facetsDiv").has(e.target).length == 0){
+            var propsName = this.props.name;//.replace(/\s/g, '');
+            var propsName_key = arr_ele.indexOf(propsName);
+            if (this.state.showTextBox && propsName_key > -1) {
+                this.setState({showTextBox: false});
+                arr_ele.splice(propsName_key, 1);
+            }
+        }
+    },
+    componentDidMount: function () {
+        document.addEventListener('click', this.OnDocumentClick);
+    },
+    componentWillUnmount: function () {
+        document.removeEventListener('click', this.OnDocumentClick);
     },
     render: function () {
         var selItems = [];
         var _onFacetItemRemoveClick = this.onFacetItemRemoveClick;
-        if (this.state.selected_facets.length > 0 ) {
-            this.state.selected_facets.map( function(item){
+        if (this.state.selected_facets.length > 0) {
+            this.state.selected_facets.map(function (item) {
                 selItems.push(<li data-fctvalue={item}>
-                                    <span title="male" className="facet-value">{item}</span>
-                                    <a title="Remove" className="facet-remove fr" onClick={_onFacetItemRemoveClick.bind(this, item)}>
-                                    </a>
-                              </li>);
+                    <span title="male" className="facet-value">{item}</span>
+                    <a title="Remove" className="facet-remove fr" onClick={_onFacetItemRemoveClick.bind(this, item)}>
+                    </a>
+                </li>);
             });
             return (
-            <div className="facets-item bt bb bl br" >
-                <a className="h3" onClick={this.onClick}>{this.props.label}</a>
-                <div id={""+this.props.name+""}>
-                    { this.state.showTextBox ? <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType} facetName={this.props.name} onFacetItemClick={this.onFacetItemClick} /> : null }
+                <div className="facets-item bt bb bl br">
+                    <a className="h3" >{this.props.label}</a>
+                    <div id={"" + this.props.name + ""}>
+                        { this.state.showTextBox ?
+                            <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType}
+                                               facetName={this.props.name}
+                                               onFacetItemClick={this.onFacetItemClick}/> : null }
+                    </div>
+                    <div className="flyout-left-container">
+                        <ul className="selected-items unstyled">
+                            {selItems}
+                        </ul>
+                    </div>
                 </div>
-                <div className="flyout-left-container">
-                    <ul className="selected-items unstyled">
-                        {selItems}
-                    </ul>
-                </div>
-            </div>
             );
         }
         return (
-            <div className="facets-item bt bb bl br" >
+            <div className="facets-item bt bb bl br">
                 <a className="h3" onClick={this.onClick}>{this.props.label}</a>
-                <div id={""+this.props.name+""}>
-                    { this.state.showTextBox ? <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType} facetName={this.props.name} onFacetItemClick={this.onFacetItemClick} /> : null }
+                <div id={"" + this.props.name + ""}>
+                    { this.state.showTextBox ?
+                        <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType}
+                                           facetName={this.props.name}
+                                           onFacetItemClick={this.onFacetItemClick}/> : null }
                 </div>
             </div>
         );
@@ -397,20 +422,20 @@ var FacetItems = React.createClass({
 
 var FacetSubMenuItems = React.createClass({
     loadFacetsFromServer: function (eFacet) {
-        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/facets/"+eFacet+"?entityType="+this.props.entityType;
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets/" + eFacet + "?entityType=" + this.props.entityType;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
             cache: false,
             success: function (data) {
                 var facetsValues = data["@graph"];
-                if( facetsValues !== undefined) {
+                if (facetsValues !== undefined) {
                     facetsValues.sort(function (a, b) {
                         var count_a = parseInt(a["http://vocab.lidakra.de/fuhsen#count"]);
                         var count_b = parseInt(b["http://vocab.lidakra.de/fuhsen#count"]);
-                        if(isNaN(count_a) || isNaN(count_b))
+                        if (isNaN(count_a) || isNaN(count_b))
                             return 0;
-                        if ( count_a < count_b)
+                        if (count_a < count_b)
                             return 1;
                         if (count_a > count_b)
                             return -1;
@@ -434,12 +459,12 @@ var FacetSubMenuItems = React.createClass({
         var subMenuEle = [];
         if (this.state.data && this.state.data !== undefined) {
             var _onFacetItemClick = this.props.onFacetItemClick;
-            this.state.data.map( function(menuItems){
-                if (menuItems["http://vocab.lidakra.de/fuhsen#value"] !== "blank") {
+            this.state.data.map(function (menuItems) {
+                if (menuItems["http://vocab.lidakra.de/fuhsen#value"] && menuItems["http://vocab.lidakra.de/fuhsen#value"] !== "blank") {
                     subMenuEle.push(<li ><a href="#" id={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
                                             onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}>
                        <span
-                        className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span>
+                           className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span>
                         {menuItems["http://vocab.lidakra.de/fuhsen#value"]}</a>
                     </li>);
                 }
@@ -454,7 +479,7 @@ var FacetSubMenuItems = React.createClass({
                     </div>
                 </div>
 
-                <div className="flyout-right-container" >
+                <div className="flyout-right-container">
                     <div className="flyout-right-head">
                         <span>{getTranslation("sortedby")}</span>
                         <div className="flyout-page-nav fr">
@@ -463,7 +488,7 @@ var FacetSubMenuItems = React.createClass({
                             </ul>
                         </div>
                     </div>
-                    <div className="flyout-right-body" >
+                    <div className="flyout-right-body">
                         <ul className="left-col unstyled">
                             {subMenuEle}
                         </ul>
@@ -476,39 +501,52 @@ var FacetSubMenuItems = React.createClass({
 
 //************** End Facets Components *******************
 var ResultsContainer = React.createClass({
-    checksListener : function(listOfSelectedRows) {
-        this.setState({selectedChecks : listOfSelectedRows})
+    checksListener: function (listOfSelectedRows) {
+        this.setState({selectedChecks: listOfSelectedRows})
     },
-    noData : function() {
+    noData: function () {
         alert(getTranslation("nodata"));
     },
-    toggleResultsView: function(){
+    toggleResultsView: function () {
         var view_selector = (this.state.view == "list" ? "table" : "list");
-        this.setState({resultsData : this.state.resultsData,selected : this.state.selected,loading: this.state.loading,underDev: false,view:view_selector, selectedChecks: [] });
+        this.setState({
+            resultsData: this.state.resultsData,
+            selected: this.state.selected,
+            loading: this.state.loading,
+            underDev: false,
+            view: view_selector,
+            selectedChecks: []
+        });
     },
-    underDevelopmentFunction : function() {
-        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: true,view:this.state.view});
+    underDevelopmentFunction: function () {
+        this.setState({
+            resultsData: this.state.resultsData,
+            selected: this.state.selected,
+            loading: this.state.loading,
+            underDev: true,
+            view: this.state.view
+        });
     },
-    crawlAll : function() {
+    crawlAll: function () {
         var JSONData = this.state.resultsData;
 
         var seeds = []
 
-        for(var key in JSONData) {
+        for (var key in JSONData) {
             seeds.push(JSONData[key].url)
         }
 
-        var createCrawlJobUrl = context+"/crawling/jobs/create";
+        var createCrawlJobUrl = context + "/crawling/jobs/create";
 
         $.ajax({
             url: createCrawlJobUrl,
-            data: JSON.stringify({ "seedURLs": seeds }),
+            data: JSON.stringify({"seedURLs": seeds}),
             type: "POST",
-            dataType : "text",
+            dataType: "text",
             contentType: "application/json; charset=utf-8",
             cache: false,
             success: function () {
-                this.setState({crawled :  true });
+                this.setState({crawled: true});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -516,7 +554,7 @@ var ResultsContainer = React.createClass({
         });
 
     },
-    csvFunction : function(e) {
+    csvFunction: function (e) {
         var JSONData = JSON.stringify(this.state.resultsData);
         var ReportTitle = "Current results in CSV format"
         var ShowLabel = true;
@@ -548,7 +586,7 @@ var ResultsContainer = React.createClass({
 
         //1st loop is to extract each row
         for (var i = 0; i < arrData.length; i++) {
-            if(this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1 ){
+            if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
                 var row = "";
 
                 //2nd loop will extract each column and convert it in string comma-seprated
@@ -571,7 +609,7 @@ var ResultsContainer = React.createClass({
         //Generate a file name
         var fileName = "Fuhsen_";
         //this will remove the blank-spaces from the title and replace it with an underscore
-        fileName += ReportTitle.replace(/ /g,"_");
+        fileName += ReportTitle.replace(/ /g, "_");
 
         //Initialize file format you want csv or xls
         var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
@@ -594,11 +632,17 @@ var ResultsContainer = React.createClass({
         link.click();
         document.body.removeChild(link);
 
-        this.setState({resultsData : this.state.resultsData, selected : this.state.selected, loading: this.state.loading, underDev: false,view:this.state.view});
+        this.setState({
+            resultsData: this.state.resultsData,
+            selected: this.state.selected,
+            loading: this.state.loading,
+            underDev: false,
+            view: this.state.view
+        });
     },
     loadDataFromServer: function (eType) {
-        this.setState({selected:eType, loading: true});
-        var searchUrl = context+"/engine/api/searches/"+this.props.searchUid+"/results?entityType="+eType+"&sources="+sourcesDirty+"&types="+typesDirty
+        this.setState({selected: eType, loading: true});
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + eType + "&sources=" + sourcesDirty + "&types=" + typesDirty
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -621,7 +665,13 @@ var ResultsContainer = React.createClass({
                 //alert(JSON.stringify(data_to_handle));
                 //data_to_handle = JSON.parse(JSON.stringify(data))
                 //data_to_maintain = JSON.parse(JSON.stringify(data))
-                this.setState({resultsData : data_to_handle, selected : eType, loading: false, underDev: false, originalData : data_to_maintain});
+                this.setState({
+                    resultsData: data_to_handle,
+                    selected: eType,
+                    loading: false,
+                    underDev: false,
+                    originalData: data_to_maintain
+                });
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -629,34 +679,52 @@ var ResultsContainer = React.createClass({
         });
     },
     getInitialState: function () {
-        return {resultsData: "", selected: "person", loading: true, underDev: false, crawled : false,view: this.props.view, selectedChecks : []};
+        return {
+            resultsData: "",
+            selected: "person",
+            loading: true,
+            underDev: false,
+            crawled: false,
+            view: this.props.view,
+            selectedChecks: []
+        };
     },
     componentDidMount: function () {
         this.loadDataFromServer(this.props.entityType);
     },
-    componentWillReceiveProps: function(nextProps){
+    componentWillReceiveProps: function (nextProps) {
         // see if it actually changed
         if (nextProps.entityType !== this.props.entityType) {
             this.loadDataFromServer(nextProps.entityType);
         }
     },
-    render: function(){
-        var personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1">{getTranslation("people")}</li>
-        var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2">{getTranslation("organisations")}</li>
-        var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3">{getTranslation("products")}</li>
-        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4">{getTranslation("tor_websites")}</li>
-        var documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5">{getTranslation("documents")}</li>
+    render: function () {
+        var personenItem = <li className="headers-li" onClick={this.props.onTypeChange}
+                               data-id="1">{getTranslation("people")}</li>
+        var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange}
+                                     data-id="2">{getTranslation("organisations")}</li>
+        var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange}
+                               data-id="3">{getTranslation("products")}</li>
+        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange}
+                              data-id="4">{getTranslation("tor_websites")}</li>
+        var documentItem = <li className="headers-li" onClick={this.props.onTypeChange}
+                               data-id="5">{getTranslation("documents")}</li>
 
-        if(this.state.selected==="person") {
-            personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p><b>{getTranslation("people")}</b></p></li>
-        } else if(this.state.selected==="organization"){
-            organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p><b>{getTranslation("organisations")}</b></p></li>
-        } else if(this.state.selected==="product"){
-            produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p><b>{getTranslation("products")}</b></p></li>
-        } else if(this.state.selected==="website"){
-            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p><b>{getTranslation("tor_websites")}</b></p></li>
-        } else if(this.state.selected==="document"){
-            documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p><b>{getTranslation("documents")}</b></p></li>
+        if (this.state.selected === "person") {
+            personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
+                <b>{getTranslation("people")}</b></p></li>
+        } else if (this.state.selected === "organization") {
+            organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p>
+                <b>{getTranslation("organisations")}</b></p></li>
+        } else if (this.state.selected === "product") {
+            produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
+                <b>{getTranslation("products")}</b></p></li>
+        } else if (this.state.selected === "website") {
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
+                <b>{getTranslation("tor_websites")}</b></p></li>
+        } else if (this.state.selected === "document") {
+            documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p>
+                <b>{getTranslation("documents")}</b></p></li>
         }
 
         if (this.state.loading) {
@@ -681,8 +749,9 @@ var ResultsContainer = React.createClass({
 
                 <div className="row">
                     <div className="col-md-12 text-center">
-                        <img className="img-responsive center-block" src={context+"/assets/images/ajaxLoading.gif"} alt="Loading results"/>
-                        <h2><img src={context+"/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
+                        <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
+                             alt="Loading results"/>
+                        <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
                     </div>
                 </div>
             </div>;
@@ -691,16 +760,14 @@ var ResultsContainer = React.createClass({
         var final_data = this.state.resultsData;
 
         //Facets filtering algorithm
-        if(Object.keys(this.props.facetsDict).length > 0)
-        {
+        if (Object.keys(this.props.facetsDict).length > 0) {
             final_data = this.state.originalData
             for (var key in this.props.facetsDict) {
                 if (this.props.facetsDict.hasOwnProperty(key)) {
-                    var facet_name = "fs:"+key
+                    var facet_name = "fs:" + key
                     var facet_values = this.props.facetsDict[key]
 
-                    function containsAll(source,target)
-                    {
+                    function containsAll(source, target) {
                         var found = false;
                         for (var i = 0; i < target.length; i++) {
                             if (source.indexOf(target[i]) > -1) {
@@ -713,9 +780,8 @@ var ResultsContainer = React.createClass({
 
                     function filterByFacet(obj) {
                         //Comparing array of elements
-                        if (Array.isArray(obj[facet_name]))
-                        {
-                            if  (containsAll(obj[facet_name],facet_values))
+                        if (Array.isArray(obj[facet_name])) {
+                            if (containsAll(obj[facet_name], facet_values))
                                 return true;
                             else
                                 return false;
@@ -728,6 +794,7 @@ var ResultsContainer = React.createClass({
                                 return false;
                         }
                     }
+
                     var as = final_data.filter(filterByFacet);
                     final_data = JSON.parse(JSON.stringify(as));
                 }
@@ -738,8 +805,7 @@ var ResultsContainer = React.createClass({
         }
 
         //No results
-        if(final_data === undefined)
-        {
+        if (final_data === undefined) {
             return <div className="col-md-9">
                 <div id="results-paginator-options" className="results-paginator-options">
                     <div class="off result-pages-count"></div>
@@ -776,42 +842,41 @@ var ResultsContainer = React.createClass({
             </div>
         }
 
-        if(this.state.underDev)
-        {
+        if (this.state.underDev) {
             return <div className="col-md-9">
-                    <div id="results-paginator-options" className="results-paginator-options">
-                        <div class="off result-pages-count"></div>
-                        <div className="row">
-                            <div className="col-md-8 tabulator">
-                                <ul className="list-inline">
-                                    <li>
-                                        <span className="total-results">{final_data.length}</span>
-                                        <span className="total-results-label"> {getTranslation("results")}:</span>
-                                    </li>
-                                    {personenItem}
-                                    {organizationenItem}
-                                    {produkteItem}
-                                    {darkWebItem}
-                                    {documentItem}
-                                </ul>
-                            </div>
-                            <div className="col-md-4 text-right">
-                                &nbsp;
-                            </div>
+                <div id="results-paginator-options" className="results-paginator-options">
+                    <div class="off result-pages-count"></div>
+                    <div className="row">
+                        <div className="col-md-8 tabulator">
+                            <ul className="list-inline">
+                                <li>
+                                    <span className="total-results">{final_data.length}</span>
+                                    <span className="total-results-label"> {getTranslation("results")}:</span>
+                                </li>
+                                {personenItem}
+                                {organizationenItem}
+                                {produkteItem}
+                                {darkWebItem}
+                                {documentItem}
+                            </ul>
                         </div>
-                    </div>
-                    <div className="search-results-content">
-                        <div className="row">
-                            <div className="col-md-12">
-                                <ul id="search-results" className="search-results">
-                                    <ul className="results-list list-unstyled">
-                                        <h1>{getTranslation("underdevelopment")}</h1>
-                                    </ul>
-                                </ul>
-                            </div>
+                        <div className="col-md-4 text-right">
+                            &nbsp;
                         </div>
                     </div>
                 </div>
+                <div className="search-results-content">
+                    <div className="row">
+                        <div className="col-md-12">
+                            <ul id="search-results" className="search-results">
+                                <ul className="results-list list-unstyled">
+                                    <h1>{getTranslation("underdevelopment")}</h1>
+                                </ul>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
 
         return <div className="col-md-9">
@@ -832,40 +897,45 @@ var ResultsContainer = React.createClass({
                         </ul>
                     </div>
                     <div className="col-md-4 text-right">
-                        { this.state.selected==="website" ? <CustomForm id = "btn_crawl" class_identifier="crawl_icon" func={this.crawlAll}></CustomForm> : null }
-                        { this.state.selected==="website" ? <div className="divider"/> : null }
-                        <CustomForm id = "btn_view_selector" class_identifier={(this.state.view == "list"? "table" : "list") + "_icon"} func={this.toggleResultsView}></CustomForm>
+                        { this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"
+                                                                          func={this.crawlAll}></CustomForm> : null }
+                        { this.state.selected === "website" ? <div className="divider"/> : null }
+                        <CustomForm id="btn_view_selector"
+                                    class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
+                                    func={this.toggleResultsView}></CustomForm>
                         <div className="divider"/>
-                        <CustomForm id = "btn_map" class_identifier="map_icon" func={this.underDevelopmentFunction}></CustomForm>
+                        <CustomForm id="btn_map" class_identifier="map_icon"
+                                    func={this.underDevelopmentFunction}></CustomForm>
                         <div className="divider"/>
-                        <CustomForm id = "btn_graph" class_identifier="graph_icon" func={this.underDevelopmentFunction}></CustomForm>
+                        <CustomForm id="btn_graph" class_identifier="graph_icon"
+                                    func={this.underDevelopmentFunction}></CustomForm>
                         <div className="divider"/>
-                        <CustomForm id = "btn_csv" class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
+                        <CustomForm id="btn_csv" class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
                     </div>
                 </div>
             </div>
             <div className="search-results-content">
                 <div className="row">
                     { this.state.view == "list" ?
-                    <div className="col-md-12">
-                        <ul id="search-results" className="search-results">
-                            <ul className="results-list list-unstyled">
-                                <ResultsList data={final_data}
-                                             crawled={this.state.crawled}>
-                                </ResultsList>
+                        <div className="col-md-12">
+                            <ul id="search-results" className="search-results">
+                                <ul className="results-list list-unstyled">
+                                    <ResultsList data={final_data}
+                                                 crawled={this.state.crawled}>
+                                    </ResultsList>
 
+                                </ul>
                             </ul>
-                            </ul>
-                    </div>
+                        </div>
                         :
                         <div id="search-results" className="search-results">
-                                <ResultsTable data={final_data}
-                                              crawled={this.state.crawled}
-                                              type={this.props.entityType}
-                                              checksListener={this.checksListener}
-                                >
-                                </ResultsTable>
-                          </div>
+                            <ResultsTable data={final_data}
+                                          crawled={this.state.crawled}
+                                          type={this.props.entityType}
+                                          checksListener={this.checksListener}
+                            >
+                            </ResultsTable>
+                        </div>
                     }
                 </div>
             </div>
@@ -874,9 +944,10 @@ var ResultsContainer = React.createClass({
 });
 
 var CustomForm = React.createClass({
-    render: function() {
+    render: function () {
         return (
-            <button id={this.props.id} onClick={this.props.func} className={this.props.class_identifier} title={getTranslation(this.props.class_identifier)}>
+            <button id={this.props.id} onClick={this.props.func} className={this.props.class_identifier}
+                    title={getTranslation(this.props.class_identifier)}>
             </button>
         );
     }
@@ -890,7 +961,7 @@ var ResultsList = React.createClass({
 
         var already_crawled = this.props.crawled
         var resultsNodes = resultsNodesSorted.map(function (result) {
-            if(result["@type"] === "foaf:Person"){
+            if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultElement
                         img={result.image}
@@ -913,7 +984,7 @@ var ResultsList = React.createClass({
                     >
                     </PersonResultElement>
                 );
-            } else if(result["@type"] === "foaf:Organization") {
+            } else if (result["@type"] === "foaf:Organization") {
                 return (
                     <OrganizationResultElement
                         img={result.image}
@@ -926,7 +997,7 @@ var ResultsList = React.createClass({
                         webpage={result.url}>
                     </OrganizationResultElement>
                 );
-            } else if(result["@type"] === "gr:ProductOrService") {
+            } else if (result["@type"] === "gr:ProductOrService") {
                 return (
                     <ProductResultElement
                         img={result.image}
@@ -939,11 +1010,11 @@ var ResultsList = React.createClass({
                         webpage={result.url}>
                     </ProductResultElement>
                 );
-            } else if(result["@type"] === "foaf:Document") {
-                if(result["fs:source"] === "ELASTIC") {
+            } else if (result["@type"] === "foaf:Document") {
+                if (result["fs:source"] === "ELASTIC") {
                     return (
                         <ElasticSearchResultElement
-                            img={context+"/assets/images/datasources/Elasticsearch.png"}
+                            img={context + "/assets/images/datasources/Elasticsearch.png"}
                             content={result["fs:content"]}
                             label={result["fs:title"]}
                             onion_url={result["fs:url"]}
@@ -956,7 +1027,7 @@ var ResultsList = React.createClass({
                 } else {
                     return (
                         <WebResultElement
-                            img={context+"/assets/images/datasources/TorLogo.png"}
+                            img={context + "/assets/images/datasources/TorLogo.png"}
                             onion_url={result.url}
                             comment={result["fs:excerpt"]}
                             source={result["fs:source"]}
@@ -964,7 +1035,7 @@ var ResultsList = React.createClass({
                         </WebResultElement>
                     );
                 }
-            } else if(result["@type"] === "fs:Document") {
+            } else if (result["@type"] === "fs:Document") {
                 return (
                     <DocumentResultElement
                         label={result["fs:title"]}
@@ -991,13 +1062,13 @@ var ResultsList = React.createClass({
 var WebResultElement = React.createClass({
     createCrawlJob: function () {
         console.info("Creating crawl job task")
-        var createCrawlJobUrl = context+"/crawling/jobs/create";
+        var createCrawlJobUrl = context + "/crawling/jobs/create";
 
         $.ajax({
             url: createCrawlJobUrl,
-            data: JSON.stringify({ "seedURLs": [ this.props.onion_url ]}),
+            data: JSON.stringify({"seedURLs": [this.props.onion_url]}),
             type: "POST",
-            dataType : "text",
+            dataType: "text",
             contentType: "application/json; charset=utf-8",
             cache: false,
             success: function () {
@@ -1008,7 +1079,7 @@ var WebResultElement = React.createClass({
             }.bind(this)
         });
     },
-    onCreateCrawlJobClick: function() {
+    onCreateCrawlJobClick: function () {
         this.createCrawlJob();
     },
     getInitialState: function () {
@@ -1030,17 +1101,21 @@ var WebResultElement = React.createClass({
                             </h2>
                             <div className="subtitle">
                                 <p><b>{getTranslation("comment")}</b>: {this.props.comment}</p>
-                                <p><b>Link: </b>: <a href={this.props.onion_url} target="_blank">{getTranslation("clickhere")}</a></p>
+                                <p><b>Link: </b>: <a href={this.props.onion_url}
+                                                     target="_blank">{getTranslation("clickhere")}</a></p>
                             </div>
                         </div>
                     </div>
                     <div>
                         <div>
                             <div>
-                                <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                                <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
+                                     alt={"Information from " + this.props.source} height="45" width="45"/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{ this.props.crawled==true || this.state.crawlJobCreated===true ? <label>{getTranslation("crawlJobCreated")}</label> : <button onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
+                                &nbsp;&nbsp;{ this.props.crawled == true || this.state.crawlJobCreated === true ?
+                                <label>{getTranslation("crawlJobCreated")}</label> : <button
+                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
                             </div>
                         </div>
                     </div>
@@ -1052,7 +1127,7 @@ var WebResultElement = React.createClass({
 
 var SnapshotLink = React.createClass({
     showPDF: function () {
-        var url = context+"/screenshot?url="+this.props.webpage;
+        var url = context + "/screenshot?url=" + this.props.webpage;
         window.open(url);
     },
     render: function () {
@@ -1078,17 +1153,25 @@ var ProductResultElement = React.createClass({
                                 {this.props.title}
                             </h2>
                             <div className="subtitle">
-                                { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
-                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
-                                { this.props.price !== undefined ? <p>{getTranslation("price")}: {this.props.price}</p> : null }
-                                { this.props.condition !== undefined ? <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a><SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                { this.props.location !== undefined ?
+                                    <p>{getTranslation("location")}: {this.props.location}</p> : null }
+                                { this.props.country !== undefined ?
+                                    <p>{getTranslation("country")}: {this.props.country}</p> : null }
+                                { this.props.price !== undefined ?
+                                    <p>{getTranslation("price")}: {this.props.price}</p> : null }
+                                { this.props.condition !== undefined ?
+                                    <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
+                                { this.props.webpage !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
+                                                                           target="_blank">{this.props.webpage}</a><SnapshotLink
+                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
+                                 alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1104,7 +1187,9 @@ var PersonResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/> : <img src={context+"/assets/images/datasources/Unknown.png"} height="60px" width="75px"/> }
+                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/> :
+                                <img src={context + "/assets/images/datasources/Unknown.png"} height="60px"
+                                     width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1113,26 +1198,41 @@ var PersonResultElement = React.createClass({
                                 {this.props.name}
                             </h2>
                             <div className="subtitle">
-                                { this.props.alias !== undefined ? <p>{getTranslation("nick")}: {this.props.alias}</p> : null }
-                                { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
-                                { this.props.gender !== undefined ? <p>{getTranslation("gender")}: {this.props.gender}</p> : null }
-                                { this.props.occupation !== undefined ? <p>{getTranslation("occupation")}: {this.props.occupation}</p> : null }
-                                { this.props.birthday !== undefined ? <p>{getTranslation("birthday")}: {this.props.birthday}</p> : null }
-                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
+                                { this.props.alias !== undefined ?
+                                    <p>{getTranslation("nick")}: {this.props.alias}</p> : null }
+                                { this.props.location !== undefined ?
+                                    <p>{getTranslation("location")}: {this.props.location}</p> : null }
+                                { this.props.gender !== undefined ?
+                                    <p>{getTranslation("gender")}: {this.props.gender}</p> : null }
+                                { this.props.occupation !== undefined ?
+                                    <p>{getTranslation("occupation")}: {this.props.occupation}</p> : null }
+                                { this.props.birthday !== undefined ?
+                                    <p>{getTranslation("birthday")}: {this.props.birthday}</p> : null }
+                                { this.props.country !== undefined ?
+                                    <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a> <SnapshotLink webpage={this.props.webpage}></SnapshotLink> </p> : null }
-                                { this.props.active_email !== undefined ? <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
-                                { this.props.wants !== undefined ? <p><b>{getTranslation("wants")}:</b> {this.props.wants}</p> : null }
-                                { this.props.haves !== undefined ? <p><b>{getTranslation("haves")}:</b> {this.props.haves}</p> : null }
-                                { this.props.top_haves !== undefined && this.props.top_haves !== "null" ? <p><b>{getTranslation("top_haves")}:</b> {this.props.top_haves}</p> : null }
-                                { this.props.interests !== undefined ? <p><b>{getTranslation("interests")}:</b> {this.props.interests}</p> : null }
+                                { this.props.webpage !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
+                                                                           target="_blank">{this.props.webpage}</a>
+                                        <SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                { this.props.active_email !== undefined ?
+                                    <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
+                                { this.props.wants !== undefined ?
+                                    <p><b>{getTranslation("wants")}:</b> {this.props.wants}</p> : null }
+                                { this.props.haves !== undefined ?
+                                    <p><b>{getTranslation("haves")}:</b> {this.props.haves}</p> : null }
+                                { this.props.top_haves !== undefined && this.props.top_haves !== "null" ?
+                                    <p><b>{getTranslation("top_haves")}:</b> {this.props.top_haves}</p> : null }
+                                { this.props.interests !== undefined ?
+                                    <p><b>{getTranslation("interests")}:</b> {this.props.interests}</p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
+                                 alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1159,15 +1259,21 @@ var OrganizationResultElement = React.createClass({
                             <div className="subtitle">
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
-                                { this.props.location !== undefined ? <p>{getTranslation("location")}: {this.props.location}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a><SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                { this.props.country !== undefined ?
+                                    <p>{getTranslation("country")}: {this.props.country}</p> : null }
+                                { this.props.location !== undefined ?
+                                    <p>{getTranslation("location")}: {this.props.location}</p> : null }
+                                { this.props.webpage !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
+                                                                           target="_blank">{this.props.webpage}</a><SnapshotLink
+                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
+                                 alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1192,18 +1298,25 @@ var ElasticSearchResultElement = React.createClass({
                                 {this.props.label}
                             </h2>
                             <div className="subtitle">
-                                { this.props.content !== undefined ? <p><b>Content: </b>{this.props.content}</p> : null }
-                                { this.props.onion_url !== undefined ? <p><b>Onion Url: </b>{this.props.onion_url}</p> : null }
-                                { this.props.entity_url !== undefined ? <p><b>Entity URL: </b>{this.props.entity_url}</p> : null }
-                                { this.props.entity_dbpedia !== undefined ? <p><b>Entity DBPedia: </b>{this.props.entity_dbpedia}</p> : null }
-                                { this.props.entity_type !== undefined ? <p><b>Entity type: </b>{this.props.entity_type}</p> : null }
-                                { this.props.entity_name !== undefined ? <p><b>Entity name: </b>{this.props.entity_name}</p> : null }
+                                { this.props.content !== undefined ?
+                                    <p><b>Content: </b>{this.props.content}</p> : null }
+                                { this.props.onion_url !== undefined ?
+                                    <p><b>Onion Url: </b>{this.props.onion_url}</p> : null }
+                                { this.props.entity_url !== undefined ?
+                                    <p><b>Entity URL: </b>{this.props.entity_url}</p> : null }
+                                { this.props.entity_dbpedia !== undefined ?
+                                    <p><b>Entity DBPedia: </b>{this.props.entity_dbpedia}</p> : null }
+                                { this.props.entity_type !== undefined ?
+                                    <p><b>Entity type: </b>{this.props.entity_type}</p> : null }
+                                { this.props.entity_name !== undefined ?
+                                    <p><b>Entity name: </b>{this.props.entity_name}</p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={context+"/assets/images/datasources/Elasticsearch.png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context + "/assets/images/datasources/Elasticsearch.png"}
+                                 alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1219,7 +1332,8 @@ var DocumentResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={context+"/assets/images/icons/"+this.props.extension+".png"}height="60px" width="75px"/>
+                            <img src={context + "/assets/images/icons/" + this.props.extension + ".png"} height="60px"
+                                 width="75px"/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1229,16 +1343,23 @@ var DocumentResultElement = React.createClass({
                             </h2>
                             <div className="subtitle">
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                { this.props.country !== undefined ? <p>{getTranslation("country")}: {this.props.country}</p> : null }
-                                { this.props.language !== undefined ? <p>{getTranslation("language")}: {this.props.language}</p> : null }
-                                { this.props.filename !== undefined ? <p>{getTranslation("filename")}: {this.props.filename}</p> : null }
-                                { this.props.webpage !== undefined ? <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a><SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                { this.props.country !== undefined ?
+                                    <p>{getTranslation("country")}: {this.props.country}</p> : null }
+                                { this.props.language !== undefined ?
+                                    <p>{getTranslation("language")}: {this.props.language}</p> : null }
+                                { this.props.filename !== undefined ?
+                                    <p>{getTranslation("filename")}: {this.props.filename}</p> : null }
+                                { this.props.webpage !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
+                                                                           target="_blank">{this.props.webpage}</a><SnapshotLink
+                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
-                            <img src={context+"/assets/images/datasources/"+this.props.source+".png"} alt={"Information from "+this.props.source} height="45" width="45"/>
+                            <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
+                                 alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
                     </div>
                 </div>
@@ -1247,4 +1368,4 @@ var DocumentResultElement = React.createClass({
     }
 });
 
-React.render(<ContainerResults url={context+"/keyword"} pollInterval={200000}/>, document.getElementById('skeleton'));
+React.render(<ContainerResults url={context + "/keyword"} pollInterval={200000}/>, document.getElementById('skeleton'));
