@@ -1060,6 +1060,27 @@ var ResultsList = React.createClass({
 });
 
 var WebResultElement = React.createClass({
+    checkOnionSite: function () {
+        var searchUrl = context + "/checkOnionSite?site=" + this.props.onion_url;
+
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                if(data.valid) {
+                    this.createCrawlJob();
+                }
+                else {
+                    alert("NOT VALID ONION SITE. Crawling Job not started.")
+                }
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
     createCrawlJob: function () {
         console.info("Creating crawl job task")
         var createCrawlJobUrl = context + "/crawling/jobs/create";
@@ -1080,7 +1101,7 @@ var WebResultElement = React.createClass({
         });
     },
     onCreateCrawlJobClick: function () {
-        this.createCrawlJob();
+        this.checkOnionSite()
     },
     getInitialState: function () {
         return {crawlJobCreated: false};
