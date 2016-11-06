@@ -1072,7 +1072,7 @@ var WebResultElement = React.createClass({
                     this.createCrawlJob();
                 }
                 else {
-                    alert("NOT VALID ONION SITE. Crawling Job not started.")
+                    alert(getTranslation("tor_invalid_websites"));
                 }
 
             }.bind(this),

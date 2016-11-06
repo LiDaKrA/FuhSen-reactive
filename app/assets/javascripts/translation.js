@@ -96,7 +96,8 @@ var dictEng = {
     "server_error": "There was an error during search or no active tokens where available... Please try again!",
     "no_results": "No results found.",
     "tor_websites": "Onion web sites",
-    "select_file": "Select file"
+    "select_file": "Select file",
+    "tor_invalid_websites": "The web site you are trying to crawl seems to be not online anymore. Crawling Job not started."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -203,7 +204,8 @@ var dictGer = {
     "server_error": "Es gab ein Serverproblem während der Suche oder es konnte kein gültiges Token gefunden werden... Bitte versuchen Sie es erneut!",
     "no_results": "Es konnten keine Ergebnisse gefunden werden.",
     "tor_websites": "Webseiten",
-    "select_file": "Datei aussuchen"
+    "select_file": "Datei aussuchen",
+    "tor_invalid_websites": "Die Website ist nicht mehr online. Crawling Job nicht gestartet."
 };
 
 window.dictGer = dictGer;
