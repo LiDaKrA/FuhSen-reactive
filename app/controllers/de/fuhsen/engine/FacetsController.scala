@@ -51,7 +51,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                     """
         current_model = QueryExecutionFactory.create(query, model).execConstruct()
       case None =>
-        InternalServerError("Provided uid has not result model associated.")
+        InternalServerError("The provided UID has not a model associated in the cache.")
     }
 
     entityType match {
@@ -147,6 +147,43 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
 
   }
 
+  def getGeneratedFacets(uid: String, entityType: String) = Action { request =>
+    Logger.info("Facets for search : " + uid + " entityType: "+entityType)
+
+    val typeEntity = entityType match {
+      case "person" => "foaf:Person"
+      case "organization" => "foaf:Organization"
+      case "product" => "gr:ProductOrService"
+      case "document" => "fs:Document"
+      case "website" => "fs:Annotation"
+    }
+
+    GraphResultsCache.getModel(uid) match {
+      case Some(model) =>
+        Logger.info("Model size: "+model.size())
+        val query = s"""
+                       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                       PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                       PREFIX gr: <http://purl.org/goodrelations/v1#>
+
+                       SELECT (SAMPLE(?p) AS ?facet) (COUNT(?p) as ?elems)
+                       WHERE
+                       {
+                         ?s a fs:SearchableEntity .
+                         ?s a $typeEntity .
+                         ?s ?p ?o
+                       } GROUP BY ?p
+                    """
+        val results = QueryExecutionFactory.create(query, model).execSelect()
+        val facetModel = getGenericFacetsModel(results)
+        Ok(RDFUtil.modelToTripleString(facetModel, Lang.JSONLD))
+      case None =>
+        InternalServerError("The provided UID has not a model associated in the cache.")
+    }
+  }
+
   //Construct did not work, I do not understand why. Temporally we are executing select queries //getFacetResultSet
   /*private def getSubModelWithFacet(facet: String, entityType :String, model :Model) : Model = {
 
@@ -181,6 +218,33 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
 
   }
   */
+
+  private def getGenericFacetsModel(resultSet: ResultSet) : Model = {
+
+    val facetsModel = ModelFactory.createDefaultModel()
+
+    while(resultSet.hasNext) {
+      val result = resultSet.next
+      val name = result.getResource("facet").getURI
+      val count = result.getLiteral("elems").getString
+
+      var id = ""
+
+      if (name.split("#").length > 1)
+        id = name.split("#").last
+      else
+        id = name.split("/").last
+
+      val resource = facetsModel.createResource(FuhsenVocab.FACET_URI + id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_VALUE), name)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_COUNT), count)
+
+    }
+
+    facetsModel
+
+  }
 
   private def getFacetResultSet(facet: String, entityType :String, model :Model) : ResultSet = {
 
