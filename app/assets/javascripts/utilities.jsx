@@ -19,3 +19,94 @@ var RichText = React.createClass({
         );
     }
 });
+var Graph = React.createClass({
+    convertData : function(entity){
+        var graph = {"nodes" : [],"links": []};
+
+        //Generate Graph
+        graph["nodes"].push({"name":entity["fs:title"],"type":"PERSON"});
+        if (entity["fs:location"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:location"], "type": "LOC"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("location")});
+        }
+
+        if (entity["fs:country"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:country"], "type": "LOC"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("country")});
+        }
+
+        if (entity["fs:gender"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:gender"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("gender")});
+        }
+
+        graph["nodes"].push({"name":entity["fs:source"],"type":"LITERAL"});
+        graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("source")});
+
+        if (entity["fs:label"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:label"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":"Label"});
+        }
+
+        if (entity["fs:birthday"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:birthday"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("birthday")});
+        }
+
+        if (entity["fs:occupation"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:occupation"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("occupation")});
+        }
+
+        if (entity["fs:liveIn"] !== undefined) {
+            for (var i = 0; i < entity["fs:liveIn"].length; i++) {
+                graph["nodes"].push({"name": entity["fs:liveIn"][i], "type": "LOC"});
+                graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("liveIn")});
+            }
+        }
+        if (entity["fs:workAt"] !== undefined) {
+            for (var i = 0; i < entity["fs:workAt"].length; i++) {
+                graph["nodes"].push({"name": entity["fs:workAt"][i], "type": "ORG"});
+                graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("workAt")});
+            }
+        }
+        if (entity["fs:studyAt"] !== undefined) {
+            for (var i = 0; i < entity["fs:studyAt"].length; i++) {
+                graph["nodes"].push({"name": entity["fs:studyAt"][i], "type": "ORG"});
+                graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("studyAt")});
+            }
+        }
+        return graph;
+    },
+    openOverlayScreen: function(){
+        document.getElementById("overlayScreen" + this.props.id).style.width = "100%";
+
+        var el = "#" + this.props.id;
+        var graph = this.convertData(this.props.entity);
+        var graph_Height = $("#overlayScreen" + this.props.id).height();
+        d3Graph.create(el, {
+            width: graph_Height*2,
+            height: graph_Height,
+            charge : -700,
+            linkDist : 350,
+            linkStrength : 0.7,
+            gravity : 0.04
+        }, graph);
+    },
+    closeOverlayScreen: function(){
+        document.getElementById("overlayScreen" + this.props.id).style.width = "0%";
+        d3Graph.destroy();
+    },
+    render: function () {
+        return(
+            <div>
+                <div className ="overlay" id = {"overlayScreen"+this.props.id}>
+                    <a href="javascript:void(0)" className="closebtn" onClick={this.closeOverlayScreen}>&times;</a>
+                    <div className="works rolefacet" id={this.props.id}>
+                    </div>
+                </div>
+                <a href="javascript:void(0)" onClick={this.openOverlayScreen}>Show Graph</a>
+            </div>
+        );
+    }
+});

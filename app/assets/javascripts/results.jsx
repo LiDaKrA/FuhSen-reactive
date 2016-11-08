@@ -960,9 +960,10 @@ var ResultsList = React.createClass({
         //var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
 
         var already_crawled = this.props.crawled
-        var resultsNodes = resultsNodesSorted.map(function (result) {
+        var resultsNodes = resultsNodesSorted.map(function (result,i) {
             if (result["@type"] === "foaf:Person") {
                 return (
+                    <div>
                     <PersonResultElement
                         img={result.image}
                         name={result["fs:title"]}
@@ -983,6 +984,8 @@ var ResultsList = React.createClass({
                         interests={result["fs:interests"]}
                     >
                     </PersonResultElement>
+                    <Graph id={"graph"+i} entity={result}/>
+                        </div>
                 );
             } else if (result["@type"] === "foaf:Organization") {
                 return (
