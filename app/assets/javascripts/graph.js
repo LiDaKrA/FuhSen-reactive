@@ -90,7 +90,7 @@ d3Graph.update = function (graph) {
 
     nodeContainer.filter(function(d){ return d.type ==  "IMAGE"; })
         .append('image')
-        .attr('xlink:href',function(d,i){
+        .attr('xlink:href',function(d){
             return d.name;//image url
         })
         .attr('height',2*r)
