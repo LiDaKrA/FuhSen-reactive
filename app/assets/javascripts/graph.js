@@ -10,7 +10,8 @@ var typeToColor = {
     "PERSON" : "#ffcc66",
     "LOC" : "#99ddff",
     "ORG" : "#85e085",
-    "LITERAL" : "#fff"};
+    "LITERAL" : "#fff",
+    "IMAGE": "#ffcc66"};
 
 d3Graph.force = null;
 d3Graph.svg = null;
@@ -87,6 +88,15 @@ d3Graph.update = function (graph) {
         .data(graph.nodes)
         .enter().append('svg:g');
 
+    nodeContainer.filter(function(d){ return d.type ==  "IMAGE"; })
+        .append('image')
+        .attr('xlink:href',function(d,i){
+            return d.name;//image url
+        })
+        .attr('height',2*r)
+        .attr('width',2*r)
+        .call(this.force.drag);
+
     nodeContainer.filter(function(d){ return d.type ==  "LITERAL"; })
         .append('svg:rect')
         .attr("width", rectW)
@@ -97,7 +107,7 @@ d3Graph.update = function (graph) {
         .call(this.force.drag);
 
     nodeContainer
-        .filter(function(d){ return d.type !=  "LITERAL"; })
+        .filter(function(d){ return d.type !=  "LITERAL" && d.type != "IMAGE"; })
         .append('svg:circle')
         .attr("class", "node")
         .attr("r", r)
@@ -105,7 +115,8 @@ d3Graph.update = function (graph) {
         .call(this.force.drag);
 
 
-    nodeContainer.filter(function(d){ return d.type !=  "LITERAL"; })
+
+    nodeContainer.filter(function(d){ return d.type !=  "LITERAL" && d.type != "IMAGE"; })
         .append("svg:text")
         .text(function (d) {
             return d.name;

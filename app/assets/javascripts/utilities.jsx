@@ -25,9 +25,19 @@ var Graph = React.createClass({
 
         //Generate Graph
         graph["nodes"].push({"name":entity["fs:title"],"type":"PERSON"});
+
+        if (entity.image !== undefined) {
+            graph["nodes"].push({"name": entity.image, "type": "IMAGE"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":"image"});
+        }
+
         if (entity["fs:location"] !== undefined) {
             graph["nodes"].push({"name": entity["fs:location"], "type": "LOC"});
             graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("location")});
+        }
+        if (entity["fs:alias"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:alias"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("nick")});
         }
 
         if (entity["fs:country"] !== undefined) {
