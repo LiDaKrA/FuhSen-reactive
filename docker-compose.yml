@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+
+  silk-service:
+    image: lidakra/silk:v1.0.0 
+    container_name: silk
+    ports:
+      - "9005:9005"
+    networks:
+      - fuhsen-net
+
+  fuhsen-service:
+    image: lidakra/fuhsen:v1.1.0
+    container_name: fuhsen
+    ports:
+      - "9000:9000"
+    networks:
+      - fuhsen-net
+    volumes:
+      - /home/luigi/projects/fraunhofer/lidakra/fuhsen-conf/application.conf:/home/lidakra/fuhsen-1.1.0/conf/application.conf 
+
+networks:
+  fuhsen-net:
+    external: true
+
