@@ -989,6 +989,7 @@ var ResultsList = React.createClass({
                 );
             } else if (result["@type"] === "foaf:Organization") {
                 return (
+                    <div>
                     <OrganizationResultElement
                         img={result.image}
                         title={result["fs:title"]}
@@ -999,9 +1000,12 @@ var ResultsList = React.createClass({
                         location={result["fs:location"]}
                         webpage={result.url}>
                     </OrganizationResultElement>
+                        <Graph id={"graph"+i} entity={result}/>
+                    </div>
                 );
             } else if (result["@type"] === "gr:ProductOrService") {
                 return (
+                    <div>
                     <ProductResultElement
                         img={result.image}
                         title={result["fs:title"]}
@@ -1012,6 +1016,8 @@ var ResultsList = React.createClass({
                         condition={result["fs:condition"]}
                         webpage={result.url}>
                     </ProductResultElement>
+                        <Graph id={"graph"+i} entity={result}/>
+                    </div>
                 );
             } else if (result["@type"] === "foaf:Document") {
                 if (result["fs:source"] === "ELASTIC") {

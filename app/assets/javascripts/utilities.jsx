@@ -20,7 +20,15 @@ var RichText = React.createClass({
     }
 });
 var Graph = React.createClass({
-    convertData : function(entity){
+    convertData : function (entity) {
+        if(entity["@type"] === "foaf:Person")
+            return this.convertPersonData(entity);
+        else if (entity["@type"] === "foaf:Organization")
+            return this.convertOrgData(entity);
+        else if (entity["@type"] === "gr:ProductOrService")
+            return this.convertProductData(entity);
+    },
+    convertPersonData : function(entity){
         var graph = {"nodes" : [],"links": []};
 
         //Generate Graph
@@ -85,6 +93,77 @@ var Graph = React.createClass({
                 graph["nodes"].push({"name": entity["fs:studyAt"][i], "type": "ORG"});
                 graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("studyAt")});
             }
+        }
+        return graph;
+    },
+    convertOrgData : function(entity){
+        var graph = {"nodes" : [],"links": []};
+
+        //Generate Graph
+        graph["nodes"].push({"name":entity["fs:title"],"type":"ORG"});
+
+        if (entity.image !== undefined) {
+            graph["nodes"].push({"name": entity.image, "type": "IMAGE"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":"image"});
+        }
+
+        if (entity["fs:location"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:location"], "type": "LOC"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("location")});
+        }
+
+        if (entity["fs:country"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:country"], "type": "LOC"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("country")});
+        }
+        graph["nodes"].push({"name":entity["fs:source"],"type":"LITERAL"});
+        graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("source")});
+
+        if (entity["fs:label"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:label"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":"Label"});
+        }
+        return graph;
+    },
+    convertProductData: function (entity) {
+        // img={result.image}
+        // title={result["fs:title"]}
+        // source={result["fs:source"]}
+        // location={result["fs:location"]}
+        // country={result["fs:country"]}
+        // price={result["fs:price"]}
+        // condition={result["fs:condition"]}
+        // webpage={result.url}>
+
+        var graph = {"nodes" : [],"links": []};
+
+        //Generate Graph
+        graph["nodes"].push({"name":entity["fs:title"],"type":"ORG"});
+
+        if (entity.image !== undefined) {
+            graph["nodes"].push({"name": entity.image, "type": "IMAGE"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":"image"});
+        }
+
+        if (entity["fs:location"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:location"], "type": "LOC"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("location")});
+        }
+
+        if (entity["fs:country"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:country"], "type": "LOC"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("country")});
+        }
+        graph["nodes"].push({"name":entity["fs:source"],"type":"LITERAL"});
+        graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("source")});
+
+        if (entity["fs:price"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:price"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("price")});
+        }
+        if (entity["fs:condition"] !== undefined) {
+            graph["nodes"].push({"name": entity["fs:condition"], "type": "LITERAL"});
+            graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("condition")});
         }
         return graph;
     },
