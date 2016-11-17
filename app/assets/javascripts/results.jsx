@@ -1334,7 +1334,7 @@ var ElasticSearchResultElement = React.createClass({
                                 { this.props.onion_url !== undefined ?
                                     <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
                                                                            onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a><SnapshotLink
-                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                        webpage={this.props.onion_url.replace(".onion",".onion.to")}></SnapshotLink></p> : null }
                                 { this.props.content !== undefined ?
                                     <p><b>Content: </b>{this.props.content}</p> : null }
                                 { this.props.entity_url !== undefined ?
