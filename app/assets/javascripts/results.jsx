@@ -1106,6 +1106,12 @@ var WebResultElement = React.createClass({
     getInitialState: function () {
         return {crawlJobCreated: false};
     },
+    onClickLink : function(url,e){
+        e.preventDefault();
+        if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
+            url = url.replace(".onion",".onion.to");
+        window.open(url,'_blank');
+    },
     render: function () {
         return (
             <li className="item bt">
@@ -1122,8 +1128,8 @@ var WebResultElement = React.createClass({
                             </h2>
                             <div className="subtitle">
                                 <p><b>{getTranslation("comment")}</b>: {this.props.comment}</p>
-                                <p><b>Link: </b>: <a href={this.props.onion_url}
-                                                     target="_blank">{getTranslation("clickhere")}</a></p>
+                                <p><b>Link: </b><a href={this.props.onion_url}
+                                                     onClick={this.onClickLink.bind(this,this.props.onion_url)}>{getTranslation("clickhere")}</a></p>
                             </div>
                         </div>
                     </div>
@@ -1304,6 +1310,12 @@ var OrganizationResultElement = React.createClass({
 });
 
 var ElasticSearchResultElement = React.createClass({
+    onClickLink : function(url,e){
+        e.preventDefault();
+        if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
+            url = url.replace(".onion",".onion.to");
+        window.open(url,'_blank');
+    },
     render: function () {
         return (
             <li className="item bt">
@@ -1321,7 +1333,7 @@ var ElasticSearchResultElement = React.createClass({
                             <div className="subtitle">
                                 { this.props.onion_url !== undefined ?
                                     <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
-                                                                           target="_blank">{this.props.onion_url}</a><SnapshotLink
+                                                                           onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a><SnapshotLink
                                         webpage={this.props.webpage}></SnapshotLink></p> : null }
                                 { this.props.content !== undefined ?
                                     <p><b>Content: </b>{this.props.content}</p> : null }
