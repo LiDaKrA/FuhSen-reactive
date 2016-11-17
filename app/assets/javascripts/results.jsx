@@ -1017,7 +1017,7 @@ var ResultsList = React.createClass({
                             img={context + "/assets/images/datasources/Elasticsearch.png"}
                             content={result["fs:content"]}
                             label={result["fs:title"]}
-                            onion_url={result["fs:url"]}
+                            onion_url={result.url}
                             entity_url={result["fs:entity_url"]}
                             entity_dbpedia={result["fs:entity_dbpedia"]}
                             entity_type={result["fs:entity_type"]}
@@ -1319,10 +1319,12 @@ var ElasticSearchResultElement = React.createClass({
                                 {this.props.label}
                             </h2>
                             <div className="subtitle">
+                                { this.props.onion_url !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
+                                                                           target="_blank">{this.props.onion_url}</a><SnapshotLink
+                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
                                 { this.props.content !== undefined ?
                                     <p><b>Content: </b>{this.props.content}</p> : null }
-                                { this.props.onion_url !== undefined ?
-                                    <p><b>Onion Url: </b>{this.props.onion_url}</p> : null }
                                 { this.props.entity_url !== undefined ?
                                     <p><b>Entity URL: </b>{this.props.entity_url}</p> : null }
                                 { this.props.entity_dbpedia !== undefined ?
