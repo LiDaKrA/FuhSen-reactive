@@ -39,6 +39,8 @@ object FuhsenVocab {
   val KEYWORD = NS + "#" + "keyword"
   val RANK = NS + "#" + "rank"
   val FACET_URI = NS + "/" + "facet#"
+  val FACET_VAL_URI = NS + "/" + "facetVal#"
+  val HAS_FACET_VAL = NS + "/" + "hasFacet"
   val FACET = NS + "#" + "Facet"
   val FACET_VALUE = NS + "#" + "value"
   val FACET_COUNT = NS + "#" + "count"

@@ -3,18 +3,144 @@ package controllers.de.fuhsen.engine
 import javax.inject.Inject
 
 import controllers.de.fuhsen.FuhsenVocab
-import org.apache.jena.query.{ResultSet, Syntax, QueryExecutionFactory, QueryFactory}
+import org.apache.jena.query.{ResultSet, QueryExecutionFactory, QueryFactory}
 import org.apache.jena.rdf.model.{Model, ModelFactory}
 import org.apache.jena.riot.Lang
 import play.Logger
 import play.api.libs.ws.WSClient
 import play.api.mvc.{Action, Controller}
 import utils.dataintegration.RDFUtil
-import play.api.libs.json._
+import scala.collection.JavaConversions.asScalaIterator
 /**
   * Created by dcollarana on 6/23/2016.
   */
 class FacetsController @Inject()(ws: WSClient) extends Controller {
+
+  def getGeneratedFacets(uid: String, entityType: String) = Action { request =>
+    Logger.info("Facets for search : " + uid + " entityType: "+entityType)
+
+    val typeEntity = entityType match {
+      case "person" => "foaf:Person"
+      case "organization" => "foaf:Organization"
+      case "product" => "gr:ProductOrService"
+      case "document" => "fs:Document"
+      case "website" => "fs:Annotation"
+    }
+
+    GraphResultsCache.getModel(uid) match {
+      case Some(model) =>
+        Logger.info("Model size: "+model.size())
+        val query = s"""
+                       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                       PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                       PREFIX gr: <http://purl.org/goodrelations/v1#>
+
+                       SELECT (SAMPLE(?p) AS ?facet) (COUNT(?p) as ?elems)
+                       WHERE
+                       {
+                         ?s a fs:SearchableEntity .
+                         ?s a $typeEntity .
+                         ?s ?p ?o
+                       } GROUP BY ?p
+                    """
+        val results = QueryExecutionFactory.create(query, model).execSelect()
+        val facetModel = getGenericFacetsModel(results, typeEntity, model)
+        Ok(RDFUtil.modelToTripleString(facetModel, Lang.JSONLD))
+      case None =>
+        InternalServerError("The provided UID has not a model associated in the cache.")
+    }
+  }
+
+  private def getGenericFacetsModel(resultSet: ResultSet, entityType :String, kg : Model) : Model = {
+
+    val facetsModel = ModelFactory.createDefaultModel()
+
+    while(resultSet.hasNext) {
+      val result = resultSet.next
+      val facetUri = result.getResource("facet").getURI
+      val count = result.getLiteral("elems").getString
+
+      var id = ""
+
+      if (facetUri.split("#").length > 1)
+        id = facetUri.split("#").last
+      else
+        id = facetUri.split("/").last
+
+      val resource = facetsModel.createResource(FuhsenVocab.FACET_URI + id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_VALUE), facetUri)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_COUNT), count)
+
+      getGenericFacetValues(facetUri, entityType, kg).map( r => resource.addProperty(facetsModel.createProperty(FuhsenVocab.HAS_FACET_VAL), r))
+      //Logger.info("facetId: "+id+" FacetValueSize: "+results.size+"")
+    }
+    facetsModel
+  }
+
+  private def getGenericFacetValues(facet: String, entityType :String, model: Model) : List[String] = {
+
+    val query = s"""
+                      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                      PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                      PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                      PREFIX gr: <http://purl.org/goodrelations/v1#>
+
+                      SELECT (SAMPLE(?fct) AS ?facet) (COUNT(?fct) as ?elems)
+                      WHERE {
+                        ?p a $entityType .
+                        ?p <$facet> ?fct .
+                      } GROUP BY ?fct
+                    """
+    val resultSet = QueryExecutionFactory.create(query, model).execSelect()
+    resultSet.map { r =>
+      if (r.get("facet").isLiteral)
+        r.getLiteral("facet").getString.replace("^"," ")+"^"+r.getLiteral("elems").getString
+      else
+        ""
+    }.filter( p => !p.isEmpty ).toList
+  }
+
+  //Construct did not work, I do not understand why. Temporally we are executing select queries //getFacetResultSet
+  /*private def getSubModelWithFacet(facet: String, entityType :String, model :Model) : Model = {
+
+    entityType match {
+      case "person" =>
+        facet match {
+          case "gender" =>
+            Logger.info("Executing Construct Query")
+            val query = QueryFactory.create(
+              s"""
+                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                 |
+                 |CONSTRUCT   {
+                 |?p rdf:type fs:FacetValue .
+                 |?p fs:count ?nelements .
+                 |?p foaf:gender ?gender
+                 |}
+                 |WHERE {
+                 |  ?p rdf:type foaf:Person .
+                 |  ?p foaf:gender ?gender .
+                 | { SELECT ?gender ( COUNT(?gender) as ?nelements ) { ?p foaf:gender ?gender } GROUP BY ?gender }
+                 |  FILTER ( ?nelements > 0 )
+                 |}
+          """.stripMargin)
+            val myModel = QueryExecutionFactory.create(query, model).execConstruct()
+            myModel
+        }
+    }
+
+  }
+  */
+
+  //Old hard-coded implementation to generate Facets
+  /*
 
   def getFacets(uid: String, entityType: String) = Action { request =>
     Logger.info("Facets for search : " + uid + " entityType: "+entityType)
@@ -144,105 +270,6 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
       case None =>
         InternalServerError("Provided uid has not result model associated.")
     }
-
-  }
-
-  def getGeneratedFacets(uid: String, entityType: String) = Action { request =>
-    Logger.info("Facets for search : " + uid + " entityType: "+entityType)
-
-    val typeEntity = entityType match {
-      case "person" => "foaf:Person"
-      case "organization" => "foaf:Organization"
-      case "product" => "gr:ProductOrService"
-      case "document" => "fs:Document"
-      case "website" => "fs:Annotation"
-    }
-
-    GraphResultsCache.getModel(uid) match {
-      case Some(model) =>
-        Logger.info("Model size: "+model.size())
-        val query = s"""
-                       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                       PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
-                       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                       PREFIX gr: <http://purl.org/goodrelations/v1#>
-
-                       SELECT (SAMPLE(?p) AS ?facet) (COUNT(?p) as ?elems)
-                       WHERE
-                       {
-                         ?s a fs:SearchableEntity .
-                         ?s a $typeEntity .
-                         ?s ?p ?o
-                       } GROUP BY ?p
-                    """
-        val results = QueryExecutionFactory.create(query, model).execSelect()
-        val facetModel = getGenericFacetsModel(results)
-        Ok(RDFUtil.modelToTripleString(facetModel, Lang.JSONLD))
-      case None =>
-        InternalServerError("The provided UID has not a model associated in the cache.")
-    }
-  }
-
-  //Construct did not work, I do not understand why. Temporally we are executing select queries //getFacetResultSet
-  /*private def getSubModelWithFacet(facet: String, entityType :String, model :Model) : Model = {
-
-    entityType match {
-      case "person" =>
-        facet match {
-          case "gender" =>
-            Logger.info("Executing Construct Query")
-            val query = QueryFactory.create(
-              s"""
-                 |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                 |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
-                 |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                 |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                 |
-                 |CONSTRUCT   {
-                 |?p rdf:type fs:FacetValue .
-                 |?p fs:count ?nelements .
-                 |?p foaf:gender ?gender
-                 |}
-                 |WHERE {
-                 |  ?p rdf:type foaf:Person .
-                 |  ?p foaf:gender ?gender .
-                 | { SELECT ?gender ( COUNT(?gender) as ?nelements ) { ?p foaf:gender ?gender } GROUP BY ?gender }
-                 |  FILTER ( ?nelements > 0 )
-                 |}
-          """.stripMargin)
-            val myModel = QueryExecutionFactory.create(query, model).execConstruct()
-            myModel
-        }
-    }
-
-  }
-  */
-
-  private def getGenericFacetsModel(resultSet: ResultSet) : Model = {
-
-    val facetsModel = ModelFactory.createDefaultModel()
-
-    while(resultSet.hasNext) {
-      val result = resultSet.next
-      val name = result.getResource("facet").getURI
-      val count = result.getLiteral("elems").getString
-
-      var id = ""
-
-      if (name.split("#").length > 1)
-        id = name.split("#").last
-      else
-        id = name.split("/").last
-
-      val resource = facetsModel.createResource(FuhsenVocab.FACET_URI + id)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), id)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_VALUE), name)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_COUNT), count)
-
-    }
-
-    facetsModel
 
   }
 
@@ -617,4 +644,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     facetsModel
 
   }
+
+  */
+
 }
