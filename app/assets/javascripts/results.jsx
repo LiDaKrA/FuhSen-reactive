@@ -1137,7 +1137,8 @@ var WebResultElement = React.createClass({
                         <div>
                             <div>
                                 <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                     alt={"Information from " + this.props.source} height="45" width="45"/>
+                                     alt={"Information from " + this.props.source} height="45" width="45"
+                                     title={this.props.source}/>
                             </div>
                             <div>
                                 &nbsp;&nbsp;{ this.props.crawled == true || this.state.crawlJobCreated === true ?
@@ -1198,7 +1199,8 @@ var ProductResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                     </div>
                 </div>
@@ -1259,7 +1261,8 @@ var PersonResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                     </div>
                 </div>
@@ -1300,7 +1303,8 @@ var OrganizationResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                     </div>
                 </div>
@@ -1351,7 +1355,8 @@ var ElasticSearchResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/Elasticsearch.png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title="Elasticsearch"/>
                         </div>
                     </div>
                 </div>
@@ -1394,7 +1399,8 @@ var DocumentResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                     </div>
                 </div>
