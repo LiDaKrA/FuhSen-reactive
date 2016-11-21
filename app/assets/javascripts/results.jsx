@@ -956,15 +956,14 @@ var CustomForm = React.createClass({
 var ResultsList = React.createClass({
     render: function () {
 
-        var resultsNodesSorted = this.props.data; //.sort(compareRank)
-        //var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
+        var resultsNodesSorted = this.props.data;
 
-        var already_crawled = this.props.crawled
-        var resultsNodes = resultsNodesSorted.map(function (result,i) {
+        var already_crawled = this.props.crawled;
+        var resultsNodes = resultsNodesSorted.map(function (result,idx) {
             if (result["@type"] === "foaf:Person") {
                 return (
-                    <div>
                     <PersonResultElement
+                        id = {idx}
                         img={result.image}
                         name={result["fs:title"]}
                         source={result["fs:source"]}
@@ -982,15 +981,14 @@ var ResultsList = React.createClass({
                         haves={result["fs:haves"]}
                         top_haves={result["fs:top_haves"]}
                         interests={result["fs:interests"]}
+                        jsonResult = {result}
                     >
                     </PersonResultElement>
-                    <Graph id={"graph"+i} entity={result}/>
-                        </div>
                 );
             } else if (result["@type"] === "foaf:Organization") {
                 return (
-                    <div>
                     <OrganizationResultElement
+                        id = {idx}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -998,15 +996,14 @@ var ResultsList = React.createClass({
                         comment={result["fs:comment"]}
                         country={result["fs:country"]}
                         location={result["fs:location"]}
-                        webpage={result.url}>
+                        webpage={result.url}
+                        jsonResult = {result}>
                     </OrganizationResultElement>
-                        <Graph id={"graph"+i} entity={result}/>
-                    </div>
                 );
             } else if (result["@type"] === "gr:ProductOrService") {
                 return (
-                    <div>
                     <ProductResultElement
+                        id = {idx}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1014,10 +1011,9 @@ var ResultsList = React.createClass({
                         country={result["fs:country"]}
                         price={result["fs:price"]}
                         condition={result["fs:condition"]}
-                        webpage={result.url}>
+                        webpage={result.url}
+                        jsonResult = {result}>
                     </ProductResultElement>
-                        <Graph id={"graph"+i} entity={result}/>
-                    </div>
                 );
             } else if (result["@type"] === "foaf:Document") {
                 if (result["fs:source"] === "ELASTIC") {
@@ -1182,6 +1178,7 @@ var ProductResultElement = React.createClass({
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
+                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
                 </div>
             </li>
@@ -1243,6 +1240,7 @@ var PersonResultElement = React.createClass({
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
+                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
                 </div>
             </li>
@@ -1284,6 +1282,7 @@ var OrganizationResultElement = React.createClass({
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"/>
                         </div>
+                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
                 </div>
             </li>

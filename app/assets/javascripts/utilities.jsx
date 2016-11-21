@@ -126,14 +126,6 @@ var Graph = React.createClass({
         return graph;
     },
     convertProductData: function (entity) {
-        // img={result.image}
-        // title={result["fs:title"]}
-        // source={result["fs:source"]}
-        // location={result["fs:location"]}
-        // country={result["fs:country"]}
-        // price={result["fs:price"]}
-        // condition={result["fs:condition"]}
-        // webpage={result.url}>
 
         var graph = {"nodes" : [],"links": []};
 
@@ -189,12 +181,12 @@ var Graph = React.createClass({
     render: function () {
         return(
             <div>
+                <button onClick={this.openOverlayScreen}>&nbsp;Show Graph&nbsp;</button>
                 <div className ="overlay" id = {"overlayScreen"+this.props.id}>
                     <a href="javascript:void(0)" className="closebtn" onClick={this.closeOverlayScreen}>&times;</a>
                     <div className="works rolefacet" id={this.props.id}>
                     </div>
                 </div>
-                <a href="javascript:void(0)" onClick={this.openOverlayScreen}>Show Graph</a>
             </div>
         );
     }
