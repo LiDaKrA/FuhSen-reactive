@@ -77,21 +77,63 @@ var Graph = React.createClass({
         }
 
         if (entity["fs:liveIn"] !== undefined) {
-            for (var i = 0; i < entity["fs:liveIn"].length; i++) {
-                graph["nodes"].push({"name": entity["fs:liveIn"][i], "type": "LOC"});
-                graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("liveIn")});
+            if(Array.isArray(entity["fs:liveIn"])) {
+                for (var i = 0; i < entity["fs:liveIn"].length; i++) {
+                    graph["nodes"].push({"name": entity["fs:liveIn"][i], "type": "LOC"});
+                    graph["links"].push({
+                        "source": 0,
+                        "target": graph["nodes"].length - 1,
+                        "label": getTranslation("liveIn")
+                    });
+                }
+            }
+            else{
+                graph["nodes"].push({"name": entity["fs:liveIn"], "type": "LOC"});
+                graph["links"].push({
+                    "source": 0,
+                    "target": graph["nodes"].length - 1,
+                    "label": getTranslation("liveIn")
+                });
             }
         }
         if (entity["fs:workAt"] !== undefined) {
-            for (var i = 0; i < entity["fs:workAt"].length; i++) {
-                graph["nodes"].push({"name": entity["fs:workAt"][i], "type": "ORG"});
-                graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("workAt")});
+            if(Array.isArray(entity["fs:workAt"])){
+                for (var i = 0; i < entity["fs:workAt"].length; i++) {
+                    graph["nodes"].push({"name": entity["fs:workAt"][i], "type": "ORG"});
+                    graph["links"].push({
+                        "source": 0,
+                        "target": graph["nodes"].length - 1,
+                        "label": getTranslation("workAt")
+                    });
+                }
+            }
+            else{
+                graph["nodes"].push({"name": entity["fs:workAt"], "type": "ORG"});
+                graph["links"].push({
+                    "source": 0,
+                    "target": graph["nodes"].length - 1,
+                    "label": getTranslation("workAt")
+                });
             }
         }
         if (entity["fs:studyAt"] !== undefined) {
-            for (var i = 0; i < entity["fs:studyAt"].length; i++) {
-                graph["nodes"].push({"name": entity["fs:studyAt"][i], "type": "ORG"});
-                graph["links"].push({"source":0,"target":graph["nodes"].length - 1,"label":getTranslation("studyAt")});
+            if(Array.isArray(entity["fs:studyAt"])){
+                for (var i = 0; i < entity["fs:studyAt"].length; i++) {
+                    graph["nodes"].push({"name": entity["fs:studyAt"][i], "type": "ORG"});
+                    graph["links"].push({
+                        "source": 0,
+                        "target": graph["nodes"].length - 1,
+                        "label": getTranslation("studyAt")
+                    });
+                }
+            }
+            else{
+                graph["nodes"].push({"name": entity["fs:studyAt"], "type": "ORG"});
+                graph["links"].push({
+                    "source": 0,
+                    "target": graph["nodes"].length - 1,
+                    "label": getTranslation("studyAt")
+                });
             }
         }
         return graph;
