@@ -1144,7 +1144,7 @@ var WebResultElement = React.createClass({
                             <div>
                                 &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true ?
                                 <label>{getTranslation("crawlJobCreated")}</label> : <button
-                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : "Invalid TOR Site" }
+                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
                             </div>
                         </div>
                     </div>
