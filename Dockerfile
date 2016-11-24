@@ -80,6 +80,7 @@ RUN tar xvf fuhsen-1.1.0.tgz
 COPY schema/ /home/lidakra/fuhsen-1.1.0/schema/
 
 # Start Fuhsen
+COPY start_fuhsen.sh /home/lidakra/fuhsen-1.1.0
 WORKDIR /home/lidakra/fuhsen-1.1.0
-
-CMD ./bin/fuhsen
+RUN ["chmod", "u+x", "start_fuhsen.sh"]
+CMD ./start_fuhsen.sh
