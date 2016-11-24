@@ -1022,7 +1022,7 @@ var ResultsList = React.createClass({
                             img={context + "/assets/images/datasources/Elasticsearch.png"}
                             content={result["fs:content"]}
                             label={result["fs:title"]}
-                            onion_url={result["fs:url"]}
+                            onion_url={result.url}
                             entity_url={result["fs:entity_url"]}
                             entity_dbpedia={result["fs:entity_dbpedia"]}
                             entity_type={result["fs:entity_type"]}
@@ -1065,6 +1065,28 @@ var ResultsList = React.createClass({
 });
 
 var WebResultElement = React.createClass({
+    checkOnionSite: function () {
+        var searchUrl = context + "/checkOnionSite?site=" + this.props.onion_url;
+
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                if(data.valid) {
+                    this.createCrawlJob();
+                }
+                else {
+                    alert(getTranslation("tor_invalid_websites"));
+                    this.setState({validTORSite: false});
+                }
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
     createCrawlJob: function () {
         console.info("Creating crawl job task")
         var createCrawlJobUrl = context + "/crawling/jobs/create";
@@ -1085,10 +1107,16 @@ var WebResultElement = React.createClass({
         });
     },
     onCreateCrawlJobClick: function () {
-        this.createCrawlJob();
+        this.checkOnionSite()
     },
     getInitialState: function () {
-        return {crawlJobCreated: false};
+        return {crawlJobCreated: false, validTORSite: true};
+    },
+    onClickLink : function(url,e){
+        e.preventDefault();
+        if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
+            url = url.replace(".onion",".onion.to");
+        window.open(url,'_blank');
     },
     render: function () {
         return (
@@ -1106,8 +1134,8 @@ var WebResultElement = React.createClass({
                             </h2>
                             <div className="subtitle">
                                 <p><b>{getTranslation("comment")}</b>: {this.props.comment}</p>
-                                <p><b>Link: </b>: <a href={this.props.onion_url}
-                                                     target="_blank">{getTranslation("clickhere")}</a></p>
+                                <p><b>Link: </b><a href={this.props.onion_url}
+                                                     onClick={this.onClickLink.bind(this,this.props.onion_url)}>{getTranslation("clickhere")}</a></p>
                             </div>
                         </div>
                     </div>
@@ -1115,12 +1143,13 @@ var WebResultElement = React.createClass({
                         <div>
                             <div>
                                 <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                     alt={"Information from " + this.props.source} height="45" width="45"/>
+                                     alt={"Information from " + this.props.source} height="45" width="45"
+                                     title={this.props.source}/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{ this.props.crawled == true || this.state.crawlJobCreated === true ?
+                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true ?
                                 <label>{getTranslation("crawlJobCreated")}</label> : <button
-                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
+                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
                             </div>
                         </div>
                     </div>
@@ -1176,7 +1205,8 @@ var ProductResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                         <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
@@ -1238,7 +1268,8 @@ var PersonResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                         <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
@@ -1280,7 +1311,8 @@ var OrganizationResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                         <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
@@ -1291,6 +1323,12 @@ var OrganizationResultElement = React.createClass({
 });
 
 var ElasticSearchResultElement = React.createClass({
+    onClickLink : function(url,e){
+        e.preventDefault();
+        if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
+            url = url.replace(".onion",".onion.to");
+        window.open(url,'_blank');
+    },
     render: function () {
         return (
             <li className="item bt">
@@ -1306,10 +1344,12 @@ var ElasticSearchResultElement = React.createClass({
                                 {this.props.label}
                             </h2>
                             <div className="subtitle">
+                                { this.props.onion_url !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
+                                                                           onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a><SnapshotLink
+                                        webpage={this.props.onion_url.replace(".onion",".onion.to")}></SnapshotLink></p> : null }
                                 { this.props.content !== undefined ?
                                     <p><b>Content: </b>{this.props.content}</p> : null }
-                                { this.props.onion_url !== undefined ?
-                                    <p><b>Onion Url: </b>{this.props.onion_url}</p> : null }
                                 { this.props.entity_url !== undefined ?
                                     <p><b>Entity URL: </b>{this.props.entity_url}</p> : null }
                                 { this.props.entity_dbpedia !== undefined ?
@@ -1324,7 +1364,8 @@ var ElasticSearchResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/Elasticsearch.png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title="Elasticsearch"/>
                         </div>
                     </div>
                 </div>
@@ -1367,7 +1408,8 @@ var DocumentResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                     </div>
                 </div>
