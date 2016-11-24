@@ -1073,6 +1073,7 @@ var WebResultElement = React.createClass({
                 }
                 else {
                     alert(getTranslation("tor_invalid_websites"));
+                    this.setState({validTORSite: false});
                 }
 
             }.bind(this),
@@ -1104,7 +1105,7 @@ var WebResultElement = React.createClass({
         this.checkOnionSite()
     },
     getInitialState: function () {
-        return {crawlJobCreated: false};
+        return {crawlJobCreated: false, validTORSite: true};
     },
     onClickLink : function(url,e){
         e.preventDefault();
@@ -1141,9 +1142,9 @@ var WebResultElement = React.createClass({
                                      title={this.props.source}/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{ this.props.crawled == true || this.state.crawlJobCreated === true ?
+                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true ?
                                 <label>{getTranslation("crawlJobCreated")}</label> : <button
-                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
+                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
                             </div>
                         </div>
                     </div>

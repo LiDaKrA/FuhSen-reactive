@@ -97,7 +97,8 @@ var dictEng = {
     "no_results": "No results found.",
     "tor_websites": "Onion web sites",
     "select_file": "Select file",
-    "tor_invalid_websites": "The web site you are trying to crawl seems to be not online anymore. Crawling Job not started."
+    "tor_invalid_websites": "The web site you are trying to crawl seems to be not online anymore. Crawling Job not started.",
+    "invalid_website": "The website is offline"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -205,7 +206,8 @@ var dictGer = {
     "no_results": "Es konnten keine Ergebnisse gefunden werden.",
     "tor_websites": "Webseiten",
     "select_file": "Datei aussuchen",
-    "tor_invalid_websites": "Die Website ist nicht mehr online. Crawling Job nicht gestartet."
+    "tor_invalid_websites": "Die Website ist nicht mehr online. Crawling Job nicht gestartet.",
+    "invalid_website": "Die Website ist offline"
 };
 
 window.dictGer = dictGer;
