@@ -898,19 +898,13 @@ var ResultsContainer = React.createClass({
                     </div>
                     <div className="col-md-4 text-right">
                         { this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"
-                                                                          func={this.crawlAll}></CustomForm> : null }
+                                                                          func={this.crawlAll}/> : null }
                         { this.state.selected === "website" ? <div className="divider"/> : null }
                         <CustomForm id="btn_view_selector"
-                                    class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
-                                    func={this.toggleResultsView}></CustomForm>
+    class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
+    func={this.toggleResultsView}/>
                         <div className="divider"/>
-                        <CustomForm id="btn_map" class_identifier="map_icon"
-                                    func={this.underDevelopmentFunction}></CustomForm>
-                        <div className="divider"/>
-                        <CustomForm id="btn_graph" class_identifier="graph_icon"
-                                    func={this.underDevelopmentFunction}></CustomForm>
-                        <div className="divider"/>
-                        <CustomForm id="btn_csv" class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
+                        <CustomForm id="btn_csv" class_identifier="csv_icon" func={this.csvFunction}/>
                     </div>
                 </div>
             </div>
