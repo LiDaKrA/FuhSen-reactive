@@ -188,7 +188,7 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType: type});
+        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}});
     },
     render: function () {
         if (this.state.initData) {
@@ -198,7 +198,8 @@ var Container = React.createClass({
                            entityType={this.state.entityType}
                            onFacetSelection={this.onFacetSelection}
                            onFacetRemoval={this.onFacetRemoval}
-                           currentTab={this.state.entityType}/>
+                           currentTab={this.state.entityType}
+                           orgFacetsDict = {this.state.orgFacetsDict}/>
                 <ResultsContainer searchUid={this.props.searchUid}
                                   keyword={this.props.keyword}
                                   entityType={this.state.entityType}
@@ -229,16 +230,18 @@ var FacetList = React.createClass({
     onFacetRemoval: function (facetName,propertyName, valueSelected) {
         this.props.onFacetRemoval(facetName,propertyName, valueSelected)
     },
-    loadFacetsFromServer: function (eType) {
+    loadFacetsFromServer: function (eType,selectedFacets) {
         var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType;
-
         $.ajax({
             type: 'POST',
             url: searchUrl,
             dataType: 'json',
             cache: false,
-            success: function (data) {
-                this.setState({data: data["@graph"]});
+            data:JSON.stringify(selectedFacets),
+            contentType: 'application/json',
+            success: function (response) {
+                console.log(JSON.stringify(response["@graph"]))
+                this.setState({data: response["@graph"]});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -249,12 +252,15 @@ var FacetList = React.createClass({
         return {data: null};
     },
     componentDidMount: function () {
-        this.loadFacetsFromServer(this.props.entityType);
+        this.loadFacetsFromServer(this.props.entityType,this.props.orgFacetsDict);
     },
     componentWillReceiveProps: function (nextProps) {
         // see if it actually changed
         if (nextProps.entityType !== this.props.entityType) {
-            this.loadFacetsFromServer(nextProps.entityType);
+            this.loadFacetsFromServer(nextProps.entityType,nextProps.orgFacetsDict);
+        }
+        else{
+            this.loadFacetsFromServer(this.props.entityType,nextProps.orgFacetsDict);
         }
     },
     render: function () {
@@ -273,7 +279,8 @@ var FacetList = React.createClass({
                                        count={menuItems["http://vocab.lidakra.de/fuhsen#count"]}
                                        onFacetSelection={this.onFacetSelection}
                                        onFacetRemoval={this.onFacetRemoval}
-                                       currentTab={this.props.currentTab}/>
+                                       currentTab={this.props.currentTab}
+                                       selectedFacets ={this.props.orgFacetsDict}/>
                 }
             }, this);
             return (
@@ -393,8 +400,8 @@ var FacetItems = React.createClass({
     render: function () {
         var selItems = [];
         var _onFacetItemRemoveClick = this.onFacetItemRemoveClick;
-        if (this.state.selected_facets.length > 0) {
-            this.state.selected_facets.map(function (item) {
+        if (this.props.selectedFacets[this.props.property]) {
+            this.props.selectedFacets[this.props.property].map(function (item) {
                 selItems.push(<li data-fctvalue={item}>
                     <span title="male" className="facet-value">{item}</span>
                     <a title="Remove" className="facet-remove fr" onClick={_onFacetItemRemoveClick.bind(this, item)}>

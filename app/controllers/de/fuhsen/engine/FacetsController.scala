@@ -17,7 +17,27 @@ import scala.collection.JavaConversions.asScalaIterator
 class FacetsController @Inject()(ws: WSClient) extends Controller {
 
   def getGeneratedFacets(uid: String, entityType: String) = Action { request =>
-    Logger.info("Facets for search : " + uid + " entityType: "+entityType)
+    val selectedFacets = if(request.body.asJson != null) request.body.asJson.get.as[Map[String,List[String]]] else null
+
+    var subFilterQuery = ""
+    if(selectedFacets != null){
+        val predicates = selectedFacets.keys.mkString(" ")
+        Logger.info("Facets for search : " + uid + " entityType: "+entityType + " body: "+ predicates)
+        val selRdfs = selectedFacets.map(x => "?s <" + x._1 + "> \"" + x._2(0) + "\" .")
+        val  selRdfPatterns = selRdfs.mkString("\n")
+        subFilterQuery = if (selRdfPatterns.length() > 0) s"""{
+                                                                SELECT ?s
+                                                                WHERE
+                                                                {
+                                                                    $selRdfPatterns
+                                                                }
+                                                              }""" else ""
+    }
+    else{
+        Logger.info("Facets for search : " + uid + " entityType: "+entityType)
+    }
+
+
 
     val typeEntity = entityType match {
       case "person" => "foaf:Person"
@@ -29,7 +49,12 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
 
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
-        Logger.info("Model size: "+model.size())
+
+        var queryModel = model
+        if(subFilterQuery != "")
+          queryModel = getGenericSubModel(model,subFilterQuery)
+
+        Logger.info("Model size: "+queryModel.size())
         val query = s"""
                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                        PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
@@ -43,16 +68,38 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                          ?s a fs:SearchableEntity .
                          ?s a $typeEntity .
                          ?s ?p ?o
-                       } GROUP BY ?p
+                       }
+                       GROUP BY ?p
                     """
-        val results = QueryExecutionFactory.create(query, model).execSelect()
-        val facetModel = getGenericFacetsModel(results, typeEntity, model)
+        val results = QueryExecutionFactory.create(query, queryModel).execSelect()
+        val facetModel = getGenericFacetsModel(results, typeEntity, queryModel)
         Ok(RDFUtil.modelToTripleString(facetModel, Lang.JSONLD))
       case None =>
         InternalServerError("The provided UID has not a model associated in the cache.")
     }
   }
+  private def getGenericSubModel(model :Model,subFilterQuery :String ) : Model = {
+    val query = s"""
+                       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                       PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                       PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                       PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                       PREFIX gr: <http://purl.org/goodrelations/v1#>
 
+                       CONSTRUCT
+                        {
+                          ?s ?p ?o
+                        }
+                       WHERE
+                       {
+                         ?s a fs:SearchableEntity .
+                         ?s ?p ?o
+                         $subFilterQuery
+                       }
+                    """
+    val subModel = QueryExecutionFactory.create(query, model).execConstruct()
+    subModel
+  }
   private def getGenericFacetsModel(resultSet: ResultSet, entityType :String, kg : Model) : Model = {
 
     val facetsModel = ModelFactory.createDefaultModel()
