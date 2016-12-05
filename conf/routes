@@ -13,7 +13,7 @@ GET    /screenshot                                          controllers.de.fuhse
 POST    /engine/api/searches                                controllers.de.fuhsen.engine.SearchEngineController.startSession(query: String)
 GET     /engine/api/searches/:uid/results                   controllers.de.fuhsen.engine.SearchEngineController.search(uid: String, entityType: String, facets: Option[String], sources: String, types: String)
 DELETE  /engine/api/searches/:uid                           controllers.de.fuhsen.engine.SearchEngineController.stopSession(uid: String)
-POST    /engine/api/searches/:uid/facets                    controllers.de.fuhsen.engine.FacetsController.getGeneratedFacets(uid: String, entityType: String)
+POST    /engine/api/searches/:uid/facets                    controllers.de.fuhsen.engine.FacetsController.getGeneratedFacets(uid: String, entityType: String, lang: String)
 # GET     /engine/api/searches/:uid/facets/:facet             controllers.de.fuhsen.engine.FacetsController.getFacetValues(uid: String, facet: String, entityType: String)
 
 #Mini-task services enriching the results graph

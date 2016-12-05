@@ -16,7 +16,7 @@ import scala.collection.JavaConversions.asScalaIterator
   */
 class FacetsController @Inject()(ws: WSClient) extends Controller {
 
-  def getGeneratedFacets(uid: String, entityType: String) = Action { request =>
+  def getGeneratedFacets(uid: String, entityType: String,lang: String) = Action { request =>
     val selectedFacets = if(request.body.asJson != null) request.body.asJson.get.as[Map[String,List[String]]] else null
 
     var subFilterQuery = ""
@@ -62,14 +62,16 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                        PREFIX gr: <http://purl.org/goodrelations/v1#>
 
-                       SELECT (SAMPLE(?p) AS ?facet) (COUNT(?p) as ?elems)
+                       SELECT (SAMPLE(?p) AS ?facet) ?label (COUNT(?p) as ?elems)
                        WHERE
                        {
                          ?s a fs:SearchableEntity .
                          ?s a $typeEntity .
-                         ?s ?p ?o
+                         ?p rdfs:label ?label .
+                         ?s ?p ?o .
+                         FILTER (lang(?label) = '$lang')
                        }
-                       GROUP BY ?p
+                       GROUP BY ?p ?label
                     """
         val results = QueryExecutionFactory.create(query, queryModel).execSelect()
         val facetModel = getGenericFacetsModel(results, typeEntity, queryModel)
@@ -108,7 +110,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
       val result = resultSet.next
       val facetUri = result.getResource("facet").getURI
       val count = result.getLiteral("elems").getString
-
+      val label = result.getLiteral("label").getString
       var id = ""
 
       if (facetUri.split("#").length > 1)
@@ -117,7 +119,8 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
         id = facetUri.split("/").last
 
       val resource = facetsModel.createResource(FuhsenVocab.FACET_URI + id)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_NAME), id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), label)
       resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_VALUE), facetUri)
       resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_COUNT), count)
 

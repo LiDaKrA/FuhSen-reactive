@@ -132,3 +132,111 @@ fs:ElasticSearch	rdf:type	fs:InformationSource;
 			        rdfs:label 	"Crawled Onion websites";
 			        fs:finds "website";
 			        fs:key "elasticsearch" .
+
+#-------------------------------------------------------------
+# Entity Properties definition
+#-------------------------------------------------------------
+fs:source rdf:type owl:DatatypeProperty;
+         rdfs:label "Quelle"@de ,
+                    "Source"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:gender rdf:type owl:DatatypeProperty;
+         rdfs:label "Geschlecht"@de ,
+                    "Gender"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:alias rdf:type owl:DatatypeProperty;
+         rdfs:label "Spitzname"@de ,
+                    "Nick Name"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:birthday rdf:type owl:DatatypeProperty;
+         rdfs:label "Geburtstag"@de ,
+                    "Birthday"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:location rdf:type owl:DatatypeProperty;
+         rdfs:label "Ort"@de ,
+                    "Location"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:country rdf:type owl:DatatypeProperty;
+         rdfs:label "Land"@de ,
+                    "Country"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+
+fs:occupation rdf:type owl:DatatypeProperty;
+         rdfs:label "Beruf"@de ,
+                    "Occupation"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:liveIn rdf:type owl:DatatypeProperty;
+         rdfs:label "Lebt in"@de ,
+                    "Lived In"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:workAt rdf:type owl:DatatypeProperty;
+         rdfs:label "Arbeitet bei"@de ,
+                    "Work"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:studyAt rdf:type owl:DatatypeProperty;
+         rdfs:label "Studium an"@de ,
+                    "Studies"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:price rdf:type owl:DatatypeProperty;
+         rdfs:label "Preis"@de ,
+                    "Price"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:condition rdf:type owl:DatatypeProperty;
+         rdfs:label "Zustand"@de ,
+                    "Condition"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
+
+fs:filetype rdf:type owl:DatatypeProperty;
+         rdfs:label "Dateityp"@de ,
+                    "File type"@en ;
+         rdfs:comment "Todo"@de ,
+                      "Excerpt of the entity, part of the entity summarization process"@en ;
+         rdfs:domain fs:SearchableEntity ;
+         rdfs:range xsd:string .
