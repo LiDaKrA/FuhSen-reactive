@@ -156,10 +156,19 @@ var Container = React.createClass({
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
-                alert(getTranslation("server_error"));
+
+                if(err.toString().includes("Not Acceptable")){
+                    alert("ERROR: NOT VALID TOKEN FOUND!");
+                }else if(err.toString().includes("timeout")){
+                    alert("TIMEOUT: THE SEARCH TOOK TOO LONG!");
+                }else{
+                    alert("INTERNAL SERVER ERROR!");
+                }
+                
                 //Todo remove this hardcoded value
                 window.location.href = "/fuhsen";
             }.bind(this)
+            ,timeout: 15000 // sets timeout to 15 seconds
         });
     },
     componentDidMount: function () {
