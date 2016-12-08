@@ -60,9 +60,13 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       //Calling the RDF-Wrappers to get the information //engine.microtask.url
       ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword+"&wrapperIds="+finalSelectedDataSources).get.map {
         response =>
-          val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
-          model.add(wrappersResult)
-          Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
+          if(finalSelectedDataSources.length == 0) {
+            Ok("NO VALID TOKEN")
+          }else{
+            val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
+            model.add(wrappersResult)
+            Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
+          }
       }
   }
 
