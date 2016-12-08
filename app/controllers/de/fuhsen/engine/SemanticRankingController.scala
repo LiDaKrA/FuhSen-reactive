@@ -20,62 +20,67 @@ class SemanticRankingController extends Controller {
       //ToDo: Replace this with an extension to String class, .toRdfModel
       //Constructing the rdf results graph model
       val textBody = request.body.asText
-      val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)
 
-      val keyword = getKeyword(model)
-      Logger.info("Keyword: "+keyword)
+      if(!textBody.get.equals("NO VALID TOKEN")){
+        val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)
 
-      //2. Add rank property
-      //2.0 For Persons
-      //2.1 Execute query
-      val keywordQuery = QueryFactory.create(
-        s"""
-           |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-           |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
-           |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-           |SELECT ?person ?name ?source
-           |WHERE {
-           |OPTIONAL { ?person rdf:type foaf:Person . } .
-           |OPTIONAL { ?person rdf:type foaf:Organization . } .
-           |?person foaf:name ?name .
-           |?person fs:source ?source .
-           |}
+        val keyword = getKeyword(model)
+        Logger.info("Keyword: "+keyword)
+
+        //2. Add rank property
+        //2.0 For Persons
+        //2.1 Execute query
+        val keywordQuery = QueryFactory.create(
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |SELECT ?person ?name ?source
+             |WHERE {
+             |OPTIONAL { ?person rdf:type foaf:Person . } .
+             |OPTIONAL { ?person rdf:type foaf:Organization . } .
+             |?person foaf:name ?name .
+             |?person fs:source ?source .
+             |}
       """.stripMargin)
-      val resultSet = QueryExecutionFactory.create(keywordQuery, model).execSelect()
+        val resultSet = QueryExecutionFactory.create(keywordQuery, model).execSelect()
 
-      //2.2 Iterate on the results
-      val rankForPersonsModel = ModelFactory.createDefaultModel()
-      while(resultSet.hasNext) {
-        val result = resultSet.next
-        val name = result.getLiteral("name").getString
-        val source = result.getLiteral("source").getString
-        val resource = rankForPersonsModel.createResource(result.getResource("person").getURI)
-        //2.3 Add rank property value
-        if (name.contains(keyword))
-          if (source == "GoogleKG")
-            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "1")
-          else if (source == "Twitter")
-            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "2")
-          else if (source == "GooglePlus")
-            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "2")
-          else
-            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "3")
-        else {
-          if (source == "Twitter")
-            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "6")
-          else if (source == "GoogleKG")
-            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "7")
-          else
-            resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "5")
+        //2.2 Iterate on the results
+        val rankForPersonsModel = ModelFactory.createDefaultModel()
+        while(resultSet.hasNext) {
+          val result = resultSet.next
+          val name = result.getLiteral("name").getString
+          val source = result.getLiteral("source").getString
+          val resource = rankForPersonsModel.createResource(result.getResource("person").getURI)
+          //2.3 Add rank property value
+          if (name.contains(keyword))
+            if (source == "GoogleKG")
+              resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "1")
+            else if (source == "Twitter")
+              resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "2")
+            else if (source == "GooglePlus")
+              resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "2")
+            else
+              resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "3")
+          else {
+            if (source == "Twitter")
+              resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "6")
+            else if (source == "GoogleKG")
+              resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "7")
+            else
+              resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "5")
+          }
         }
+
+        //3 Add ranked triples to the results model
+        Logger.info("Rank Model Size: "+rankForPersonsModel.size())
+        model.add(rankForPersonsModel)
+
+        //4 Return the model containing the rank values
+        Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
+      }else{
+        Ok(textBody.get)
       }
-
-      //3 Add ranked triples to the results model
-      Logger.info("Rank Model Size: "+rankForPersonsModel.size())
-      model.add(rankForPersonsModel)
-
-      //4 Return the model containing the rank values
-      Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
   }
 
   private def getKeyword(model: Model): String = {
