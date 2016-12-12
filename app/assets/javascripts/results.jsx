@@ -231,7 +231,7 @@ var FacetList = React.createClass({
         this.props.onFacetRemoval(facetName,propertyName, valueSelected)
     },
     loadFacetsFromServer: function (eType,selectedFacets) {
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType;
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType + "&lang=" + window.localStorage.lang;
         $.ajax({
             type: 'POST',
             url: searchUrl,
@@ -240,7 +240,7 @@ var FacetList = React.createClass({
             data:JSON.stringify(selectedFacets),
             contentType: 'application/json',
             success: function (response) {
-                console.log(JSON.stringify(response["@graph"]))
+                console.log(JSON.stringify(response))
                 this.setState({data: response["@graph"]});
             }.bind(this),
             error: function (xhr, status, err) {
@@ -272,8 +272,8 @@ var FacetList = React.createClass({
                 if(menuItems["http://vocab.lidakra.de/fuhsen/hasFacet"] !== undefined) {
                     return <FacetItems searchUid={_searchUid}
                                        entityType={_entityType}
-                                       label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}
-                                       name={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}
+                                       label={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}//{getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetName"])}//
+                                       name={menuItems["http://vocab.lidakra.de/fuhsen#facetName"]}
                                        property={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
                                        facets={menuItems["http://vocab.lidakra.de/fuhsen/hasFacet"]}
                                        count={menuItems["http://vocab.lidakra.de/fuhsen#count"]}
@@ -1040,7 +1040,7 @@ var ResultsList = React.createClass({
                         location={result["fs:location"]}
                         label={result["fs:label"]}
                         comment={result["fs:comment"]}
-                        gender={result["foaf:gender"]}
+                        gender={result["fs:gender"]}
                         occupation={result["fs:occupation"]}
                         birthday={result["fs:birthday"]}
                         country={result["fs:country"]}

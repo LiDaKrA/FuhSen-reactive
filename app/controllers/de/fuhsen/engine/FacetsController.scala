@@ -16,15 +16,26 @@ import scala.collection.JavaConversions.asScalaIterator
   */
 class FacetsController @Inject()(ws: WSClient) extends Controller {
 
-  def getGeneratedFacets(uid: String, entityType: String) = Action { request =>
+  def getGeneratedFacets(uid: String, entityType: String,lang: String) = Action { request =>
     val selectedFacets = if(request.body.asJson != null) request.body.asJson.get.as[Map[String,List[String]]] else null
 
     var subFilterQuery = ""
     if(selectedFacets != null){
         val predicates = selectedFacets.keys.mkString(" ")
         Logger.info("Facets for search : " + uid + " entityType: "+entityType + " body: "+ predicates)
-        val selRdfs = selectedFacets.map(x => "?s <" + x._1 + "> \"" + x._2(0) + "\" .")
-        val  selRdfPatterns = selRdfs.mkString("\n")
+        val selRdfs = selectedFacets.map { x =>
+          """{
+              {?s <%s> "%s" }
+              UNION
+              {
+                ?s <%s> ?resource .
+                ?resource fs:name "%s" .
+                FILTER(isURI(?resource))
+              }
+            }""".format(x._1, x._2(0), x._1, x._2(0))
+        }
+
+      val  selRdfPatterns = selRdfs.mkString("\n")
         subFilterQuery = if (selRdfPatterns.length() > 0) s"""{
                                                                 SELECT ?s
                                                                 WHERE
@@ -51,29 +62,34 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
       case Some(model) =>
 
         var queryModel = model
-        if(subFilterQuery != "")
-          queryModel = getGenericSubModel(model,subFilterQuery)
-
         Logger.info("Model size: "+queryModel.size())
+        if(subFilterQuery != "") {
+          queryModel = getGenericSubModel(model, subFilterQuery)
+          Logger.info("After Filtering Model size: " + queryModel.size())
+        }
         val query = s"""
                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                        PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
                        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                        PREFIX gr: <http://purl.org/goodrelations/v1#>
+                       PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
-                       SELECT (SAMPLE(?p) AS ?facet) (COUNT(?p) as ?elems)
+                       SELECT (SAMPLE(?p) AS ?facet) (SAMPLE(?title) AS ?label) (COUNT(?p) as ?elems)
                        WHERE
                        {
                          ?s a fs:SearchableEntity .
                          ?s a $typeEntity .
-                         ?s ?p ?o
+                         ?p a owl:DatatypeProperty .
+                         ?s ?p ?o .
+                         ?p rdfs:label ?title .
+                         FILTER (lang(?title) = '$lang')
                        }
-                       GROUP BY ?p
+                       GROUP BY ?p ?title
                     """
-        val results = QueryExecutionFactory.create(query, queryModel).execSelect()
-        val facetModel = getGenericFacetsModel(results, typeEntity, queryModel)
-        Ok(RDFUtil.modelToTripleString(facetModel, Lang.JSONLD))
+          val results = QueryExecutionFactory.create(query, queryModel).execSelect()
+          val facetModel = getGenericFacetsModel(results, typeEntity, queryModel)
+          Ok(RDFUtil.modelToTripleString(facetModel, Lang.JSONLD))
       case None =>
         InternalServerError("The provided UID has not a model associated in the cache.")
     }
@@ -88,41 +104,46 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
 
                        CONSTRUCT
                         {
-                          ?s ?p ?o
+                          ?s ?p ?o .
+                          ?p ?prop ?moreData .
+                          ?s ?metaProp ?value .
+                          ?o fs:name ?label
                         }
                        WHERE
                        {
-                         ?s a fs:SearchableEntity .
-                         ?s ?p ?o
+                         ?s ?p ?o .
                          $subFilterQuery
+                          OPTIONAL { ?p ?prop ?moreData . }
+                          OPTIONAL { ?o fs:name ?label .}
                        }
                     """
+    Logger.info("Filter Model Query: \n" + query)
     val subModel = QueryExecutionFactory.create(query, model).execConstruct()
     subModel
   }
   private def getGenericFacetsModel(resultSet: ResultSet, entityType :String, kg : Model) : Model = {
 
     val facetsModel = ModelFactory.createDefaultModel()
-
     while(resultSet.hasNext) {
       val result = resultSet.next
       val facetUri = result.getResource("facet").getURI
       val count = result.getLiteral("elems").getString
-
+      val label = result.getLiteral("label").getString
       var id = ""
-
+      Logger.info("Uri: "+facetUri+ " Label: " + label)
       if (facetUri.split("#").length > 1)
         id = facetUri.split("#").last
       else
         id = facetUri.split("/").last
 
       val resource = facetsModel.createResource(FuhsenVocab.FACET_URI + id)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_NAME), id)
+      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), label)
       resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_VALUE), facetUri)
       resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_COUNT), count)
 
       getGenericFacetValues(facetUri, entityType, kg).map( r => resource.addProperty(facetsModel.createProperty(FuhsenVocab.HAS_FACET_VAL), r))
-      //Logger.info("facetId: "+id+" FacetValueSize: "+results.size+"")
+//      Logger.info("facetId: "+id+" FacetValueSize: "+results.size+"")
     }
     facetsModel
   }
@@ -138,13 +159,22 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
 
                       SELECT (SAMPLE(?fct) AS ?facet) (COUNT(?fct) as ?elems)
                       WHERE {
-                        ?p a $entityType .
-                        ?p <$facet> ?fct .
+                          ?s a $entityType .
+                          {
+                          ?s <$facet> ?fct .
+                          FILTER(isLiteral(?fct))
+                          }
+                          UNION
+                          {
+                            ?s <$facet> ?resource .
+                            ?resource fs:name ?fct .
+                            FILTER(isURI(?resource))
+                          }
                       } GROUP BY ?fct
                     """
     val resultSet = QueryExecutionFactory.create(query, model).execSelect()
     resultSet.map { r =>
-      if (r.get("facet").isLiteral)
+      if (r.get("facet") != null && r.get("facet").isLiteral)
         r.getLiteral("facet").getString.replace("^"," ")+"^"+r.getLiteral("elems").getString
       else
         ""

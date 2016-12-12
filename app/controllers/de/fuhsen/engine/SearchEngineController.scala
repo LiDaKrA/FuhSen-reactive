@@ -96,6 +96,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
     val searchURI = FuhsenVocab.SEARCH_URI + searchUid
 
     val model = ModelFactory.createDefaultModel()
+    model.add(JenaGlobalSchema.getModel())
 
     //Creating fs:Search resource
     model.createResource(searchURI)
@@ -134,7 +135,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
     entityType match {
       case "person" =>
-        val query = QueryFactory.create(
+                val query = QueryFactory.create(
           s"""
              |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
              |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
@@ -142,88 +143,63 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
              |
              |CONSTRUCT   {
-             |?p rdf:type foaf:Person .
-             |?p fs:title ?name .
-             |?p fs:image ?img .
-             |?p fs:url ?url .
-             |?p fs:source ?source .
-             |?p fs:alias ?alias .
-             |?p fs:location ?location .
-             |?p fs:label ?label .
-             |?p fs:comment ?comment .
-             |?p fs:gender ?gender .
-             |?p fs:occupation ?occupation .
-             |?p fs:birthday ?birthday .
-             |?p fs:country ?country .
-             |?p fs:rank ?rank .
-             |?p fs:active_email ?active_email .
-             |?p fs:wants ?wants .
-             |?p fs:haves ?haves .
-             |?p fs:top_haves ?top_haves .
-             |?p fs:liveIn ?liveInName .
-             |?p fs:workAt ?workedAtName .
-             |?p fs:studyAt ?studyAtName .
+             |  ?s ?p ?o .
+             |  ?s rdf:type foaf:Person .
+             |  ?s fs:title ?name .
+             |  ?s fs:source ?source .
+             |  ?s fs:rank ?rank .
+             |  ?s fs:image ?img .
              |}
              |WHERE {
-             |?p rdf:type foaf:Person .
-             |?p foaf:name ?name .
-             |?p fs:source ?source .
-             |OPTIONAL { ?p foaf:img ?img } .
-             |OPTIONAL { ?p fs:url ?url } .
-             |OPTIONAL { ?p fs:alias ?alias } .
-             |OPTIONAL { ?p fs:location ?location } .
-             |OPTIONAL { ?p rdfs:label ?label } .
-             |OPTIONAL { ?p rdfs:comment ?comment } .
-             |OPTIONAL { ?p foaf:gender ?gender } .
-             |OPTIONAL { ?p fs:occupation ?occupation } .
-             |OPTIONAL { ?p fs:birthday ?birthday } .
-             |OPTIONAL { ?p fs:country ?country } .
-             |OPTIONAL { ?p fs:active_email ?active_email } .
-             |OPTIONAL { ?p fs:wants ?wants } .
-             |OPTIONAL { ?p fs:haves ?haves } .
-             |OPTIONAL { ?p fs:top_haves ?top_haves } .
-             |OPTIONAL { ?p fs:interests ?interests } .
-             |OPTIONAL { ?p fs:placeLived ?livedAt .
-             |            ?livedAt foaf:name ?liveInName . } .
-             |OPTIONAL { ?p fs:workedAt ?workedAt .
-             |            ?workedAt foaf:name ?workedAtName . } .
-             |OPTIONAL { ?p fs:studiedAt ?studyAt .
-             |            ?studyAt foaf:name ?studyAtName . } .
-             |?p fs:rank ?rank .
+             |?s rdf:type foaf:Person .
+             |?s fs:name ?name .
+             |?s fs:source ?source .
+             |?s fs:rank ?rank .
+             |OPTIONAL { ?s fs:img ?img } .
+             | {
+             |    { ?s ?p ?o .
+             |    FILTER(isLiteral(?o))
+             |    }
+             |  UNION
+             |    { ?s ?p ?resource .
+             |    ?resource fs:name ?o .
+             |    FILTER(isURI(?resource))
+             |    }
+             |  }
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "product" =>
         val query = QueryFactory.create(
-          s"""
-             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
-             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-             |PREFIX gr: <http://purl.org/goodrelations/v1#>
-             |
-             |CONSTRUCT   {
-             |?p rdf:type gr:ProductOrService .
-             |?p fs:title ?description .
-             |?p fs:image ?img .
-             |?p fs:url ?url .
-             |?p fs:location ?location .
-             |?p fs:country ?country .
-             |?p fs:price ?price .
-             |?p fs:condition ?condition .
-             |?p fs:source ?source .
-             |}
-             |WHERE {
-             |?p rdf:type gr:ProductOrService .
-             |?p gr:description ?description .
-             |?p fs:source ?source .
-             |OPTIONAL { ?p foaf:img ?img } .
-             |OPTIONAL { ?p fs:url ?url } .
-             |OPTIONAL { ?p fs:location ?location } .
-             |OPTIONAL { ?p fs:country ?country } .
-             |OPTIONAL { ?p fs:priceLabel ?price } .
-             |OPTIONAL { ?p fs:condition ?condition } .
-             |}
-          """.stripMargin)
+                  s"""
+                     |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                     |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                     |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                     |PREFIX gr: <http://purl.org/goodrelations/v1#>
+                     |
+                     |CONSTRUCT   {
+                     |?p rdf:type gr:ProductOrService .
+                     |?p fs:title ?description .
+                     |?p fs:image ?img .
+                     |?p fs:url ?url .
+                     |?p fs:location ?location .
+                     |?p fs:country ?country .
+                     |?p fs:price ?price .
+                     |?p fs:condition ?condition .
+                     |?p fs:source ?source .
+                     |}
+                     |WHERE {
+                     |?p rdf:type gr:ProductOrService .
+                     |?p gr:description ?description .
+                     |?p fs:source ?source .
+                     |OPTIONAL { ?p foaf:img ?img } .
+                     |OPTIONAL { ?p fs:url ?url } .
+                     |OPTIONAL { ?p fs:location ?location } .
+                     |OPTIONAL { ?p fs:country ?country } .
+                     |OPTIONAL { ?p fs:priceLabel ?price } .
+                     |OPTIONAL { ?p fs:condition ?condition } .
+                     |}
+                  """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "organization" =>
         val query = QueryFactory.create(

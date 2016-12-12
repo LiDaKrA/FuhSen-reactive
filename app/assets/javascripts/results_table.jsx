@@ -50,9 +50,9 @@ var ResultsTable = React.createClass({
                         haves={result["fs:haves"]}
                         top_haves={result["fs:top_haves"]}
                         interests={result["fs:interests"]}
-                        liveInName = {result["fs:liveIn"]}
-                        workedAtName = {result["fs:workAt"]}
-                        studyAtName = {result["fs:studyAt"]}
+                        liveInName = {result["fs:placeLived"]}
+                        workedAtName = {result["fs:workedAt"]}
+                        studyAtName = {result["fs:studiedAt"]}
                         OnCheckBoxChangeHandle = {checkBoxHandle}
                     >
                     </PersonResultRow>
