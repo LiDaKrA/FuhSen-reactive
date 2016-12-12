@@ -158,11 +158,11 @@ var Container = React.createClass({
                 console.error(this.props.url, status, err.toString());
 
                 if(err.toString().includes("Not Acceptable")){
-                    alert("ERROR: NOT VALID TOKEN FOUND!");
+                    alert(getTranslation("no_valid_token_found"))
                 }else if(err.toString().includes("timeout")){
-                    alert("TIMEOUT: THE SEARCH TOOK TOO LONG!");
+                    alert(getTranslation("timeout"));
                 }else{
-                    alert("INTERNAL SERVER ERROR!");
+                    alert(getTranslation("internal_server_error"));
                 }
                 
                 //Todo remove this hardcoded value

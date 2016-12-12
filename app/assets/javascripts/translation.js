@@ -98,7 +98,10 @@ var dictEng = {
     "tor_websites": "Onion web sites",
     "select_file": "Select file",
     "tor_invalid_websites": "The web site you are trying to crawl seems to be not online anymore. Crawling Job not started.",
-    "invalid_website": "The website is offline"
+    "invalid_website": "The website is offline",
+    "no_valid_token_found": "ERROR: NO VALID TOKEN FOUND.",
+    "timeout": "TIMEOUT: THE SEARCH TOOK TOO LONG!",
+    "internal_server_error": "INTERNAL SERVER ERROR!"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -207,7 +210,10 @@ var dictGer = {
     "tor_websites": "Webseiten",
     "select_file": "Datei aussuchen",
     "tor_invalid_websites": "Die Website ist nicht mehr online. Crawling Job nicht gestartet.",
-    "invalid_website": "Die Website ist offline"
+    "invalid_website": "Die Website ist offline",
+    "no_valid_token_found": "FEHLER: KEIN GÜLTIGES TOKEN GEFUNDEN.",
+    "timeout": "TIMEOUT: DIE SUCHE HAT ZU LANG GEDAUERT!",
+    "internal_server_error": "INTERNER SERVERFEHLER!"
 };
 
 window.dictGer = dictGer;
