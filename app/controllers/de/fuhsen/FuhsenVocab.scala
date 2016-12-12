@@ -45,6 +45,7 @@ object FuhsenVocab {
   val FACET_VALUE = NS + "#" + "value"
   val FACET_COUNT = NS + "#" + "count"
   val FACET_LABEL = NS + "#" + "facetLabel"
+  val FACET_NAME = NS + "#" + "facetName"
   val DATA_SOURCE = NS + "#" + "dataSource"
   val ENTITY_TYPE = NS + "#" + "entityType"
 

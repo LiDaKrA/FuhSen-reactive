@@ -80,6 +80,10 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                        {
                          ?s a fs:SearchableEntity .
                          ?s a $typeEntity .
+                       WHERE
+                       {
+                         ?s a fs:SearchableEntity .
+                         ?s a $typeEntity .
                          ?p a owl:DatatypeProperty .
                          ?s ?p ?o .
                          ?p rdfs:label ?title .

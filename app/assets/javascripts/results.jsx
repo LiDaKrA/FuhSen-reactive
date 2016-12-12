@@ -240,7 +240,6 @@ var FacetList = React.createClass({
             data:JSON.stringify(selectedFacets),
             contentType: 'application/json',
             success: function (response) {
-                console.log(JSON.stringify(response))
                 this.setState({data: response["@graph"]});
             }.bind(this),
             error: function (xhr, status, err) {
@@ -272,7 +271,7 @@ var FacetList = React.createClass({
                 if(menuItems["http://vocab.lidakra.de/fuhsen/hasFacet"] !== undefined) {
                     return <FacetItems searchUid={_searchUid}
                                        entityType={_entityType}
-                                       label={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}//{getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetName"])}//
+                                       label={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}
                                        name={menuItems["http://vocab.lidakra.de/fuhsen#facetName"]}
                                        property={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
                                        facets={menuItems["http://vocab.lidakra.de/fuhsen/hasFacet"]}
