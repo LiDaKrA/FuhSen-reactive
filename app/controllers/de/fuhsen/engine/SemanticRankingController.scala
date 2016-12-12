@@ -37,7 +37,7 @@ class SemanticRankingController extends Controller {
            |WHERE {
            |OPTIONAL { ?person rdf:type foaf:Person . } .
            |OPTIONAL { ?person rdf:type foaf:Organization . } .
-           |?person foaf:name ?name .
+           |?person fs:name ?name .
            |?person fs:source ?source .
            |}
       """.stripMargin)
