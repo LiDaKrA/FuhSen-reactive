@@ -149,14 +149,16 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |  ?s fs:source ?source .
              |  ?s fs:rank ?rank .
              |  ?s fs:image ?img .
+             |  ?s fs:url ?url .
              |}
              |WHERE {
              |?s rdf:type foaf:Person .
              |?s fs:name ?name .
              |?s fs:source ?source .
              |?s fs:rank ?rank .
+             |OPTIONAL { ?s fs:url ?url } .
              |OPTIONAL { ?s fs:img ?img } .
-             | {
+             |OPTIONAL {
              |    { ?s ?p ?o .
              |    FILTER(isLiteral(?o))
              |    }
@@ -171,34 +173,34 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
         QueryExecutionFactory.create(query, model).execConstruct()
       case "product" =>
         val query = QueryFactory.create(
-                  s"""
-                     |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                     |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
-                     |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                     |PREFIX gr: <http://purl.org/goodrelations/v1#>
-                     |
-                     |CONSTRUCT   {
-                     |?p rdf:type gr:ProductOrService .
-                     |?p fs:title ?description .
-                     |?p fs:image ?img .
-                     |?p fs:url ?url .
-                     |?p fs:location ?location .
-                     |?p fs:country ?country .
-                     |?p fs:price ?price .
-                     |?p fs:condition ?condition .
-                     |?p fs:source ?source .
-                     |}
-                     |WHERE {
-                     |?p rdf:type gr:ProductOrService .
-                     |?p gr:description ?description .
-                     |?p fs:source ?source .
-                     |OPTIONAL { ?p foaf:img ?img } .
-                     |OPTIONAL { ?p fs:url ?url } .
-                     |OPTIONAL { ?p fs:location ?location } .
-                     |OPTIONAL { ?p fs:country ?country } .
-                     |OPTIONAL { ?p fs:priceLabel ?price } .
-                     |OPTIONAL { ?p fs:condition ?condition } .
-                     |}
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |PREFIX gr: <http://purl.org/goodrelations/v1#>
+             |
+             |CONSTRUCT   {
+             |?p rdf:type gr:ProductOrService .
+             |?p fs:title ?description .
+             |?p fs:image ?img .
+             |?p fs:url ?url .
+             |?p fs:location ?location .
+             |?p fs:country ?country .
+             |?p fs:priceLabel ?price .
+             |?p fs:condition ?condition .
+             |?p fs:source ?source .
+             |}
+             |WHERE {
+             |?p rdf:type gr:ProductOrService .
+             |?p fs:description ?description .
+             |?p fs:source ?source .
+             |OPTIONAL { ?p fs:img ?img } .
+             |OPTIONAL { ?p fs:url ?url } .
+             |OPTIONAL { ?p fs:location ?location } .
+             |OPTIONAL { ?p fs:country ?country } .
+             |OPTIONAL { ?p fs:priceLabel ?price } .
+             |OPTIONAL { ?p fs:condition ?condition } .
+             |}
                   """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "organization" =>
@@ -210,26 +212,22 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
              |
              |CONSTRUCT   {
-             |?p rdf:type foaf:Organization .
-             |?p fs:title ?name .
-             |?p fs:image ?img .
-             |?p fs:url ?url .
-             |?p fs:label ?label .
-             |?p fs:comment ?comment .
-             |?p fs:country ?country .
-             |?p fs:location ?location .
-             |?p fs:source ?source .
+             |?s ?p ?o .
+             |?s rdf:type foaf:Organization .
+             |?s fs:title ?name .
+             |?s fs:image ?img .
+             |?s fs:url ?url .
+             |?s fs:source ?source .
              |}
              |WHERE {
-             |?p rdf:type foaf:Organization .
-             |?p foaf:name ?name .
-             |?p fs:source ?source .
-             |OPTIONAL { ?p foaf:img ?img } .
-             |OPTIONAL { ?p fs:url ?url } .
-             |OPTIONAL { ?p rdfs:label ?label } .
-             |OPTIONAL { ?p rdfs:comment ?comment } .
-             |OPTIONAL { ?p fs:location ?location } .
-             |OPTIONAL { ?p fs:country ?country } .
+             |?s rdf:type foaf:Organization .
+             |?s fs:name ?name .
+             |?s fs:source ?source .
+             |OPTIONAL { ?s fs:url ?url } .
+             |OPTIONAL { ?s fs:img ?img } .
+             |OPTIONAL { ?s ?p ?o .
+             |     FILTER(isLiteral(?o)) }
+             |
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
@@ -277,28 +275,18 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
              |
              |CONSTRUCT   {
-             |?p rdf:type fs:Document .
-             |?p fs:title ?label .
-             |?p fs:comment ?comment .
-             |?p fs:url ?url .
-             |?p fs:country ?country .
-             |?p fs:language ?language .
-             |?p fs:file_name ?file_name .
-             |?p fs:filetype ?extension .
-             |?p fs:source ?source
+             |?s ?p ?o .
+             |?s rdf:type fs:Document .
+             |?s fs:label ?label .
+             |?s fs:url ?url .
              |}
              |WHERE {
-             |?p rdf:type fs:Document .
-             |?p rdfs:label ?label .
-             |OPTIONAL { ?p rdfs:comment ?comment } .
-             |OPTIONAL { ?p fs:url ?url } .
-             |OPTIONAL { ?p fs:source ?source } .
-             |OPTIONAL { ?p fs:country ?country } .
-             |OPTIONAL { ?p fs:language ?language } .
-             |OPTIONAL { ?p fs:file_name ?file_name } .
-             |OPTIONAL { ?p fs:extension ?extension } .
-             |OPTIONAL { ?p fs:source ?source } .
-             |}
+             |?s rdf:type fs:Document .
+             |?s fs:label ?label .
+             |OPTIONAL { ?s ?p ?o .
+             |     FILTER(isLiteral(?o)) } .
+             |OPTIONAL { ?s fs:url ?url } .
+             }
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
     }

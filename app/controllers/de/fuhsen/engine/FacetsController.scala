@@ -107,14 +107,14 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                           ?s ?p ?o .
                           ?p ?prop ?moreData .
                           ?s ?metaProp ?value .
-                          ?o fs:name ?label
+                          ?o ?metaProp ?metaValue .
                         }
                        WHERE
                        {
                          ?s ?p ?o .
                          $subFilterQuery
                           OPTIONAL { ?p ?prop ?moreData . }
-                          OPTIONAL { ?o fs:name ?label .}
+                          OPTIONAL { ?o ?metaProp ?metaValue .}
                        }
                     """
     Logger.info("Filter Model Query: \n" + query)

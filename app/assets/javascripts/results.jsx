@@ -1025,8 +1025,6 @@ var ResultsList = React.createClass({
     render: function () {
 
         var resultsNodesSorted = this.props.data; //.sort(compareRank)
-        //var resultsNodesSorted = this.props.data["@graph"].sort(compareRank)
-
         var already_crawled = this.props.crawled
         var resultsNodes = resultsNodesSorted.map(function (result) {
             if (result["@type"] === "foaf:Person") {
@@ -1073,7 +1071,7 @@ var ResultsList = React.createClass({
                         source={result["fs:source"]}
                         location={result["fs:location"]}
                         country={result["fs:country"]}
-                        price={result["fs:price"]}
+                        price={result["fs:priceLabel"]}
                         condition={result["fs:condition"]}
                         webpage={result.url}>
                     </ProductResultElement>
@@ -1106,13 +1104,13 @@ var ResultsList = React.createClass({
             } else if (result["@type"] === "fs:Document") {
                 return (
                     <DocumentResultElement
-                        label={result["fs:title"]}
+                        label={result["fs:label"]}
                         comment={result["fs:comment"]}
                         webpage={result.url}
                         country={result["fs:country"]}
                         language={result["fs:language"]}
                         filename={result["fs:file_name"]}
-                        extension={result["fs:filetype"]}
+                        extension={result["fs:extension"]}
                         source={result["fs:source"]}>
                     </DocumentResultElement>
                 );
@@ -1316,7 +1314,8 @@ var OrganizationResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={this.props.img} height="60px" width="75px"/>
+                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
+                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1357,7 +1356,8 @@ var ElasticSearchResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={this.props.img} height="60px" width="75px"/>
+                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
+                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1400,8 +1400,8 @@ var DocumentResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={context + "/assets/images/icons/" + this.props.extension + ".png"} height="60px"
-                                 width="75px"/>
+                            { this.props.extension !== undefined ? <img src={context + "/assets/images/icons/" + this.props.extension + ".png"} height="60px" width="75px"/>:
+                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
