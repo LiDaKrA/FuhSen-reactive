@@ -126,23 +126,27 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     val facetsModel = ModelFactory.createDefaultModel()
     while(resultSet.hasNext) {
       val result = resultSet.next
-      val facetUri = result.getResource("facet").getURI
-      val count = result.getLiteral("elems").getString
-      val label = result.getLiteral("label").getString
-      var id = ""
-      Logger.info("Uri: "+facetUri+ " Label: " + label)
-      if (facetUri.split("#").length > 1)
-        id = facetUri.split("#").last
-      else
-        id = facetUri.split("/").last
+      if(result.getResource("facet") != null)
+      {
 
-      val resource = facetsModel.createResource(FuhsenVocab.FACET_URI + id)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_NAME), id)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), label)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_VALUE), facetUri)
-      resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_COUNT), count)
+        val facetUri = result.getResource("facet").getURI
+        val count = result.getLiteral("elems").getString
+        val label = result.getLiteral("label").getString
+        var id = ""
+        Logger.info("Uri: " + facetUri + " Label: " + label)
+        if (facetUri.split("#").length > 1)
+          id = facetUri.split("#").last
+        else
+          id = facetUri.split("/").last
 
-      getGenericFacetValues(facetUri, entityType, kg).map( r => resource.addProperty(facetsModel.createProperty(FuhsenVocab.HAS_FACET_VAL), r))
+        val resource = facetsModel.createResource(FuhsenVocab.FACET_URI + id)
+        resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_NAME), id)
+        resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_LABEL), label)
+        resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_VALUE), facetUri)
+        resource.addProperty(facetsModel.createProperty(FuhsenVocab.FACET_COUNT), count)
+
+        getGenericFacetValues(facetUri, entityType, kg).map(r => resource.addProperty(facetsModel.createProperty(FuhsenVocab.HAS_FACET_VAL), r))
+      }
 //      Logger.info("facetId: "+id+" FacetValueSize: "+results.size+"")
     }
     facetsModel
