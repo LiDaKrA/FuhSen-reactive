@@ -70,4 +70,6 @@ class XingWrapper extends RestApiWrapperTrait with RestApiOAuthTrait with SilkTr
     * Returns the globally unique URI String of the source that is wrapped. This is used to track provenance.
     */
   override def sourceLocalName: String = "xing"
+
+  //override def requestType: String = "JAVA"
 }
