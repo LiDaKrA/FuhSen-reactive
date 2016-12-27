@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
+import controllers.Application
 import controllers.de.fuhsen.wrappers.dataintegration.{EntityLinking, SilkConfig, SilkTransformableTrait}
 import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, RestApiOAuthTrait}
 import org.apache.jena.graph.Triple
@@ -64,9 +65,20 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   private def execQueryAgainstWrapper(query: String, wrapper: RestApiWrapperTrait): Future[ApiResponse] = {
     val apiRequest = createApiRequest(wrapper, query)
-    val apiResponse = executeApiRequest(apiRequest)
-    val customApiResponse = customApiHandling(wrapper, apiResponse)
-    transformApiResponse(wrapper, customApiResponse)
+
+    if(!wrapper.requestType.equals("JAVA")){
+      Logger.info("GET wrapper request")
+
+      val apiResponse = executeApiRequest(apiRequest)
+      val customApiResponse = customApiHandling(wrapper, apiResponse)
+      transformApiResponse(wrapper, customApiResponse, null)
+
+    }else{
+      Logger.info("POST wrapper request")
+
+      transformApiResponse(wrapper, null, apiRequest.url)
+    }
+
   }
 
   /**
@@ -87,6 +99,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   /**
     * Returns the merged result from multiple wrappers in JSON-LD format.
+    *
     * @param query for each wrapper
     * @param wrapperIds a comma-separated list of wrapper ids
     */
@@ -225,14 +238,24 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   /** Handles transformation if configured for the wrapper */
   private def transformApiResponse(wrapper: RestApiWrapperTrait,
-                                   apiResponse: Future[ApiResponse]): Future[ApiResponse] = {
-    apiResponse.flatMap {
-      case error: ApiError =>
-        // There has been an error previously, don't go on.
-        Future(error)
-      case ApiSuccess(body) =>
-        Logger.debug("PRE-SILK: "+body)
-        handleSilkTransformation(wrapper, body)
+                                   apiResponse: Future[ApiResponse],
+                                   apiUrl:String): Future[ApiResponse] = {
+    if(apiResponse != null){
+      apiResponse.flatMap {
+        case error: ApiError =>
+          // There has been an error previously, don't go on.
+          Future(error)
+        case ApiSuccess(body) =>
+          Logger.debug("PRE-SILK: "+body)
+          handleSilkTransformation(wrapper, body)
+      }
+    }else{
+      wrapper match {
+        case oAuthWrapper: RestApiOAuthTrait =>
+          val bodyJava = new Application().javaRequest(oAuthWrapper, apiUrl)
+          Logger.debug("PRE-SILK (Java): " + bodyJava )
+          handleSilkTransformation(wrapper, bodyJava)
+      }
     }
   }
 
