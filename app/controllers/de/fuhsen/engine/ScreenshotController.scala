@@ -28,7 +28,6 @@ class ScreenshotController @Inject()(ws: WSClient) extends Controller {
           header = ResponseHeader(200),
           body = Enumerator(r.bodyAsBytes)
         ).withHeaders( CONTENT_TYPE -> "application/pdf")
-       //Ok(r.body)
     }
   }
 }

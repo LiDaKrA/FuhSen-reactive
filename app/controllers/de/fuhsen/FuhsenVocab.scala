@@ -15,6 +15,11 @@
  */
 package controllers.de.fuhsen
 
+import java.util.Optional
+
+import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
+import org.apache.jena.rdf.model.Model
+
 /**
   * Created by andreas on 2/26/16.
   */
@@ -48,5 +53,23 @@ object FuhsenVocab {
   val FACET_NAME = NS + "#" + "facetName"
   val DATA_SOURCE = NS + "#" + "dataSource"
   val ENTITY_TYPE = NS + "#" + "entityType"
+
+  //SPARQL to get the keyword in a search results KB
+  def getKeyword(model: Model): Option[String] = {
+
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |SELECT ?keyword WHERE {
+         |?search fs:keyword ?keyword .
+         |} limit 10
+      """.stripMargin)
+    val resultSet = QueryExecutionFactory.create(query, model).execSelect()
+
+    if( resultSet.hasNext )
+      Some(resultSet.next.getLiteral("keyword").getString)
+    else
+      None
+  }
 
 }

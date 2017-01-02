@@ -151,7 +151,6 @@ fs:name rdf:type owl:DatatypeProperty;
           rdfs:domain fs:SearchableEntity ;
                    rdfs:range xsd:string .
 
-
 fs:label rdf:type owl:DatatypeProperty;
          rdfs:label "Titel"@de ,
                     "Title"@en ;
@@ -289,3 +288,11 @@ fs:language rdf:type owl:DatatypeProperty;
                                   "Excerpt of the entity, part of the entity summarization process"@en ;
                      rdfs:domain fs:SearchableEntity ;
                      rdfs:range xsd:string .
+
+fs:annotation_person rdf:type owl:DatatypeProperty;
+                     rdfs:label "Person"@de ,
+                                "Person"@en ;
+                     rdfs:comment "Todo"@de ,
+                                  "Annotation type person"@en ;
+                     rdfs:domain fs:SearchableEntity ;
+                     rdfs:range fs:SearchableEntity .

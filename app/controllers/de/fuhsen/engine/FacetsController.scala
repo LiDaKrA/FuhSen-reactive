@@ -48,14 +48,12 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
         Logger.info("Facets for search : " + uid + " entityType: "+entityType)
     }
 
-
-
     val typeEntity = entityType match {
       case "person" => "foaf:Person"
       case "organization" => "foaf:Organization"
       case "product" => "gr:ProductOrService"
       case "document" => "fs:Document"
-      case "website" => "fs:Annotation"
+      case "website" => "foaf:Document"
     }
 
     GraphResultsCache.getModel(uid) match {
@@ -94,6 +92,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
         InternalServerError("The provided UID has not a model associated in the cache.")
     }
   }
+
   private def getGenericSubModel(model :Model,subFilterQuery :String ) : Model = {
     val query = s"""
                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -121,6 +120,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     val subModel = QueryExecutionFactory.create(query, model).execConstruct()
     subModel
   }
+
   private def getGenericFacetsModel(resultSet: ResultSet, entityType :String, kg : Model) : Model = {
 
     val facetsModel = ModelFactory.createDefaultModel()
@@ -153,7 +153,6 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
   }
 
   private def getGenericFacetValues(facet: String, entityType :String, model: Model) : List[String] = {
-
     val query = s"""
                       PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                       PREFIX fs: <http://vocab.lidakra.de/fuhsen#>

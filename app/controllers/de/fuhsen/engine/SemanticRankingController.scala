@@ -22,7 +22,7 @@ class SemanticRankingController extends Controller {
       val textBody = request.body.asText
       val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)
 
-      val keyword = getKeyword(model)
+      val keyword = FuhsenVocab.getKeyword(model)
       Logger.info("Keyword: "+keyword)
 
       //2. Add rank property
@@ -51,7 +51,7 @@ class SemanticRankingController extends Controller {
         val source = result.getLiteral("source").getString
         val resource = rankForPersonsModel.createResource(result.getResource("person").getURI)
         //2.3 Add rank property value
-        if (name.contains(keyword))
+        if (name.contains(keyword.get))
           if (source == "GoogleKG")
             resource.addProperty(rankForPersonsModel.createProperty(FuhsenVocab.RANK), "1")
           else if (source == "Twitter")
@@ -78,7 +78,7 @@ class SemanticRankingController extends Controller {
       Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
   }
 
-  private def getKeyword(model: Model): String = {
+  /*private def getKeyword(model: Model): String = {
 
     val query = QueryFactory.create(
       s"""
@@ -93,6 +93,6 @@ class SemanticRankingController extends Controller {
       resultSet.next.getLiteral("keyword").getString
     else
       null
-  }
+  }*/
 
 }
