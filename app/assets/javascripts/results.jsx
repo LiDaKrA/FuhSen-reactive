@@ -1094,8 +1094,8 @@ var ResultsList = React.createClass({
                     return (
                         <WebResultElement
                             img={context + "/assets/images/datasources/TorLogo.png"}
-                            onion_url={result.url}
-                            comment={result["fs:excerpt"]}
+                            onion_url={result["url"]}
+                            comment={result["fs:comment"]}
                             source={result["fs:source"]}
                             crawled={already_crawled}>
                         </WebResultElement>

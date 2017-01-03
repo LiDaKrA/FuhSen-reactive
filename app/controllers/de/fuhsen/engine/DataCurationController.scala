@@ -32,13 +32,15 @@ class DataCurationController extends Controller {
            |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
            |
            |CONSTRUCT {
-           | ?uri a fs:Person .
-           | ?s fs:annotation_person ?uri .
+           | ?uri ?entityType fs:Person .
+           | ?s ?annotationType ?uri .
            | }
            |WHERE {
            |?uri a fs:Annotation .
-           |?uri fs:entity-type ?type .
            |?s fs:annotation ?uri .
+           |?uri fs:entity-type ?type .
+           |BIND(uri(concat("http://vocab.lidakra.de/fuhsen#",?type)) AS ?entityType) .
+           |BIND(uri(concat("http://vocab.lidakra.de/fuhsen#",concat("a", ?type))) AS ?annotationType) .
            | }
       """.stripMargin)
       val annotations = QueryExecutionFactory.create(sparqlQuery, model).execConstruct()

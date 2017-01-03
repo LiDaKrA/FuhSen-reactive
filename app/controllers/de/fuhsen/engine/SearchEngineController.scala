@@ -241,29 +241,24 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
              |
              |CONSTRUCT   {
-             |?p rdf:type foaf:Document .
-             |?p fs:title ?label .
-             |?p fs:excerpt ?comment .
-             |?p fs:url ?url .
-             |?p fs:source ?source .
-             |?p fs:content ?content .
-             |?p fs:title ?title .
-             |?p fs:entity_url ?annotation .
-             |?p fs:entity_type ?entity_type .
-             |?p fs:entity_name ?entity_name .
+             |?s ?p ?o .
+             |?s rdf:type foaf:Document .
+             |?s fs:url ?url .
              |}
              |WHERE {
-             |?p rdf:type foaf:Document .
-             |OPTIONAL { ?p rdfs:label ?label . } .
-             |OPTIONAL { ?p rdfs:comment ?comment } .
-             |OPTIONAL { ?p fs:url ?url } .
-             |OPTIONAL { ?p fs:source ?source } .
-             |OPTIONAL { ?p fs:content ?content } .
-             |OPTIONAL { ?p fs:title ?title } .
-             |OPTIONAL { ?p fs:annotation ?annotation .
-             |           ?annotation fs:entity_type ?entity_type .
-             |           ?annotation fs:entity-name ?entity_name .
-             |         } .
+             |?s a foaf:Document .
+             |?s fs:source ?source .
+             |OPTIONAL { ?s fs:url ?url } .
+             |OPTIONAL {
+             |    { ?s ?p ?o .
+             |    FILTER(isLiteral(?o))
+             |    }
+             |  UNION
+             |    { ?s ?p ?resource .
+             |    ?resource fs:name ?o .
+             |    FILTER(isURI(?resource))
+             |    }
+             |  }
              |}
           """.stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()

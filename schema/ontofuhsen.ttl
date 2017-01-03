@@ -289,9 +289,41 @@ fs:language rdf:type owl:DatatypeProperty;
                      rdfs:domain fs:SearchableEntity ;
                      rdfs:range xsd:string .
 
-fs:annotation_person rdf:type owl:DatatypeProperty;
+fs:aPerson rdf:type owl:DatatypeProperty;
                      rdfs:label "Person"@de ,
                                 "Person"@en ;
+                     rdfs:comment "Todo"@de ,
+                                  "Annotation type person"@en ;
+                     rdfs:domain fs:SearchableEntity ;
+                     rdfs:range fs:SearchableEntity .
+
+fs:aOrganization rdf:type owl:DatatypeProperty;
+                     rdfs:label "Organization"@de ,
+                                "Organization"@en ;
+                     rdfs:comment "Todo"@de ,
+                                  "Annotation type person"@en ;
+                     rdfs:domain fs:SearchableEntity ;
+                     rdfs:range fs:SearchableEntity .
+
+fs:aProduct rdf:type owl:DatatypeProperty;
+                     rdfs:label "Produkt"@de ,
+                                "Product"@en ;
+                     rdfs:comment "Todo"@de ,
+                                  "Annotation type person"@en ;
+                     rdfs:domain fs:SearchableEntity ;
+                     rdfs:range fs:SearchableEntity .
+
+fs:aEvent rdf:type owl:DatatypeProperty;
+                     rdfs:label "Veranstaltung"@de ,
+                                "Event"@en ;
+                     rdfs:comment "Todo"@de ,
+                                  "Annotation type person"@en ;
+                     rdfs:domain fs:SearchableEntity ;
+                     rdfs:range fs:SearchableEntity .
+
+fs:aPlace rdf:type owl:DatatypeProperty;
+                     rdfs:label "Ort"@de ,
+                                "Place"@en ;
                      rdfs:comment "Todo"@de ,
                                   "Annotation type person"@en ;
                      rdfs:domain fs:SearchableEntity ;
