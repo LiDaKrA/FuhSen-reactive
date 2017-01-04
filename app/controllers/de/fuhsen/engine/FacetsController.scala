@@ -116,7 +116,7 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                           OPTIONAL { ?o ?metaProp ?metaValue .}
                        }
                     """
-    Logger.info("Filter Model Query: \n" + query)
+    //Logger.info("Filter Model Query: \n" + query)
     val subModel = QueryExecutionFactory.create(query, model).execConstruct()
     subModel
   }

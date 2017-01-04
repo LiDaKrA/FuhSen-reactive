@@ -174,7 +174,7 @@ var Container = React.createClass({
                 //Todo remove this hardcoded value
                 window.location.href = "/fuhsen";
             }.bind(this)
-            ,timeout: 15000 // sets timeout to 15 seconds
+            ,timeout: 60000 // sets timeout to 60 seconds
         });
     },
     componentDidMount: function () {
@@ -730,7 +730,7 @@ var ResultsContainer = React.createClass({
                 if (data_to_handle["@graph"] !== undefined)
                     data_to_handle = data_to_handle["@graph"].sort(compareRank);
                 else {
-                    if (data_to_handle["fs:rank"] !== undefined) {
+                    if (data_to_handle["fs:source"] !== undefined) {
                         data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
                         data_to_handle = data_to_handle["@graph"].sort(compareRank);
                     }
