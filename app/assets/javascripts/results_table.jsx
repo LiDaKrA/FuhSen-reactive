@@ -50,9 +50,9 @@ var ResultsTable = React.createClass({
                         haves={result["fs:haves"]}
                         top_haves={result["fs:top_haves"]}
                         interests={result["fs:interests"]}
-                        liveInName = {result["fs:liveIn"]}
-                        workedAtName = {result["fs:workAt"]}
-                        studyAtName = {result["fs:studyAt"]}
+                        liveInName = {result["fs:placeLived"]}
+                        workedAtName = {result["fs:workedAt"]}
+                        studyAtName = {result["fs:studiedAt"]}
                         OnCheckBoxChangeHandle = {checkBoxHandle}
                     >
                     </PersonResultRow>
@@ -82,7 +82,7 @@ var ResultsTable = React.createClass({
                         source={result["fs:source"] === "ELASTIC" ? "Elasticsearch" : result["fs:source"]}
                         location={result["fs:location"]}
                         country={result["fs:country"]}
-                        price={result["fs:price"]}
+                        price={result["fs:priceLabel"]}
                         condition={result["fs:condition"]}
                         webpage={result.url}
                         OnCheckBoxChangeHandle = {checkBoxHandle}>
@@ -109,13 +109,13 @@ var ResultsTable = React.createClass({
                  return (
                      <DocumentResultRow
                          id = {i}
-                         label={result["fs:title"]}
+                         label={result["fs:label"]}
                          comment={result["fs:comment"]}
                          webpage={result.url}
                          country={result["fs:country"]}
                          language={result["fs:language"]}
                          filename={result["fs:file_name"]}
-                         extension={result["fs:filetype"]}
+                         extension={result["fs:extension"]}
                          source={result["fs:source"] === "ELASTIC" ? "Elasticsearch" : result["fs:source"]}
                          OnCheckBoxChangeHandle = {checkBoxHandle}>
                      </DocumentResultRow>

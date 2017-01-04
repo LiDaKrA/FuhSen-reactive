@@ -120,30 +120,36 @@ var Trigger = React.createClass({
 });
 
 var Container = React.createClass({
-    onFacetSelection: function (facetName, facetValue) {
+    onFacetSelection: function (facetName, propertyName,facetValue) {
         if (this.state.facetsDict[facetName]) {
             if (this.state.facetsDict[facetName].indexOf(facetValue) === -1) {
                 this.state.facetsDict[facetName].push(facetValue)
-                this.setState({facetsDict: this.state.facetsDict})
+                this.state.orgFacetsDict[propertyName].push(facetValue)
+                this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
             }
         } else {
-            this.state.facetsDict[facetName] = [facetValue]
-            this.setState({facetsDict: this.state.facetsDict})
+            this.state.facetsDict[facetName] = [facetValue];
+            this.state.orgFacetsDict[propertyName] = [facetValue];
+            this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
         }
     },
-    onFacetRemoval: function (facetName, facetValue) {
+    onFacetRemoval: function (facetName, propertyName,facetValue) {
         if (facetValue != "all") {
             var index_of = this.state.facetsDict[facetName].indexOf(facetValue)
             this.state.facetsDict[facetName].splice(index_of, 1)
+            index_of = this.state.orgFacetsDict[propertyName].indexOf(facetValue)
+            this.state.orgFacetsDict[propertyName].splice(index_of, 1)
 
             if (this.state.facetsDict[facetName].length === 0) {
                 delete this.state.facetsDict[facetName]
+                delete this.state.orgFacetsDict[propertyName]
             }
         } else {
             delete this.state.facetsDict[facetName]
+            delete this.state.orgFacetsDict[propertyName]
         }
 
-        this.setState({facetsDict: this.state.facetsDict})
+        this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
     },
     loadCommentsFromServer: function () {
         var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty;
@@ -164,7 +170,7 @@ var Container = React.createClass({
                 }else{
                     alert(getTranslation("internal_server_error"));
                 }
-                
+
                 //Todo remove this hardcoded value
                 window.location.href = "/fuhsen";
             }.bind(this)
@@ -175,7 +181,7 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}};
+        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}};
     },
     onTypeChange: function (event) {
         var optionSelected = event.currentTarget.dataset.id;
@@ -191,7 +197,7 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType: type});
+        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}});
     },
     render: function () {
         if (this.state.initData) {
@@ -201,7 +207,8 @@ var Container = React.createClass({
                            entityType={this.state.entityType}
                            onFacetSelection={this.onFacetSelection}
                            onFacetRemoval={this.onFacetRemoval}
-                           currentTab={this.state.entityType}/>
+                           currentTab={this.state.entityType}
+                           orgFacetsDict = {this.state.orgFacetsDict}/>
                 <ResultsContainer searchUid={this.props.searchUid}
                                   keyword={this.props.keyword}
                                   entityType={this.state.entityType}
@@ -226,21 +233,23 @@ var Container = React.createClass({
 
 // inject/ passing data
 var FacetList = React.createClass({
-    onFacetSelection: function (facetName, valueSelected) {
-        this.props.onFacetSelection(facetName, valueSelected)
+    onFacetSelection: function (facetName,propertyName, valueSelected) {
+        this.props.onFacetSelection(facetName,propertyName, valueSelected)
     },
-    onFacetRemoval: function (facetName, valueSelected) {
-        this.props.onFacetRemoval(facetName, valueSelected)
+    onFacetRemoval: function (facetName,propertyName, valueSelected) {
+        this.props.onFacetRemoval(facetName,propertyName, valueSelected)
     },
-    loadFacetsFromServer: function (eType) {
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType;
-
+    loadFacetsFromServer: function (eType,selectedFacets) {
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType + "&lang=" + window.localStorage.lang;
         $.ajax({
+            type: 'POST',
             url: searchUrl,
             dataType: 'json',
             cache: false,
-            success: function (data) {
-                this.setState({data: data["@graph"]});
+            data:JSON.stringify(selectedFacets),
+            contentType: 'application/json',
+            success: function (response) {
+                this.setState({data: response["@graph"]});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -251,12 +260,15 @@ var FacetList = React.createClass({
         return {data: null};
     },
     componentDidMount: function () {
-        this.loadFacetsFromServer(this.props.entityType);
+        this.loadFacetsFromServer(this.props.entityType,this.props.orgFacetsDict);
     },
     componentWillReceiveProps: function (nextProps) {
         // see if it actually changed
         if (nextProps.entityType !== this.props.entityType) {
-            this.loadFacetsFromServer(nextProps.entityType);
+            this.loadFacetsFromServer(nextProps.entityType,nextProps.orgFacetsDict);
+        }
+        else{
+            this.loadFacetsFromServer(this.props.entityType,nextProps.orgFacetsDict);
         }
     },
     render: function () {
@@ -265,13 +277,19 @@ var FacetList = React.createClass({
             var _searchUid = this.props.searchUid;
             var _entityType = this.props.entityType;
             var MItems = this.state.data.map(function (menuItems) {
-                return <FacetItems searchUid={_searchUid}
-                                   entityType={_entityType}
-                                   label={getTranslation(menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"])}
-                                   name={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}
-                                   onFacetSelection={this.onFacetSelection}
-                                   onFacetRemoval={this.onFacetRemoval}
-                                   currentTab={this.props.currentTab}/>
+                if(menuItems["http://vocab.lidakra.de/fuhsen/hasFacet"] !== undefined) {
+                    return <FacetItems searchUid={_searchUid}
+                                       entityType={_entityType}
+                                       label={menuItems["http://vocab.lidakra.de/fuhsen#facetLabel"]}
+                                       name={menuItems["http://vocab.lidakra.de/fuhsen#facetName"]}
+                                       property={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
+                                       facets={menuItems["http://vocab.lidakra.de/fuhsen/hasFacet"]}
+                                       count={menuItems["http://vocab.lidakra.de/fuhsen#count"]}
+                                       onFacetSelection={this.onFacetSelection}
+                                       onFacetRemoval={this.onFacetRemoval}
+                                       currentTab={this.props.currentTab}
+                                       selectedFacets ={this.props.orgFacetsDict}/>
+                }
             }, this);
             return (
                 <div id="facetsDiv" className="col-md-3 facets-container hidden-phone">
@@ -349,7 +367,7 @@ var FacetItems = React.createClass({
             this.setState({showTextBox: false, selected_facets: _selectedFacets});
         }
 
-        this.props.onFacetSelection(this.props.name, eSelectedItem)
+        this.props.onFacetSelection(this.props.name,this.props.property, eSelectedItem)
     },
     onFacetItemRemoveClick: function (eSelectedItem) {
         if (eSelectedItem != "all") {
@@ -363,7 +381,7 @@ var FacetItems = React.createClass({
             this.setState({showTextBox: false, selected_facets: []});
         }
 
-        this.props.onFacetRemoval(this.props.name, eSelectedItem)
+        this.props.onFacetRemoval(this.props.name, this.props.property,eSelectedItem)
 
     },
     componentWillUpdate: function (nextProps, nextState) {
@@ -390,8 +408,8 @@ var FacetItems = React.createClass({
     render: function () {
         var selItems = [];
         var _onFacetItemRemoveClick = this.onFacetItemRemoveClick;
-        if (this.state.selected_facets.length > 0) {
-            this.state.selected_facets.map(function (item) {
+        if (this.props.selectedFacets[this.props.property]) {
+            this.props.selectedFacets[this.props.property].map(function (item) {
                 selItems.push(<li data-fctvalue={item}>
                     <span title="male" className="facet-value">{item}</span>
                     <a title="Remove" className="facet-remove fr" onClick={_onFacetItemRemoveClick.bind(this, item)}>
@@ -405,6 +423,8 @@ var FacetItems = React.createClass({
                         { this.state.showTextBox ?
                             <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType}
                                                facetName={this.props.name}
+                                               property = {this.props.property}
+                                               facetsValues = {this.props.facets}
                                                onFacetItemClick={this.onFacetItemClick}/> : null }
                     </div>
                     <div className="flyout-left-container">
@@ -422,6 +442,8 @@ var FacetItems = React.createClass({
                     { this.state.showTextBox ?
                         <FacetSubMenuItems searchUid={this.props.searchUid} entityType={this.props.entityType}
                                            facetName={this.props.name}
+                                           property = {this.props.property}
+                                           facetsValues = {this.props.facets}
                                            onFacetItemClick={this.onFacetItemClick}/> : null }
                 </div>
             </div>
@@ -461,8 +483,54 @@ var FacetSubMenuItems = React.createClass({
     getInitialState: function () {
         return {data: null};
     },
+    sortFacetsValues : function(facetsValues){
+        if (facetsValues !== undefined) {
+            facetsValues.sort(function (a, b) {
+                var count_a = parseInt(a["http://vocab.lidakra.de/fuhsen#count"]);
+                var count_b = parseInt(b["http://vocab.lidakra.de/fuhsen#count"]);
+                if (isNaN(count_a) || isNaN(count_b))
+                    return 0;
+                if (count_a < count_b)
+                    return 1;
+                if (count_a > count_b)
+                    return -1;
+                return 0;
+            });
+        }
+        return facetsValues;
+    },
+    splitFacetsValues : function(){
+        var facetData = [];
+        if(Array.isArray(this.props.facetsValues)){
+            this.props.facetsValues.map(function (facetElement) {
+                var res = facetElement.split("^");
+                if (res.length == 2) {
+                    facetData.push({
+                        "http://vocab.lidakra.de/fuhsen#value": res[0],
+                        "http://vocab.lidakra.de/fuhsen#count": res[1]
+                    });
+                }
+            });
+        }
+        else{
+            var facetElement = this.props.facetsValues;
+            if(facetElement.length >0){
+                var res = facetElement.split("^");
+                if (res.length == 2) {
+                    facetData.push({
+                        "http://vocab.lidakra.de/fuhsen#value": res[0],
+                        "http://vocab.lidakra.de/fuhsen#count": res[1]
+                    });
+                }
+            }
+        }
+       return facetData;
+    },
     componentDidMount: function () {
-        this.loadFacetsFromServer(this.props.facetName);
+        //this.loadFacetsFromServer(this.props.facetName);
+        var facetsValues = this.splitFacetsValues();
+        facetsValues = this.sortFacetsValues(facetsValues);
+        this.setState({data: facetsValues});
     },
     render: function () {
         var subMenuEle = [];
@@ -974,7 +1042,7 @@ var ResultsList = React.createClass({
                         location={result["fs:location"]}
                         label={result["fs:label"]}
                         comment={result["fs:comment"]}
-                        gender={result["foaf:gender"]}
+                        gender={result["fs:gender"]}
                         occupation={result["fs:occupation"]}
                         birthday={result["fs:birthday"]}
                         country={result["fs:country"]}
@@ -1012,7 +1080,7 @@ var ResultsList = React.createClass({
                         source={result["fs:source"]}
                         location={result["fs:location"]}
                         country={result["fs:country"]}
-                        price={result["fs:price"]}
+                        price={result["fs:priceLabel"]}
                         condition={result["fs:condition"]}
                         webpage={result.url}
                         jsonResult = {result}>
@@ -1036,8 +1104,8 @@ var ResultsList = React.createClass({
                     return (
                         <WebResultElement
                             img={context + "/assets/images/datasources/TorLogo.png"}
-                            onion_url={result.url}
-                            comment={result["fs:excerpt"]}
+                            onion_url={result["url"]}
+                            comment={result["fs:comment"]}
                             source={result["fs:source"]}
                             crawled={already_crawled}>
                         </WebResultElement>
@@ -1046,13 +1114,13 @@ var ResultsList = React.createClass({
             } else if (result["@type"] === "fs:Document") {
                 return (
                     <DocumentResultElement
-                        label={result["fs:title"]}
+                        label={result["fs:label"]}
                         comment={result["fs:comment"]}
                         webpage={result.url}
                         country={result["fs:country"]}
                         language={result["fs:language"]}
                         filename={result["fs:file_name"]}
-                        extension={result["fs:filetype"]}
+                        extension={result["fs:extension"]}
                         source={result["fs:source"]}>
                     </DocumentResultElement>
                 );
@@ -1289,7 +1357,8 @@ var OrganizationResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={this.props.img} height="60px" width="75px"/>
+                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
+                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1338,7 +1407,8 @@ var ElasticSearchResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={this.props.img} height="60px" width="75px"/>
+                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
+                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1384,8 +1454,8 @@ var DocumentResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={context + "/assets/images/icons/" + this.props.extension + ".png"} height="60px"
-                                 width="75px"/>
+                            { this.props.extension !== undefined ? <img src={context + "/assets/images/icons/" + this.props.extension + ".png"} height="60px" width="75px"/>:
+                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
