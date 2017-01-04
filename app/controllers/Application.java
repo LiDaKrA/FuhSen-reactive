@@ -15,9 +15,17 @@
  */
 package controllers;
 
+import controllers.de.fuhsen.wrappers.RestApiWrapperTrait;
+import controllers.de.fuhsen.wrappers.security.RestApiOAuthTrait;
 import controllers.de.fuhsen.wrappers.security.TokenManager;
 import play.mvc.*;
 import views.html.*;
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.basic.DefaultOAuthConsumer;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class Application extends Controller {
 
@@ -43,6 +51,45 @@ public class Application extends Controller {
     public Result getKeyword(){
         String json_res = "{ \"keyword\" : \""+this.keyword+"\" }";
         return ok(json_res);
+    }
+
+    public String javaRequest(RestApiOAuthTrait wrapper, String apiUrl) {
+        try
+        {
+            OAuthConsumer consumer = new DefaultOAuthConsumer(wrapper.oAuthConsumerKey().key(),wrapper.oAuthConsumerKey().secret());
+            consumer.setTokenWithSecret(wrapper.oAuthRequestToken().token(),wrapper.oAuthRequestToken().secret());
+
+            URL url = new URL(apiUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod("GET");
+            consumer.sign(conn);
+
+            if (conn.getResponseCode() != 200) {
+                System.err.println("NOT OK "+conn.getResponseCode()+" "+conn.getResponseMessage());
+                return "NOT OK "+conn.getResponseCode()+" "+conn.getResponseMessage();
+            }
+            else {
+                BufferedReader br = new BufferedReader(new InputStreamReader(
+                        (conn.getInputStream())));
+
+                String finalOutput = "";
+                String output;
+                System.out.println("Output from Server .... \n");
+                while ((output = br.readLine()) != null) {
+                    finalOutput += output;
+                }
+
+                conn.disconnect();
+                return finalOutput;
+            }
+
+        }catch(Exception e)
+        {
+            System.err.println("NOT OK - Exception "+e.getMessage());
+            return "NOT OK - Exception "+e.getMessage();
+        }
+
     }
 }
 

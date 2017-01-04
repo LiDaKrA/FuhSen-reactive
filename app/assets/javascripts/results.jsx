@@ -162,10 +162,19 @@ var Container = React.createClass({
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
-                alert(getTranslation("server_error"));
+
+                if(err.toString().includes("Not Acceptable")){
+                    alert(getTranslation("no_valid_token_found"))
+                }else if(err.toString().includes("timeout")){
+                    alert(getTranslation("timeout"));
+                }else{
+                    alert(getTranslation("internal_server_error"));
+                }
+
                 //Todo remove this hardcoded value
                 window.location.href = "/fuhsen";
             }.bind(this)
+            ,timeout: 15000 // sets timeout to 15 seconds
         });
     },
     componentDidMount: function () {
@@ -966,19 +975,13 @@ var ResultsContainer = React.createClass({
                     </div>
                     <div className="col-md-4 text-right">
                         { this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"
-                                                                          func={this.crawlAll}></CustomForm> : null }
+                                                                          func={this.crawlAll}/> : null }
                         { this.state.selected === "website" ? <div className="divider"/> : null }
                         <CustomForm id="btn_view_selector"
-                                    class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
-                                    func={this.toggleResultsView}></CustomForm>
+    class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
+    func={this.toggleResultsView}/>
                         <div className="divider"/>
-                        <CustomForm id="btn_map" class_identifier="map_icon"
-                                    func={this.underDevelopmentFunction}></CustomForm>
-                        <div className="divider"/>
-                        <CustomForm id="btn_graph" class_identifier="graph_icon"
-                                    func={this.underDevelopmentFunction}></CustomForm>
-                        <div className="divider"/>
-                        <CustomForm id="btn_csv" class_identifier="csv_icon" func={this.csvFunction}></CustomForm>
+                        <CustomForm id="btn_csv" class_identifier="csv_icon" func={this.csvFunction}/>
                     </div>
                 </div>
             </div>
@@ -1024,12 +1027,14 @@ var CustomForm = React.createClass({
 var ResultsList = React.createClass({
     render: function () {
 
-        var resultsNodesSorted = this.props.data; //.sort(compareRank)
-        var already_crawled = this.props.crawled
-        var resultsNodes = resultsNodesSorted.map(function (result) {
+        var resultsNodesSorted = this.props.data;
+
+        var already_crawled = this.props.crawled;
+        var resultsNodes = resultsNodesSorted.map(function (result,idx) {
             if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultElement
+                        id = {idx}
                         img={result.image}
                         name={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1047,12 +1052,14 @@ var ResultsList = React.createClass({
                         haves={result["fs:haves"]}
                         top_haves={result["fs:top_haves"]}
                         interests={result["fs:interests"]}
+                        jsonResult = {result}
                     >
                     </PersonResultElement>
                 );
             } else if (result["@type"] === "foaf:Organization") {
                 return (
                     <OrganizationResultElement
+                        id = {idx}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1060,12 +1067,14 @@ var ResultsList = React.createClass({
                         comment={result["fs:comment"]}
                         country={result["fs:country"]}
                         location={result["fs:location"]}
-                        webpage={result.url}>
+                        webpage={result.url}
+                        jsonResult = {result}>
                     </OrganizationResultElement>
                 );
             } else if (result["@type"] === "gr:ProductOrService") {
                 return (
                     <ProductResultElement
+                        id = {idx}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1073,7 +1082,8 @@ var ResultsList = React.createClass({
                         country={result["fs:country"]}
                         price={result["fs:priceLabel"]}
                         condition={result["fs:condition"]}
-                        webpage={result.url}>
+                        webpage={result.url}
+                        jsonResult = {result}>
                     </ProductResultElement>
                 );
             } else if (result["@type"] === "foaf:Document") {
@@ -1083,7 +1093,7 @@ var ResultsList = React.createClass({
                             img={context + "/assets/images/datasources/Elasticsearch.png"}
                             content={result["fs:content"]}
                             label={result["fs:title"]}
-                            onion_url={result["fs:url"]}
+                            onion_url={result.url}
                             entity_url={result["fs:entity_url"]}
                             entity_dbpedia={result["fs:entity_dbpedia"]}
                             entity_type={result["fs:entity_type"]}
@@ -1126,6 +1136,28 @@ var ResultsList = React.createClass({
 });
 
 var WebResultElement = React.createClass({
+    checkOnionSite: function () {
+        var searchUrl = context + "/checkOnionSite?site=" + this.props.onion_url;
+
+        $.ajax({
+            url: searchUrl,
+            dataType: 'json',
+            cache: false,
+            success: function (data) {
+                if(data.valid) {
+                    this.createCrawlJob();
+                }
+                else {
+                    alert(getTranslation("tor_invalid_websites"));
+                    this.setState({validTORSite: false});
+                }
+
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
     createCrawlJob: function () {
         console.info("Creating crawl job task")
         var createCrawlJobUrl = context + "/crawling/jobs/create";
@@ -1146,10 +1178,16 @@ var WebResultElement = React.createClass({
         });
     },
     onCreateCrawlJobClick: function () {
-        this.createCrawlJob();
+        this.checkOnionSite()
     },
     getInitialState: function () {
-        return {crawlJobCreated: false};
+        return {crawlJobCreated: false, validTORSite: true};
+    },
+    onClickLink : function(url,e){
+        e.preventDefault();
+        if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
+            url = url.replace(".onion",".onion.to");
+        window.open(url,'_blank');
     },
     render: function () {
         return (
@@ -1167,8 +1205,8 @@ var WebResultElement = React.createClass({
                             </h2>
                             <div className="subtitle">
                                 <p><b>{getTranslation("comment")}</b>: {this.props.comment}</p>
-                                <p><b>Link: </b>: <a href={this.props.onion_url}
-                                                     target="_blank">{getTranslation("clickhere")}</a></p>
+                                <p><b>Link: </b><a href={this.props.onion_url}
+                                                     onClick={this.onClickLink.bind(this,this.props.onion_url)}>{getTranslation("clickhere")}</a></p>
                             </div>
                         </div>
                     </div>
@@ -1176,12 +1214,13 @@ var WebResultElement = React.createClass({
                         <div>
                             <div>
                                 <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                     alt={"Information from " + this.props.source} height="45" width="45"/>
+                                     alt={"Information from " + this.props.source} height="45" width="45"
+                                     title={this.props.source}/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{ this.props.crawled == true || this.state.crawlJobCreated === true ?
+                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true ?
                                 <label>{getTranslation("crawlJobCreated")}</label> : <button
-                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> }
+                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
                             </div>
                         </div>
                     </div>
@@ -1237,8 +1276,10 @@ var ProductResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
+                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
                 </div>
             </li>
@@ -1298,8 +1339,10 @@ var PersonResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
+                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
                 </div>
             </li>
@@ -1340,8 +1383,10 @@ var OrganizationResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
+                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
                     </div>
                 </div>
             </li>
@@ -1350,6 +1395,12 @@ var OrganizationResultElement = React.createClass({
 });
 
 var ElasticSearchResultElement = React.createClass({
+    onClickLink : function(url,e){
+        e.preventDefault();
+        if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
+            url = url.replace(".onion",".onion.to");
+        window.open(url,'_blank');
+    },
     render: function () {
         return (
             <li className="item bt">
@@ -1366,10 +1417,12 @@ var ElasticSearchResultElement = React.createClass({
                                 {this.props.label}
                             </h2>
                             <div className="subtitle">
-                                { this.props.content !== undefined ?
-                                    <p><b>Content: </b>{this.props.content}</p> : null }
                                 { this.props.onion_url !== undefined ?
-                                    <p><b>Onion Url: </b>{this.props.onion_url}</p> : null }
+                                    <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
+                                                                           onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a><SnapshotLink
+                                        webpage={this.props.onion_url.replace(".onion",".onion.to")}></SnapshotLink></p> : null }
+                                { this.props.content !== undefined ?
+                                    <p><b>Content: </b>{<RichText label="Content" text={this.props.content} maxLength={300}/>}</p> : null }
                                 { this.props.entity_url !== undefined ?
                                     <p><b>Entity URL: </b>{this.props.entity_url}</p> : null }
                                 { this.props.entity_dbpedia !== undefined ?
@@ -1384,7 +1437,8 @@ var ElasticSearchResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/Elasticsearch.png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title="Elasticsearch"/>
                         </div>
                     </div>
                 </div>
@@ -1427,7 +1481,8 @@ var DocumentResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"/>
+                                 alt={"Information from " + this.props.source} height="45" width="45"
+                                 title={this.props.source}/>
                         </div>
                     </div>
                 </div>

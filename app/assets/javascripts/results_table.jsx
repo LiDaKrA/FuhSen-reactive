@@ -376,6 +376,12 @@ var OrganizationResultRow = React.createClass({
     }
 });
 var WebResultRow = React.createClass({
+    onClickLink : function(url,e){
+        e.preventDefault();
+        if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
+            url = url.replace(".onion",".onion.to");
+        window.open(url,'_blank');
+    },
     render: function () {
         return (
             <tr id={"row"+this.props.id}>
@@ -392,7 +398,7 @@ var WebResultRow = React.createClass({
                 <td>{ this.props.comment !== undefined ? <RichText label="Comment" text={this.props.comment} maxLength={100}/> : null}</td>
                 <td>{ this.props.webpage !== undefined ? <p><a className="no-external-link-icon" href={this.props.webpage}
 
-                                                               target="_blank">
+                                                               onClick={this.onClickLink.bind(this,this.props.webpage)}>
                     <img src={context + "/assets/images/icons/link_icon_0.png"}/>
                 </a>
                 </p> : null }</td>

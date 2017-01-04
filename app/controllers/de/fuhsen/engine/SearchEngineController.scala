@@ -69,12 +69,16 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
           }
           futureResponse.map {
             r =>
-              val finalModel = RDFUtil.rdfStringToModel(r.body, Lang.TURTLE)
-              GraphResultsCache.saveModel(uid, finalModel)
-              Logger.info("Search results stored in cache: "+uid)
+              if(!r.body.equals("NO VALID TOKEN")){
+                val finalModel = RDFUtil.rdfStringToModel(r.body, Lang.TURTLE)
+                GraphResultsCache.saveModel(uid, finalModel)
+                Logger.info("Search results stored in cache: "+uid)
 
-              //Return sub model by type
-              Ok(RDFUtil.modelToTripleString(getSubModel(entityType, finalModel), Lang.JSONLD))
+                //Return sub model by type
+                Ok(RDFUtil.modelToTripleString(getSubModel(entityType, finalModel), Lang.JSONLD))
+              }else{
+                NotAcceptable(r.body)
+              }
           }
         }
         //Search results are already in storage

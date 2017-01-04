@@ -5,7 +5,7 @@
 #
 # 2) Test Fuhsen in a container. Run the following docker command for testing
 #
-#    $ docker run --rm -it -p 9000:9000 --name fuhsen lidakra/fuhsen:v1.1.0 /bin/bash
+#    $ docker run --rm -it -p 9000:9000 --network=fuhsen-net --name fuhsen lidakra/fuhsen:v1.1.0 /bin/bash
 #
 # 3) Fuhsen needs API keys to access social networs. The keys are stored in conf/application.conf
 # For security reason the application.conf file on Github does not contain the keys. The config file
@@ -24,12 +24,21 @@
 # 5) Within the container check that the application.conf is right and start Fuhsen  ./bin/fuhsen
 #
 # 6) Detach from the container with Ctrl-p Ctrl-q
+#
+# The container can be started in detached mode executing the command
+#
+# $ docker run -d -p 9000:9000 --network=fuhsen-net --volumes-from fuhsen-conf --name fuhsen lidakra/fuhsen:v1.1.0
 
 
 # Pull base image
 #FROM ubuntu:15.04
 FROM ubuntu
 MAINTAINER Luigi Selmi <luigiselmi@gmail.com>
+
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 # Install Java 8.
 RUN apt-get update && \
@@ -43,6 +52,12 @@ RUN apt-get update && \
 
 # Define JAVA_HOME environment variable
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+
+# Install  network tools (ifconfig, netstat, ping, ip)
+RUN apt-get update && \
+    apt-get install -y net-tools && \
+    apt-get install -y iputils-ping && \
+    apt-get install -y iproute2
 
 # Install vi for editing
 RUN apt-get update && \
@@ -60,9 +75,12 @@ COPY target/universal/fuhsen-1.1.0.tgz /home/lidakra/
 WORKDIR /home/lidakra/
 RUN tar xvf fuhsen-1.1.0.tgz  
 
+
 # Copy the schema folder (as sbt universal package does not include it by default)
 COPY schema/ /home/lidakra/fuhsen-1.1.0/schema/
 
 # Start Fuhsen
+COPY start_fuhsen.sh /home/lidakra/fuhsen-1.1.0
 WORKDIR /home/lidakra/fuhsen-1.1.0
-#CMD ./bin/fuhsen
+RUN ["chmod", "u+x", "start_fuhsen.sh"]
+CMD ./start_fuhsen.sh
