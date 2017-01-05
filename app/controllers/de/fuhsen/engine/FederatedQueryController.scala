@@ -1,6 +1,7 @@
 package controllers.de.fuhsen.engine
 
 import com.typesafe.config.ConfigFactory
+import controllers.de.fuhsen.FuhsenVocab
 import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.riot.Lang
@@ -30,7 +31,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       val textBody = request.body.asText
       val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)
 
-      val keyword = getKeywordQuery(model)
+      val keyword = FuhsenVocab.getKeyword(model)
       val dataSources = getDataSourceQuery(model)
       val entityTypes = getEntityTypeQuery(model)
       val enabledDataSourcesByTypes = JenaGlobalSchema.getDataSourceByEntityTypes(entityTypes.split(",").map(x => "'"+x+"'").toSet.mkString(","))
@@ -75,7 +76,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       }
   }
 
-  private def getKeywordQuery(model: Model): String = {
+  /*private def getKeywordQuery(model: Model): String = {
 
     val keywordQuery = QueryFactory.create(
       s"""
@@ -92,7 +93,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       Logger.error("No keyword query found in the graph.")
       ""
     }
-  }
+  }*/
 
   private def getDataSourceQuery(model: Model): String = {
     val keywordQuery = QueryFactory.create(
