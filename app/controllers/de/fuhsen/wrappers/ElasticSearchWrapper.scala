@@ -24,7 +24,7 @@ import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, S
 class ElasticSearchWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
 
   /** Query parameters that should be added to the request. */
-  override def queryParams: Map[String, String] = Map("size" -> "10", "pretty" -> "true")
+  override def queryParams: Map[String, String] = Map("size" -> "100", "pretty" -> "false")
 
   /** Headers that should be added to the request. */
   override def headersParams: Map[String, String] = Map()

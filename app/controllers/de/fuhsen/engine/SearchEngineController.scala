@@ -117,10 +117,11 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
     Logger.info("Search Session started: "+searchUid)
 
+    val queryJsValue = query.replace("\"","\\\"") //Replacing "" with scape characters for JSON response
     //Building json response
     val json: JsValue = Json.parse(s"""
         {
-          "keyword" : "$query",
+          "keyword" : "$queryJsValue",
           "uid" : "$searchUid"
         }
         """)
