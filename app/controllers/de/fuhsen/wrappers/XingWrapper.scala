@@ -25,7 +25,7 @@ import play.api.libs.oauth.{ConsumerKey, RequestToken}
 class XingWrapper extends RestApiWrapperTrait with RestApiOAuthTrait with SilkTransformableTrait {
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map(
-    "limit" -> "100",
+    "limit" -> "10",
     "user_fields" -> ConfigFactory.load.getString("xing.search.fields")
   )
 

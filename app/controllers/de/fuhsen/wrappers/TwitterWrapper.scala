@@ -24,7 +24,7 @@ import play.api.libs.oauth.{ConsumerKey, RequestToken}
  */
 class TwitterWrapper extends RestApiWrapperTrait with RestApiOAuthTrait with SilkTransformableTrait {
   /** Query parameters that should be added to the request. */
-  override def queryParams: Map[String, String] = Map("count" -> "20") //20 is the maximum value for count parameter
+  override def queryParams: Map[String, String] = Map("count" -> "100")
 
   /** Headers that should be added to the request. */
   override def headersParams: Map[String, String] = Map()

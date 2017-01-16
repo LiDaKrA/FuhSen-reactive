@@ -16,12 +16,14 @@
 package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
-import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformationTask, SilkTransformableTrait}
+import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
 
 /**
   * Wrapper for the Tor2Web REST API.
   */
-class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
+class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait with PaginatingApiTrait {
+  // The number of results in one response
+  final val limit = 100
 
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map(
@@ -61,4 +63,17 @@ class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
 
+  override def nextPageQueryParameter: String = "start"
+
+  /**
+    * Extracts and returns the next page/offset value from the response body of the API.
+    *
+    * @param resultBody The body serialized as String as coming from the API.
+    * @param lastValue  The last value. This can be used if the value is not available in the result body, but instead
+    *                   is calculated by the wrapper implementation.
+    */
+  override def extractNextPageQueryValue(resultBody: String, lastValue: Option[String]): Option[String] = {
+    val newOffset = lastValue map { v => v.toInt + limit} getOrElse limit
+    Some(newOffset.toString)
+  }
 }
