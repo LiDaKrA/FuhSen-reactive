@@ -19,7 +19,6 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
   * Micro-Task service that calls the RDF-Wrappers to extract the information.
   */
 class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
-  final val SEARCH_ENDPOINT = "/ldw/restApiWrapper/search"
 
   def execute = Action.async {
     request =>
@@ -60,15 +59,11 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         Ok(textBody.get)
 
       //Calling the RDF-Wrappers to get the information //engine.microtask.url
-      ws.url(ConfigFactory.load.getString("engine.microtask.url") +
-          s"$SEARCH_ENDPOINT?query=$keyword&wrapperIds=$finalSelectedDataSources").
-          withHeaders("content-type" -> "application/json").
-          // TODO: Add wrapper meta data to request
-          post("""{"nextPageMap":{}}""").map {
+      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword.get+"&wrapperIds="+finalSelectedDataSources).get.map {
         response =>
-          if (response.status / 100 != 2) {
-            InternalServerError(s"Got ${response.status} code from $SEARCH_ENDPOINT endpoint. Response body (truncated): " + response.body.take(1000))
-          } else {
+          if(finalSelectedDataSources.length == 0) {
+            Ok("NO VALID TOKEN")
+          }else{
             val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
             model.add(wrappersResult)
             Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))

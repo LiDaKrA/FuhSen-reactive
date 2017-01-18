@@ -18,14 +18,12 @@ package controllers.de.fuhsen.wrappers
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
 import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, TokenManager}
-import org.apache.jena.atlas.json.JSON
-import play.api.libs.json.Json
 
 
 /**
   * Created by cmorales on 16.03.2016.
   */
-class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with SilkTransformableTrait with PaginatingApiTrait {
+class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with SilkTransformableTrait{
 
   //RestApiWrapperTrait implementation:
   /** Query parameters that should be added to the request. */
@@ -37,7 +35,7 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
     var query_string: String = queryString.replace(" ", "+")
-    query_string = queryString.replace("%20", "+")
+    query_string = query_string.replace("%20", "+")
     Map("q" -> query_string)
   }
   /** The REST endpoint URL */
@@ -63,19 +61,4 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
   override def datasetPluginType: DatasetPluginType = DatasetPluginType.JsonDatasetPlugin
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
-
-  /** The query parameter to specify the page/offset in the result set */
-  override def nextPageQueryParameter: String = "after"
-
-  /**
-    * Extracts and returns the next page/offset value from the response body of the API.
-    *
-    * @param resultBody The body serialized as String as coming from the API.
-    * @param lastValue  The last value. This can be used if the value is not available in the result body, but instead
-    *                   is calculated by the wrapper implementation.
-    */
-  override def extractNextPageQueryValue(resultBody: String, lastValue: Option[String]): Option[String] = {
-    val jsonBody = Json.parse(resultBody)
-    (jsonBody \ "paging" \ "cursors" \ "after").toOption map (_.as[String])
-  }
 }

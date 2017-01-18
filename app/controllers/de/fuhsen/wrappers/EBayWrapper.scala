@@ -31,7 +31,7 @@ class EBayWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
     "GLOBAL-ID" -> "EBAY-DE",
     "RESPONSE-DATA-FORMAT" -> "JSON",
     "REST-PAYLOAD" -> "",
-    "paginationInput.entriesPerPage" -> "20"
+    "paginationInput.entriesPerPage" -> "100"
   )
 
   /** Headers that should be added to the request. */
