@@ -1,6 +1,0 @@
-2017-01-16 16:40:04,402 [INFO] from play.core.server.NettyServer in play-fork-run-akka.actor.default-dispatcher-3 - Listening for HTTP on /0:0:0:0:0:0:0:0:9000
-2017-01-16 16:40:31,663 [INFO] from application in ForkJoinPool-1-worker-1 - Application is started!!!
-2017-01-16 16:40:32,332 [INFO] from application in ForkJoinPool-1-worker-1 - Model loaded: true
-2017-01-16 16:40:32,339 [INFO] from play.api.Play in ForkJoinPool-1-worker-1 - Application started (Dev)
-2017-01-16 16:40:33,513 [INFO] from application in application-akka.actor.default-dispatcher-4 - Source List
-2017-01-16 16:40:33,525 [INFO] from application in application-akka.actor.default-dispatcher-2 - Entity Type List
