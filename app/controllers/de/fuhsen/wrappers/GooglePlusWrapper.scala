@@ -96,11 +96,14 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
   override def customResponseHandling(implicit ws: WSClient) = Some(apiResponse => {
 
     val people = {
-      try
-        {
-          (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
+      try { (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
         }catch {
-          case e: Exception => List[Person]((Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[Person]) //
+          case e: Exception =>
+            try {
+              List[Person]((Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[Person]) //
+            } catch {
+              case e: Exception => List[Person]()
+            }
       }
     }
 
