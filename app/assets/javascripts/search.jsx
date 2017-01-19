@@ -106,12 +106,12 @@ var LangSwitcher = React.createClass({
                 <div>
                     <b>Deutsch</b>
                     &#124;
-                    <a onClick={boundClickEng}>English</a>
+                    <a href="#" onClick={boundClickEng}>English</a>
                 </div>)
         } else {
             return (
                 <div>
-                    <a onClick={boundClickGer}>Deutsch</a>
+                    <a href="#" onClick={boundClickGer}>Deutsch</a>
                     &#124;
                     <b>English</b>
                 </div>)
