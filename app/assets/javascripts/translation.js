@@ -103,7 +103,8 @@ var dictEng = {
     "timeout": "TIMEOUT: THE SEARCH TOOK TOO LONG!",
     "internal_server_error": "INTERNAL SERVER ERROR!",
     "datasources": "Datasources",
-    "entitytypes": "Entitytypes"
+    "entitytypes": "Entitytypes",
+    "fuhsen" : "Federated Hybrid Search"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -217,7 +218,8 @@ var dictGer = {
     "timeout": "TIMEOUT: DIE SUCHE HAT ZU LANG GEDAUERT!",
     "internal_server_error": "INTERNER SERVERFEHLER!",
     "datasources": "Datenquellen",
-    "entitytypes": "Entitätstypen"
+    "entitytypes": "Entitätstypen",
+    "fuhsen" : "Föderierte Hybride Suche"
 };
 
 window.dictGer = dictGer;

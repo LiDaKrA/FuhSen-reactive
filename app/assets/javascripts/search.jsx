@@ -34,7 +34,8 @@ var ContainerSearch = React.createClass({
                     <link rel="stylesheet" media="screen" href={context+"/assets/stylesheets/startPage.css"}>
                         <div className="col-md-12 search-widget">
                             <div class="row">
-                                <img src={context+"/assets/images/imgpsh_fullsize.png"} className="bigLogo" alt="Logo_Description"/>
+                                <img src={context+"/assets/images/imgpsh_fullsize_NoText.png"} className="bigLogo" alt="Logo_Description"/>
+                                <h1 style={{color: "#456499"} }>{getTranslation("fuhsen")}</h1>
                             </div>
                             <div className="row">
                                 <div className="col-md-12 text-center">
