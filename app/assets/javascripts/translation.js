@@ -101,7 +101,9 @@ var dictEng = {
     "invalid_website": "The website is offline",
     "no_valid_token_found": "ERROR: NO VALID TOKEN FOUND.",
     "timeout": "TIMEOUT: THE SEARCH TOOK TOO LONG!",
-    "internal_server_error": "INTERNAL SERVER ERROR!"
+    "internal_server_error": "INTERNAL SERVER ERROR!",
+    "datasources": "Datasources",
+    "entitytypes": "Entitytypes"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -213,7 +215,9 @@ var dictGer = {
     "invalid_website": "Die Website ist offline",
     "no_valid_token_found": "FEHLER: KEIN GÜLTIGES TOKEN GEFUNDEN.",
     "timeout": "TIMEOUT: DIE SUCHE HAT ZU LANG GEDAUERT!",
-    "internal_server_error": "INTERNER SERVERFEHLER!"
+    "internal_server_error": "INTERNER SERVERFEHLER!",
+    "datasources": "Datenquellen",
+    "entitytypes": "Entitätstypen"
 };
 
 window.dictGer = dictGer;

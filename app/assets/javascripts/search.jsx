@@ -3,19 +3,22 @@ checkLanguage();
 var context = $('body').data('context')
 
 var ContainerSearch = React.createClass({
+    getInitialState: function() {
+        return { dictionary: "" };
+    },
     setLang: function() {
         switch (window.localStorage.getItem("lang")) {
             case "de":
                 window.globalDict = dictGer;
                 window.localStorage.lang = "de";
                 this.setState({dictionary: "de"});
-                globalFlushFilters();
+                // globalFlushFilters();
                 break;
             case "en":
                 window.globalDict = dictEng;
                 window.localStorage.lang = "en";
                 this.setState({dictionary: "en"});
-                globalFlushFilters();
+                // globalFlushFilters();
                 break;
         }
     },
@@ -35,7 +38,7 @@ var ContainerSearch = React.createClass({
                             </div>
                             <div className="row">
                                 <div className="col-md-12 text-center">
-                                    <SearchForm id_class="form-search"/>
+                                    <SearchForm id_class="form-search" lang = {this.state.dictionary}/>
                                 </div>
                             </div>
                         </div>
@@ -243,10 +246,10 @@ var SearchForm = React.createClass({
                         <div className={floatingDivStyle}>
                             <div className="row" id="filterList">
                                 <div className="col-md-6 separator">
-                                    <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                    <FilterCheckList filterType="datasources" lang = {this.props.lang} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                                 <div className="col-md-6">
-                                    <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                    <FilterCheckList filterType="entitytypes" lang = {this.props.lang} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                             </div>
                         </div>
@@ -288,10 +291,10 @@ var SearchForm = React.createClass({
                     <div className={floatingDivStyle}>
                         <div className="row" id="filterList">
                             <div className="col-md-6 separator">
-                                <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="datasources" lang = {this.props.lang} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                             <div className="col-md-6">
-                                <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="entitytypes" lang = {this.props.lang} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                         </div>
                     </div>
@@ -353,6 +356,10 @@ var FilterCheckList = React.createClass({
             }.bind(this)
         });
     },
+    componentWillReceiveProps: function (nextProps) {
+        if(nextProps.lang != this.props.lang)
+            this.loadListFromServer(this.props.filterType);
+    },
     componentDidMount: function () {
         this.loadListFromServer(this.props.filterType);
     },
@@ -373,7 +380,7 @@ var FilterCheckList = React.createClass({
     render: function() {
         if (this.props.show) {
             if (this.state.data) {
-                var filter_title = (this.props.filterType).charAt(0).toUpperCase() + (this.props.filterType).slice(1);
+                var filter_title = getTranslation(this.props.filterType);//(this.props.filterType).charAt(0).toUpperCase() + (this.props.filterType).slice(1);
 
                 var checks = this.state.data.map(function(d) {
                     return (
