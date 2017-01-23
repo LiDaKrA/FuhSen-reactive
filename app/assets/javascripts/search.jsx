@@ -283,10 +283,10 @@ var SearchForm = React.createClass({
                             </div>
                         </form>
                     </div>
-                    <div className="col-md-1 vertical-separator" title="Search with 1 keyword <- OR ->Search with 1 or more keywords"/>
-                    <div className="col-md-1 ">
-                        <KeywordsFile sources={selected_sources} types={selected_types}/>
-                    </div>
+                    {/*<div className="col-md-1 vertical-separator" title="Search with 1 keyword <- OR ->Search with 1 or more keywords"/>*/}
+                    {/*<div className="col-md-1 ">*/}
+                        {/*<KeywordsFile sources={selected_sources} types={selected_types}/>*/}
+                    {/*</div>*/}
                 </div>
                 <div class="row">
                     <div className={floatingDivStyle}>
