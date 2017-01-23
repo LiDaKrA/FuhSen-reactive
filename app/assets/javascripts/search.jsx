@@ -128,24 +128,26 @@ var SearchForm = React.createClass({
         var sources_label = ""
         var types_label = ""
 
+        var prefix_sources_label = getTranslation("datasources");
+        var prefix_types_label = getTranslation("types");
         if(sources_list.length === 0) {
-            sources_label = "Datenquellen: none."
+            sources_label = prefix_sources_label  + ": "+ getTranslation("none") + "."
         }
         else if(sources_list.length === this.state.sources.length) {
-            sources_label = "Datenquellen: alle."
+            sources_label = prefix_sources_label + ": "+ getTranslation("all") + "."
         }else if(sources_list.length > 0) {
-            sources_label = "Datenquellen: (" + sources_list + ")."
+            sources_label = prefix_sources_label + ": (" + sources_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
 
         if(types_list.length === 0){
-            types_label = "Typen: none."
+            types_label = prefix_types_label + ": "+ getTranslation("none") + "."
         }
         else if(types_list.length === this.state.types.length) {
-            types_label = "Typen: alle."
+            types_label = prefix_types_label + ": " + getTranslation("all") + "."
         }else if(types_list.length > 0) {
-            types_label = "Typen: (" + types_list + ")."
+            types_label = prefix_types_label + ": (" + types_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
@@ -378,11 +380,25 @@ var FilterCheckList = React.createClass({
                 key: d.key
             };
         });
+        var allselected = state.every(function(item){
+           return item.selected;
+        });
         this.props.onSourceChangedFunction(state)
-        this.setState({ data: state });
+        this.setState({ data: state, selectAll:allselected });
+    },
+    __changeSelectAll: function(){
+        var state = this.state.data.map(function(d) {
+            return {
+                id: d.id,
+                selected: !this.state.selectAll,//!d.selected,//(d.id === id ? !d.selected : d.selected),
+                key: d.key
+            };
+        },this);
+        this.props.onSourceChangedFunction(state)
+        this.setState({ data: state , selectAll: !this.state.selectAll});
     },
     getInitialState: function() {
-        return { data: undefined };
+        return { data: undefined, selectAll: true };
     },
     render: function() {
         if (this.props.show) {
@@ -400,7 +416,9 @@ var FilterCheckList = React.createClass({
                 }.bind(this));
                 return (
                     <div>
-                        <p className="thick">{filter_title+":"}</p>
+                         <p className="thick">
+                             <input type="checkbox" checked={this.state.selectAll} onChange={this.__changeSelectAll}/>
+                             {filter_title+":"}</p>
                         {checks}
                     </div>
                 );

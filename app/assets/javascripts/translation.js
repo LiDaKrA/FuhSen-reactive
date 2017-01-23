@@ -104,6 +104,9 @@ var dictEng = {
     "internal_server_error": "INTERNAL SERVER ERROR!",
     "datasources": "Datasources",
     "entitytypes": "Entitytypes",
+    "types" : "Types",
+    "all" : "all",
+    "none" : "none",
     "fuhsen" : "Federated Hybrid Search"
 };
 var dictGer = {
@@ -219,6 +222,9 @@ var dictGer = {
     "internal_server_error": "INTERNER SERVERFEHLER!",
     "datasources": "Datenquellen",
     "entitytypes": "Entitätstypen",
+    "types" : "Typen",
+    "all" : "alle",
+    "none" : "keiner",
     "fuhsen" : "Föderierte Hybride Suche"
 };
 
