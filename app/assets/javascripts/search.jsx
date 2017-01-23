@@ -129,6 +129,9 @@ var SearchForm = React.createClass({
         var types_label = ""
 
         if(sources_list.length === 0) {
+            sources_label = "Datenquellen: none."
+        }
+        else if(sources_list.length === this.state.sources.length) {
             sources_label = "Datenquellen: alle."
         }else if(sources_list.length > 0) {
             sources_label = "Datenquellen: (" + sources_list + ")."
@@ -136,7 +139,10 @@ var SearchForm = React.createClass({
             alert("[Error] Well, seems like something went wrong...")
         }
 
-        if(types_list.length === 0) {
+        if(types_list.length === 0){
+            types_label = "Typen: none."
+        }
+        else if(types_list.length === this.state.types.length) {
             types_label = "Typen: alle."
         }else if(types_list.length > 0) {
             types_label = "Typen: (" + types_list + ")."
@@ -206,7 +212,7 @@ var SearchForm = React.createClass({
         document.removeEventListener('click', this.OnDocumentClick);
     },
     getInitialState: function() {
-        return { showSourcesTypesDiv: false };
+        return { showSourcesTypesDiv: false, sources: [] , types: [] };
     },
     render: function() {
 
@@ -335,8 +341,8 @@ var FilterCheckList = React.createClass({
                     var current_key = list_data["@graph"][k]["fs:key"]
                     var checked = false
 
-                    if(list_data["@graph"].length > previousDataList.length) {
-                        checked = $.inArray(current_key, previousDataList) > -1 ? true : false
+                    if(list_data["@graph"].length >= previousDataList.length) {
+                        checked = $.inArray(current_key, previousDataList) > -1 || previousDataList.length == 0 ? true : false
                     }
 
                     if(Object.prototype.toString.call(current_label) === '[object Array]'){
