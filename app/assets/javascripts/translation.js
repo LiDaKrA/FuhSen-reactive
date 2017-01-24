@@ -101,7 +101,13 @@ var dictEng = {
     "invalid_website": "The website is offline",
     "no_valid_token_found": "ERROR: NO VALID TOKEN FOUND.",
     "timeout": "TIMEOUT: THE SEARCH TOOK TOO LONG!",
-    "internal_server_error": "INTERNAL SERVER ERROR!"
+    "internal_server_error": "INTERNAL SERVER ERROR!",
+    "datasources": "Data sources",
+    "entitytypes": "Entity types",
+    "types" : "Types",
+    "all" : "all",
+    "none" : "none",
+    "fuhsen" : "Federated Hybrid Search"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -161,7 +167,7 @@ var dictGer = {
     "toolminmax":"MIN-MAX: Ermöglich die Eingabe einer Unter- oder Obergrenze für diese Eigenschaft.",
     "newtoken":"Ein neues Access Token bekommen",
     "novalidtkfound_pre":"Kein gültiges ",
-    "novalidtkfound_post": "-Token gefunden. Wenn Sie diese Source nutzen wollen, bitte:",
+    "novalidtkfound_post": "-Token gefunden. Wenn Sie diese Datenquelle nutzen wollen, bitte:",
     "minutes":"Minuten",
     "hours":"Stunden",
     "days":"Tage",
@@ -213,7 +219,13 @@ var dictGer = {
     "invalid_website": "Die Website ist offline",
     "no_valid_token_found": "FEHLER: KEIN GÜLTIGES TOKEN GEFUNDEN.",
     "timeout": "TIMEOUT: DIE SUCHE HAT ZU LANG GEDAUERT!",
-    "internal_server_error": "INTERNER SERVERFEHLER!"
+    "internal_server_error": "INTERNER SERVERFEHLER!",
+    "datasources": "Datenquellen",
+    "entitytypes": "Entitätstypen",
+    "types" : "Typen",
+    "all" : "alle",
+    "none" : "keiner",
+    "fuhsen" : "Föderierte Hybride Suche"
 };
 
 window.dictGer = dictGer;

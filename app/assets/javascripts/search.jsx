@@ -3,19 +3,22 @@ checkLanguage();
 var context = $('body').data('context')
 
 var ContainerSearch = React.createClass({
+    getInitialState: function() {
+        return { dictionary: "" };
+    },
     setLang: function() {
         switch (window.localStorage.getItem("lang")) {
             case "de":
                 window.globalDict = dictGer;
                 window.localStorage.lang = "de";
                 this.setState({dictionary: "de"});
-                globalFlushFilters();
+                // globalFlushFilters();
                 break;
             case "en":
                 window.globalDict = dictEng;
                 window.localStorage.lang = "en";
                 this.setState({dictionary: "en"});
-                globalFlushFilters();
+                // globalFlushFilters();
                 break;
         }
     },
@@ -31,11 +34,12 @@ var ContainerSearch = React.createClass({
                     <link rel="stylesheet" media="screen" href={context+"/assets/stylesheets/startPage.css"}>
                         <div className="col-md-12 search-widget">
                             <div class="row">
-                                <img src={context+"/assets/images/imgpsh_fullsize.png"} className="bigLogo" alt="Logo_Description"/>
+                                <img src={context+"/assets/images/imgpsh_fullsize_NoText.png"} className="bigLogo" alt="Logo_Description"/>
+                                <h1 style={{color: "#456499"} }>{getTranslation("fuhsen")}</h1>
                             </div>
                             <div className="row">
                                 <div className="col-md-12 text-center">
-                                    <SearchForm id_class="form-search"/>
+                                    <SearchForm id_class="form-search" lang = {this.state.dictionary}/>
                                 </div>
                             </div>
                         </div>
@@ -103,12 +107,12 @@ var LangSwitcher = React.createClass({
                 <div>
                     <b>Deutsch</b>
                     &#124;
-                    <a onClick={boundClickEng}>English</a>
+                    <a href="#" onClick={boundClickEng}>English</a>
                 </div>)
         } else {
             return (
                 <div>
-                    <a onClick={boundClickGer}>Deutsch</a>
+                    <a href="#" onClick={boundClickGer}>Deutsch</a>
                     &#124;
                     <b>English</b>
                 </div>)
@@ -124,18 +128,26 @@ var SearchForm = React.createClass({
         var sources_label = ""
         var types_label = ""
 
+        var prefix_sources_label = getTranslation("datasources");
+        var prefix_types_label = getTranslation("types");
         if(sources_list.length === 0) {
-            sources_label = "Datenquellen: alle."
+            sources_label = prefix_sources_label  + ": "+ getTranslation("none") + "."
+        }
+        else if(sources_list.length === this.state.sources.length) {
+            sources_label = prefix_sources_label + ": "+ getTranslation("all") + "."
         }else if(sources_list.length > 0) {
-            sources_label = "Datenquellen: (" + sources_list + ")."
+            sources_label = prefix_sources_label + ": (" + sources_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
 
-        if(types_list.length === 0) {
-            types_label = "Typen: alle."
+        if(types_list.length === 0){
+            types_label = prefix_types_label + ": "+ getTranslation("none") + "."
+        }
+        else if(types_list.length === this.state.types.length) {
+            types_label = prefix_types_label + ": " + getTranslation("all") + "."
         }else if(types_list.length > 0) {
-            types_label = "Typen: (" + types_list + ")."
+            types_label = prefix_types_label + ": (" + types_list + ")."
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
@@ -202,7 +214,7 @@ var SearchForm = React.createClass({
         document.removeEventListener('click', this.OnDocumentClick);
     },
     getInitialState: function() {
-        return { showSourcesTypesDiv: false };
+        return { showSourcesTypesDiv: false, sources: [] , types: [] };
     },
     render: function() {
 
@@ -243,10 +255,10 @@ var SearchForm = React.createClass({
                         <div className={floatingDivStyle}>
                             <div className="row" id="filterList">
                                 <div className="col-md-6 separator">
-                                    <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                    <FilterCheckList filterType="datasources" lang = {this.props.lang} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                                 <div className="col-md-6">
-                                    <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                    <FilterCheckList filterType="entitytypes" lang = {this.props.lang} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                             </div>
                         </div>
@@ -279,19 +291,19 @@ var SearchForm = React.createClass({
                             </div>
                         </form>
                     </div>
-                    <div className="col-md-1 vertical-separator" title="Search with 1 keyword <- OR ->Search with 1 or more keywords"/>
-                    <div className="col-md-1 ">
-                        <KeywordsFile sources={selected_sources} types={selected_types}/>
-                    </div>
+                    {/*<div className="col-md-1 vertical-separator" title="Search with 1 keyword <- OR ->Search with 1 or more keywords"/>*/}
+                    {/*<div className="col-md-1 ">*/}
+                        {/*<KeywordsFile sources={selected_sources} types={selected_types}/>*/}
+                    {/*</div>*/}
                 </div>
                 <div class="row">
                     <div className={floatingDivStyle}>
                         <div className="row" id="filterList">
                             <div className="col-md-6 separator">
-                                <FilterCheckList filterType="datasources" onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="datasources" lang = {this.props.lang} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                             <div className="col-md-6">
-                                <FilterCheckList filterType="entitytypes" onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="entitytypes" lang = {this.props.lang} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                         </div>
                     </div>
@@ -331,8 +343,8 @@ var FilterCheckList = React.createClass({
                     var current_key = list_data["@graph"][k]["fs:key"]
                     var checked = false
 
-                    if(list_data["@graph"].length > previousDataList.length) {
-                        checked = $.inArray(current_key, previousDataList) > -1 ? true : false
+                    if(list_data["@graph"].length >= previousDataList.length) {
+                        checked = $.inArray(current_key, previousDataList) > -1 || previousDataList.length == 0 ? true : false
                     }
 
                     if(Object.prototype.toString.call(current_label) === '[object Array]'){
@@ -353,6 +365,10 @@ var FilterCheckList = React.createClass({
             }.bind(this)
         });
     },
+    componentWillReceiveProps: function (nextProps) {
+        if(nextProps.lang != this.props.lang)
+            this.loadListFromServer(this.props.filterType);
+    },
     componentDidMount: function () {
         this.loadListFromServer(this.props.filterType);
     },
@@ -364,16 +380,30 @@ var FilterCheckList = React.createClass({
                 key: d.key
             };
         });
+        var allselected = state.every(function(item){
+           return item.selected;
+        });
         this.props.onSourceChangedFunction(state)
-        this.setState({ data: state });
+        this.setState({ data: state, selectAll:allselected });
+    },
+    __changeSelectAll: function(){
+        var state = this.state.data.map(function(d) {
+            return {
+                id: d.id,
+                selected: !this.state.selectAll,//!d.selected,//(d.id === id ? !d.selected : d.selected),
+                key: d.key
+            };
+        },this);
+        this.props.onSourceChangedFunction(state)
+        this.setState({ data: state , selectAll: !this.state.selectAll});
     },
     getInitialState: function() {
-        return { data: undefined };
+        return { data: undefined, selectAll: true };
     },
     render: function() {
         if (this.props.show) {
             if (this.state.data) {
-                var filter_title = (this.props.filterType).charAt(0).toUpperCase() + (this.props.filterType).slice(1);
+                var filter_title = getTranslation(this.props.filterType);//(this.props.filterType).charAt(0).toUpperCase() + (this.props.filterType).slice(1);
 
                 var checks = this.state.data.map(function(d) {
                     return (
@@ -386,7 +416,9 @@ var FilterCheckList = React.createClass({
                 }.bind(this));
                 return (
                     <div>
-                        <p className="thick">{filter_title+":"}</p>
+                         <p className="thick">
+                             <input type="checkbox" checked={this.state.selectAll} onChange={this.__changeSelectAll}/>
+                             {filter_title+":"}</p>
                         {checks}
                     </div>
                 );

@@ -49,7 +49,7 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
 
   /** Returns for a given query string the representation as query parameter. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = Map (
-    "q" -> ("USE 'http://www.datatables.org/google/google.plus.people.search.xml';SELECT * FROM google.plus.people.search WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND query='"+queryString+"' and maxResults='100'")
+    "q" -> ("USE 'http://www.datatables.org/google/google.plus.people.search.xml';SELECT * FROM google.plus.people.search WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND query='"+queryString+"'")
     //Replaced by YQL
     //"query" -> queryString
   )
@@ -96,11 +96,14 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
   override def customResponseHandling(implicit ws: WSClient) = Some(apiResponse => {
 
     val people = {
-      try
-        {
-          (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
+      try { (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
         }catch {
-          case e: Exception => List[Person]((Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[Person]) //
+          case e: Exception =>
+            try {
+              List[Person]((Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[Person]) //
+            } catch {
+              case e: Exception => List[Person]()
+            }
       }
     }
 

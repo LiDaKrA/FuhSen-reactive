@@ -2066,6 +2066,19 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     background-image: url("../images/LiDaKrA_Logo.jpg");
 }
 
+#contact-footer {
+    position: fixed;
+    width: 183px;
+    height: 65px;
+    left: 20px;
+    bottom: 20px;
+}
+
+#support-icon {
+    width: 60px;
+    height: 60px;
+    float: left;
+}
 /* Vertical Divider Style */
 
 .vertical-separator:after {
@@ -2076,4 +2089,8 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     margin: 0 20px;
     height: 50px;
     width: 2px;
+}
+
+.no-external-link-icon{
+    text-decoration: underline;
 }

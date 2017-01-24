@@ -1279,7 +1279,7 @@ var ProductResultElement = React.createClass({
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title={this.props.source}/>
                         </div>
-                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
+                        {/*<Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>*/}
                     </div>
                 </div>
             </li>
@@ -1342,7 +1342,7 @@ var PersonResultElement = React.createClass({
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title={this.props.source}/>
                         </div>
-                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
+                        {/*<Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>*/}
                     </div>
                 </div>
             </li>
@@ -1386,7 +1386,7 @@ var OrganizationResultElement = React.createClass({
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title={this.props.source}/>
                         </div>
-                        <Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>
+                        {/*<Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>*/}
                     </div>
                 </div>
             </li>
