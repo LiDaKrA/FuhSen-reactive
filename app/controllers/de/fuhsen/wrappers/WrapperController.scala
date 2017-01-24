@@ -20,12 +20,12 @@ import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
 import controllers.Application
-import controllers.de.fuhsen.common.{ApiError, ApiResponse, ApiSuccess}
+import controllers.de.fuhsen.common.{ModelBodyParser, ApiError, ApiResponse, ApiSuccess}
 import controllers.de.fuhsen.wrappers.dataintegration.{EntityLinking, SilkConfig, SilkTransformableTrait}
 import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, RestApiOAuthTrait}
 import org.apache.jena.graph.Triple
 import org.apache.jena.query.{Dataset, DatasetFactory}
-import org.apache.jena.rdf.model.ModelFactory
+import org.apache.jena.rdf.model.{Model, ModelFactory}
 import org.apache.jena.riot.Lang
 import org.apache.jena.sparql.core.Quad
 import play.Logger
@@ -36,7 +36,7 @@ import play.api.libs.oauth.OAuthCalculator
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc._
 import utils.dataintegration.RDFUtil._
-import utils.dataintegration.{RequestMerger, UriTranslator}
+import utils.dataintegration.{RDFUtil, RequestMerger, UriTranslator}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
@@ -47,6 +47,41 @@ import scala.concurrent.Future
   */
 class WrapperController @Inject()(ws: WSClient) extends Controller {
   val requestCounter = new AtomicInteger(0)
+
+  def searchBeta(wrapperId: String, query: String) = Action.async { request =>
+    WrapperController.wrapperMap.get(wrapperId) match {
+      case Some(wrapper) =>
+        Logger.info(s"Starting $wrapperId Search with query: " + query)
+        createWrapperMetaData(request.body) match {
+          case Some(model) =>
+            Future(Ok(RDFUtil.modelToTripleString(model, Lang.JSONLD)))
+          case None => Future(Ok("No wrapper metadata sent!"))
+        }
+      case None =>
+        Future(NotFound("Wrapper " + wrapperId + " not found! Supported wrapper: " +
+          WrapperController.sortedWrapperIds.mkString(", ")))
+    }
+  }
+
+  private def createWrapperMetaData(body: AnyContent): Option[Model] = {
+    ModelBodyParser.parse(body)
+    //Validate that the provided model is PROV data.
+  }
+
+  private def execQueryAgainstWrapperBeta(query: String,
+                                          wrapper: RestApiWrapperTrait,
+                                          searchMetaData: Model): Future[ApiResponse] = {
+    val apiRequest = createApiRequestBeta(wrapper, query, searchMetaData)
+    Future(ApiSuccess(""))
+  }
+
+  def createApiRequestBeta(wrapper: RestApiWrapperTrait,
+                       query: String,
+                           searchMetaData: Model): WSRequest = {
+    ws.url("")
+  }
+
+  //-----------------------------------------------------------
 
   def search(wrapperId: String, query: String) = Action.async {
     WrapperController.wrapperMap.get(wrapperId) match {

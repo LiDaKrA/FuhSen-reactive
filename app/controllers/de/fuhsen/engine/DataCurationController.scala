@@ -17,7 +17,7 @@ class DataCurationController extends Controller {
     request =>
       Logger.info("Data Curation")
       //1. Transform string into model
-      //ToDo: Replace this with an extension to String class, .toRdfModel
+      //ToDo: Replace this with a BodyParser
       //Constructing the rdf results graph model
       val textBody = request.body.asText
       val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)
