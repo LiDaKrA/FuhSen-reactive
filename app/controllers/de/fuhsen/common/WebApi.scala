@@ -1,8 +1,9 @@
 package controllers.de.fuhsen.common
 
-import org.apache.jena.rdf.model.Model
+import org.apache.jena.rdf.model.{ModelFactory, Model}
 import org.apache.jena.riot.Lang
-import play.api.mvc.{AnyContent, Request}
+import play.api.Logger
+import play.api.mvc.{AnyContent}
 import utils.dataintegration.RDFUtil
 
 sealed trait ApiResponse
@@ -14,13 +15,23 @@ case class ApiSuccess(responseBody: String) extends ApiResponse
 object ModelBodyParser {
 
   def parse(body: AnyContent): Option[Model] = {
-    val textBody = body.asText
+    body.asText match {
+      case Some(textBody) =>
+        Some(parse(textBody))
+      case None =>
+        Logger.info("No meta-model sent")
+        None
+    }
+  }
+
+  def parse(body: String): Model = {
     try {
-      val model = RDFUtil.rdfStringToModel(textBody.get, Lang.TURTLE)
-      Option(model)
+      val model = RDFUtil.rdfStringToModel(body, Lang.TURTLE)
+      model
     }  catch {
-      //case ioe: IOException => ... // more specific cases first !
-      case e: Exception => None
+      case e: Exception =>
+        Logger.warn("An exception occurred when creating the MetaData from the text body. Returning an empty model")
+        ModelFactory.createDefaultModel()
     }
   }
 

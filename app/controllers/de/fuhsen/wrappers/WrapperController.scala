@@ -15,11 +15,13 @@
  */
 package controllers.de.fuhsen.wrappers
 
+import java.util.Calendar
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
 import controllers.Application
+import controllers.de.fuhsen.FuhsenVocab
 import controllers.de.fuhsen.common.{ModelBodyParser, ApiError, ApiResponse, ApiSuccess}
 import controllers.de.fuhsen.wrappers.dataintegration.{EntityLinking, SilkConfig, SilkTransformableTrait}
 import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, RestApiOAuthTrait}
@@ -52,10 +54,11 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     WrapperController.wrapperMap.get(wrapperId) match {
       case Some(wrapper) =>
         Logger.info(s"Starting $wrapperId Search with query: " + query)
-        createWrapperMetaData(request.body) match {
-          case Some(model) =>
-            Future(Ok(RDFUtil.modelToTripleString(model, Lang.JSONLD)))
-          case None => Future(Ok("No wrapper metadata sent!"))
+        execQueryAgainstWrapperBeta(query, wrapper, createWrapperMetaData(request.body) ) map {
+          case errorResult: ApiError =>
+            InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode)
+          case success: ApiSuccess =>
+            Ok(success.responseBody)
         }
       case None =>
         Future(NotFound("Wrapper " + wrapperId + " not found! Supported wrapper: " +
@@ -65,20 +68,90 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   private def createWrapperMetaData(body: AnyContent): Option[Model] = {
     ModelBodyParser.parse(body)
-    //Validate that the provided model is PROV data.
+    //ToDo: Validate that the provided model is PROV data.
   }
 
   private def execQueryAgainstWrapperBeta(query: String,
                                           wrapper: RestApiWrapperTrait,
-                                          searchMetaData: Model): Future[ApiResponse] = {
+                                          searchMetaData: Option[Model]): Future[ApiResponse] = {
     val apiRequest = createApiRequestBeta(wrapper, query, searchMetaData)
-    Future(ApiSuccess(""))
+    val apiResponse = executeApiRequestBeta(wrapper, apiRequest)
+    val customApiResponse = customApiHandling(wrapper, apiResponse)
+    val transformedApiResponse = transformApiResponseBeta(wrapper, customApiResponse)
+    addProvMetaData(wrapper, transformedApiResponse)
   }
 
-  def createApiRequestBeta(wrapper: RestApiWrapperTrait,
-                       query: String,
-                           searchMetaData: Model): WSRequest = {
-    ws.url("")
+  def createApiRequestBeta( wrapper: RestApiWrapperTrait,
+                            query: String,
+                            searchMetaData: Option[Model]): WSRequest = {
+    val apiRequest: WSRequest = ws.url(wrapper.apiUrl)
+    val apiRequestWithApiParams = addQueryParameters(wrapper, apiRequest, query)
+    val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
+    apiRequestWithOAuthIfNeeded
+  }
+
+  /** Add all query parameters to the request. */
+  private def addQueryParameters(wrapper: RestApiWrapperTrait,
+                                 request: WSRequest,
+                                 queryString: String): WSRequest = {
+
+    var url_with_params = wrapper.apiUrl+"?"
+
+    for ((k,v) <- wrapper.searchQueryAsParam(queryString)){
+      url_with_params = url_with_params.concat(k+"="+v+"&")
+    }
+
+    for ((k,v) <- wrapper.queryParams){
+      url_with_params = url_with_params.concat(k+"="+v+"&")
+    }
+
+    val apiRequest: WSRequest = ws.url(url_with_params.dropRight(1))
+
+    apiRequest.withHeaders(wrapper.headersParams.toSeq: _*)
+  }
+
+  private def executeApiRequestBeta(wrapper: RestApiWrapperTrait,
+                                        request: WSRequest) : Future[ApiResponse] = {
+
+    if(!wrapper.requestType.equals("JAVA"))
+      request.get.map(convertToApiResponse("Wrapper or the wrapped service"))
+    else {
+      wrapper match {
+        case oAuthWrapper: RestApiOAuthTrait =>
+          Logger.info("Using JAVA impl to call the rest api")
+          val bodyJava = new Application().javaRequest(oAuthWrapper, request.url)
+          Future(ApiSuccess(bodyJava))
+        case _ => Future(ApiError(INTERNAL_SERVER_ERROR, "Not correct wrapper definition"))
+      }
+    }
+  }
+
+  private def transformApiResponseBeta(wrapper: RestApiWrapperTrait,
+                                   apiResponse: Future[ApiResponse]): Future[ApiResponse] = {
+
+    apiResponse.flatMap {
+        case error: ApiError =>
+          // There has been an error previously, don't go on.
+          Future(error)
+        case ApiSuccess(body) =>
+          Logger.debug("PRE-SILK: "+body)
+          handleSilkTransformation(wrapper, body)
+      }
+  }
+
+  private def addProvMetaData(wrapper: RestApiWrapperTrait, apiResponse: Future[ApiResponse]) :  Future[ApiSuccess] = {
+    apiResponse map {
+      case errorResult: ApiError => {
+        val model = FuhsenVocab.createProvModel(wrapper.sourceLocalName,errorResult.statusCode.toString, errorResult.statusCode.toString)
+        ApiSuccess(RDFUtil.modelToTripleString(model, Lang.JSONLD))
+      }
+      case success: ApiSuccess => {
+        //ToDo: Review and remove unnecesary transformation from model to string and string to model
+        val model = RDFUtil.rdfStringToModel(success.responseBody, Lang.JSONLD)
+        model.add(FuhsenVocab.createProvModel(wrapper.sourceLocalName,"200","OK")) //Adding PROV metadata
+        ApiSuccess(RDFUtil.modelToTripleString(model, Lang.JSONLD))
+      }
+    }
   }
 
   //-----------------------------------------------------------
