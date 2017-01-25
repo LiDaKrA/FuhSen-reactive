@@ -94,6 +94,78 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
   }
 
+  def calculateModelStat(uid: String) = Action { request =>
+    GraphResultsCache.getModel(uid) match {
+      case Some(model) =>
+        val query = QueryFactory.create(
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+             |
+             |SELECT (SAMPLE(?type) AS ?entity_type) (SAMPLE(?key) AS ?entity_key) (COUNT(?type) AS ?count)
+             |WHERE {
+             |  {
+             |  ?s rdf:type ?type .
+             |  ?type fs:key ?key .
+             |  ?s fs:name ?name .
+             |  ?s fs:source ?source .
+             |  ?s fs:rank ?rank .
+             |  FILTER(?key = "person") .
+             |  }
+             |  UNION
+             |  {
+             |    ?s rdf:type ?type .
+             |    ?type fs:key ?key .
+             |    ?s fs:name ?name .
+             |    ?s fs:source ?source .
+             |    FILTER(?key = "organization") .
+             |  }
+             |  UNION
+             |  {
+             |    ?s rdf:type ?type .
+             |    ?type fs:key ?key .
+             |    ?s fs:description ?description .
+             |    ?s fs:source ?source .
+             |    FILTER(?key = "product") .
+             |  }
+             |    UNION
+             |  {
+             |    ?s rdf:type ?type .
+             |    ?type fs:key ?key .
+             |    ?s fs:source ?source .
+             |    FILTER(?key = "website") .
+             |  }
+             |   UNION
+             |  {
+             |    ?s rdf:type ?type .
+             |    ?type fs:key ?key .
+             |    ?s fs:label ?label .
+             |    FILTER(?key = "document") .
+             |  }
+             |}
+             |GROUP BY ?type ?key
+          """.stripMargin)
+        val resultSet = QueryExecutionFactory.create(query, model).execSelect()
+        val results_model = ModelFactory.createDefaultModel()
+
+        while(resultSet.hasNext) {
+          val result = resultSet.next
+          if(result.getResource("entity_type") != null) {
+            val entity_type = result.getResource("entity_type").getURI
+            val count = result.getLiteral("count").getString
+            val entity_key = result.getLiteral("entity_key").getString
+            val resource = results_model.createResource(entity_type)
+            resource.addProperty(results_model.createProperty(FuhsenVocab.FACET_VALUE), entity_key)
+            resource.addProperty(results_model.createProperty(FuhsenVocab.FACET_COUNT), count)
+          }
+        }
+        Ok(RDFUtil.modelToTripleString(results_model, Lang.JSONLD))
+      case None =>
+        InternalServerError("The provided UID has not a model associated in the cache.")
+    }
+  }
   def startSession(query: String) = Action { request =>
     Logger.info("Starting Search Session with Query: " + query)
 

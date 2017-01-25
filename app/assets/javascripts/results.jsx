@@ -725,6 +725,8 @@ var ResultsContainer = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
+                if(Object.keys(this.state.results_stat).length == 0)
+                    this.computeDataStatistics();
                 data_to_handle = JSON.parse(JSON.stringify(data));
                 //alert(JSON.stringify(data_to_handle));
                 if (data_to_handle["@graph"] !== undefined)
@@ -755,6 +757,34 @@ var ResultsContainer = React.createClass({
             }.bind(this)
         });
     },
+    computeDataStatistics: function(){
+      var stat_url = context + "/engine/api/searches/" + this.props.searchUid + "/results_stat";
+      $.ajax({
+          url: stat_url,
+          dataType: 'json',
+          cache: true,
+          success: function (data) {
+              var stat = {};
+              stat["person"] = stat["organization"] = stat["product"] = stat["website"] = stat["document"] = 0;
+              if (data["@graph"] === undefined && data["http://vocab.lidakra.de/fuhsen#value"] !== undefined)
+                  data = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
+
+              if(data["@graph"] !== undefined) {
+                  data["@graph"].map(function (result) {
+                      stat[result["http://vocab.lidakra.de/fuhsen#value"]] = result["http://vocab.lidakra.de/fuhsen#count"];
+                  });
+              }
+
+              this.setState({
+                    results_stat: stat
+                });
+
+          }.bind(this),
+          error: function (xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+          }.bind(this)
+      });
+    },
     getInitialState: function () {
         return {
             resultsData: "",
@@ -763,7 +793,8 @@ var ResultsContainer = React.createClass({
             underDev: false,
             crawled: false,
             view: this.props.view,
-            selectedChecks: []
+            selectedChecks: [],
+            results_stat: {}
         };
     },
     componentDidMount: function () {
@@ -777,31 +808,31 @@ var ResultsContainer = React.createClass({
     },
     render: function () {
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="1">{getTranslation("people")}</li>
+                               data-id="1">{getTranslation("people")+'(' + this.state.results_stat["person"]+ ')'}</li>
         var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                                     data-id="2">{getTranslation("organisations")}</li>
+                                     data-id="2">{getTranslation("organisations")+'(' + this.state.results_stat["organization"]+ ')'}</li>
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="3">{getTranslation("products")}</li>
+                               data-id="3">{getTranslation("products")+'(' + this.state.results_stat["product"]+ ')'}</li>
         var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                              data-id="4">{getTranslation("tor_websites")}</li>
+                              data-id="4">{getTranslation("tor_websites")+'(' + this.state.results_stat["website"]+ ')'}</li>
         var documentItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="5">{getTranslation("documents")}</li>
+                               data-id="5">{getTranslation("documents")+'(' + this.state.results_stat["document"]+ ')'}</li>
 
         if (this.state.selected === "person") {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
-                <b>{getTranslation("people")}</b></p></li>
+                <b>{getTranslation("people")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "organization") {
             organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p>
-                <b>{getTranslation("organisations")}</b></p></li>
+                <b>{getTranslation("organisations")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "product") {
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
-                <b>{getTranslation("products")}</b></p></li>
+                <b>{getTranslation("products")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "website") {
             darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
-                <b>{getTranslation("tor_websites")}</b></p></li>
+                <b>{getTranslation("tor_websites")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "document") {
             documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p>
-                <b>{getTranslation("documents")}</b></p></li>
+                <b>{getTranslation("documents")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         }
 
         if (this.state.loading) {
