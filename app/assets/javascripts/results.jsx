@@ -818,6 +818,7 @@ var ResultsContainer = React.createClass({
         var documentItem = <li className="headers-li" onClick={this.props.onTypeChange}
                                data-id="5">{getTranslation("documents")+'(' + this.state.results_stat["document"]+ ')'}</li>
 
+
         if (this.state.selected === "person") {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
                 <b>{getTranslation("people")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
@@ -826,7 +827,7 @@ var ResultsContainer = React.createClass({
                 <b>{getTranslation("organisations")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "product") {
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
-                <b>{getTranslation("products")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
+                <b>{getTranslation("products")+'(' +  this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "website") {
             darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
                 <b>{getTranslation("tor_websites")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
@@ -842,9 +843,9 @@ var ResultsContainer = React.createClass({
                     <div className="row">
                         <div className="col-md-8 tabulator">
                             <ul className="list-inline">
-                                <li>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
+                                {/*<li>*/}
+                                    {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                                {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
                                 {produkteItem}
@@ -911,7 +912,6 @@ var ResultsContainer = React.createClass({
         else {
             final_data = this.state.originalData;
         }
-
         //No results
         if (final_data === undefined) {
             return <div className="col-md-9">
@@ -920,10 +920,10 @@ var ResultsContainer = React.createClass({
                     <div className="row">
                         <div className="col-md-8 tabulator">
                             <ul className="list-inline">
-                                <li>
-                                    <span className="total-results">0</span>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
+                                {/*<li>*/}
+                                    {/*<span className="total-results">0</span>*/}
+                                    {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                                {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
                                 {produkteItem}
@@ -950,6 +950,24 @@ var ResultsContainer = React.createClass({
             </div>
         }
 
+        var stat_text = (final_data.length <  this.state.results_stat[this.state.selected] ?  final_data.length + '/' : "")+ this.state.results_stat[this.state.selected];
+        if (this.state.selected === "person") {
+            personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
+                <b>{getTranslation("people")+'(' + stat_text + ')'}</b></p></li>
+        } else if (this.state.selected === "organization") {
+            organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p>
+                <b>{getTranslation("organisations")+'(' + stat_text+ ')'}</b></p></li>
+        } else if (this.state.selected === "product") {
+            produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
+                <b>{getTranslation("products")+'(' + stat_text + ')'}</b></p></li>
+        } else if (this.state.selected === "website") {
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
+                <b>{getTranslation("tor_websites")+'(' + stat_text + ')'}</b></p></li>
+        } else if (this.state.selected === "document") {
+            documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p>
+                <b>{getTranslation("documents")+'(' + stat_text + ')'}</b></p></li>
+        }
+
         if (this.state.underDev) {
             return <div className="col-md-9">
                 <div id="results-paginator-options" className="results-paginator-options">
@@ -957,10 +975,10 @@ var ResultsContainer = React.createClass({
                     <div className="row">
                         <div className="col-md-8 tabulator">
                             <ul className="list-inline">
-                                <li>
-                                    <span className="total-results">{final_data.length}</span>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
+                                {/*<li>*/}
+                                    {/*<span className="total-results">{final_data.length}</span>*/}
+                                    {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                                {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
                                 {produkteItem}
@@ -993,10 +1011,10 @@ var ResultsContainer = React.createClass({
                 <div className="row">
                     <div className="col-md-8 tabulator">
                         <ul className="list-inline">
-                            <li>
-                                <span className="total-results">{final_data.length}</span>
-                                <span className="total-results-label"> {getTranslation("results")}:</span>
-                            </li>
+                            {/*<li>*/}
+                                {/*<span className="total-results">{final_data.length}</span>*/}
+                                {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                            {/*</li>*/}
                             {personenItem}
                             {organizationenItem}
                             {produkteItem}
