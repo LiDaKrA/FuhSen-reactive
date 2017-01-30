@@ -1128,9 +1128,9 @@ var ResultsContainer = React.createClass({
                         </ul>
                     </div>
                     <div className="col-md-4 text-right">
-                        { this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"
-                                                                          func={this.crawlAll}/> : null }
-                        { this.state.selected === "website" ? <div className="divider"/> : null }
+                        {/*{ this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"*/}
+                                                                          {/*func={this.crawlAll}/> : null }*/}
+                        {/*{ this.state.selected === "website" ? <div className="divider"/> : null }*/}
                         <CustomForm id="btn_view_selector"
     class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
     func={this.toggleResultsView}/>
@@ -1323,8 +1323,30 @@ var WebResultElement = React.createClass({
             dataType: "text",
             contentType: "application/json; charset=utf-8",
             cache: false,
-            success: function () {
-                this.setState({crawlJobCreated: true});
+            success: function (response) {
+                var idx = response.lastIndexOf('/');
+                var crawlID = null;
+                if(idx !== -1)
+                    crawlID = response.substr(idx+1);
+                var timer = setInterval(this.getCrawlJobStatus,5000);
+                this.setState({crawlJobCreated: true,crawlID: crawlID,jobStatus: "crawlJobCreated",timerJobStatus : timer });
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    getCrawlJobStatus: function(){
+      var jobStatusUrl = context + "/crawling/jobs/" + this.state.crawlID + "/status";
+        $.ajax({
+            url: jobStatusUrl,
+            contentType: "application/json; charset=utf-8",
+            cache: false,
+            success: function (response) {
+                var status = response['crawlStatus'];
+                if(status === "FINISHED" || status === "FAILED")
+                    clearInterval(this.state.timerJobStatus);
+                this.setState({jobStatus: "crawlJob"+ status});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -1332,10 +1354,11 @@ var WebResultElement = React.createClass({
         });
     },
     onCreateCrawlJobClick: function () {
-        this.checkOnionSite()
+        this.checkOnionSite();
+        this.setState({jobStatus:"validatingUrl"});
     },
     getInitialState: function () {
-        return {crawlJobCreated: false, validTORSite: true};
+        return {crawlJobCreated: false, validTORSite: true,crawlID: null,jobStatus: null,timerJobStatus: null };
     },
     onClickLink : function(url,e){
         e.preventDefault();
@@ -1372,8 +1395,8 @@ var WebResultElement = React.createClass({
                                      title={this.props.source}/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true ?
-                                <label>{getTranslation("crawlJobCreated")}</label> : <button
+                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
+                                <label>{getTranslation(this.state.jobStatus)}</label> : <button
                                 onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
                             </div>
                         </div>
