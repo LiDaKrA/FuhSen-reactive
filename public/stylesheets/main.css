@@ -2092,4 +2092,6 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
 
 .no-external-link-icon{
     text-decoration: underline;
+    color: blue;
+    background-color: transparent;
 }

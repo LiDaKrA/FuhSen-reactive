@@ -396,14 +396,14 @@ var FacetList = React.createClass({
             return (
                 <div id="facetsDiv" className="col-md-3 facets-container hidden-phone">
                     <div className="facets-head">
-                        <h3>{getTranslation("resultfilters")}</h3>
+                        <h3>{getTranslation("resultfilters")}
+                            <span className="export-facets-btn">(<a href="#" title={getTranslation("export_facets")} onClick={this.facets2CSV} className="no-external-link-icon">{getTranslation("export")}</a>)</span>
+                        </h3>
+
                     </div>
                     <div className="js facets-list bt bb">
                         {MItems}
                     </div>
-                    <button onClick={this.facets2CSV}>
-                        Export Facets
-                    </button>
                 </div>
             )
         }

@@ -76,6 +76,7 @@ var dictEng = {
     "underdevelopment": "Feature under development.",
     "nodata": "No data to export to CSV.",
     "csv_icon": "Export results to CSV.",
+    "export_facets" : "Export facets to CSV.",
     "graph_icon": "View the relations among the results.",
     "map_icon": "View the results in a Map.",
     "table_icon": "View the results in a Table.",
@@ -111,7 +112,8 @@ var dictEng = {
     "types" : "Types",
     "all" : "all",
     "none" : "none",
-    "fuhsen" : "Federated Hybrid Search"
+    "fuhsen" : "Federated Hybrid Search",
+    "export": "Export"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -200,6 +202,7 @@ var dictGer = {
     "underdevelopment": "Diese Funktion wird gerade entwickelt.",
     "nodata": "Es gibt keine Daten, die als CSV exportiert werden können.",
     "csv_icon": "Exportiere die Ergebnisse als CSV-Datei.",
+    "export_facets" : "Exportiere die Facetten als CSV-Datei.",
     "graph_icon": "Verbindungen zwischen den Ergebnissen anzeigen.",
     "map_icon": "Ergebnisse auf der Karte anzeigen.",
     "crawl_icon": "Crawle die Webseiten.",
@@ -233,7 +236,8 @@ var dictGer = {
     "types" : "Typen",
     "all" : "alle",
     "none" : "keiner",
-    "fuhsen" : "Föderierte Hybride Suche"
+    "fuhsen" : "Föderierte Hybride Suche",
+    "export" : "Exportieren"
 };
 
 window.dictGer = dictGer;
