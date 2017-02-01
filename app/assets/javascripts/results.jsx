@@ -77,6 +77,11 @@ var ContainerResults = React.createClass({
                 <div className="row search-results-container">
                     <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000}/>
                 </div>
+
+                <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
+                    <div id="logo-mini" title={getTranslation("sponsored_by")}/>
+                </a>
+
             </div>
         );
     }

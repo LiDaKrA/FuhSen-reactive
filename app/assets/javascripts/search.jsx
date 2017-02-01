@@ -53,6 +53,17 @@ var ContainerSearch = React.createClass({
                         </div>
                     </div>
                 </div>
+
+                <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
+                    <div id="logo-mini" title={getTranslation("sponsored_by")}/>
+                </a>
+
+                <div id="contact-mini">
+                    {getTranslation("need_help")}<a href="mailto:lidakra-support@@ontos.com">{getTranslation("contact")}<img class="thumbnail" src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/></a>
+                </div>
+
+
+
             </div>
         );
     }
@@ -508,6 +519,18 @@ var AccessTokenForm = React.createClass({
             <div align="center">
                 {getTranslation("checkingtoken")}
             </div> )
+    }
+});
+
+var SupportContact = React.createClass({
+    render: function () {
+        return (
+            <div id="contact-footer">
+                <img class="thumbnail" src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/>
+                <h6>{getTranslation("need_help")}</h6>
+                <h6><a class="no-external-link-icon" href="mailto:lidakra-support@ontos.com">{getTranslation("contact")}</a></h6>
+            </div>
+        );
     }
 });
 

@@ -113,7 +113,10 @@ var dictEng = {
     "all" : "all",
     "none" : "none",
     "fuhsen" : "Federated Hybrid Search",
-    "export": "Export"
+    "export": "Export",
+    "need_help": "Need Help. ",
+    "contact": "Send us an e-mail",
+    "sponsored_by": "Sponsored by the German Ministry of Education and Research - Project LiDaKrA"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -237,7 +240,10 @@ var dictGer = {
     "all" : "alle",
     "none" : "keiner",
     "fuhsen" : "Föderierte Hybride Suche",
-    "export" : "Exportieren"
+    "export" : "Exportieren",
+    "need_help": "Brauchen sie hilfe. ",
+    "contact": "Nachricht schreiben",
+    "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung - Projekt LiDaKrA"
 };
 
 window.dictGer = dictGer;

@@ -2066,6 +2066,16 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     background-image: url("../images/LiDaKrA_Logo.jpg");
 }
 
+#contact-mini {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    width: 300px;
+    height: 30px;
+    background-size: 100%;
+    opacity: 0.5;
+}
+
 #contact-footer {
     position: fixed;
     width: 230px;
@@ -2074,9 +2084,9 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
 }
 
 #support-icon {
-    width: 60px;
-    height: 60px;
-    float: left;
+    width: 30px;
+    height: 30px;
+    margin: 2px;
 }
 /* Vertical Divider Style */
 
