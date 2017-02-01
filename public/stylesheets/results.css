@@ -1451,3 +1451,9 @@ color: #44639A;
 .page-info-nav.grid {
   border-bottom: solid 1px #D3D6D9;
 }
+
+.export-facets-btn{
+  margin-left:5px;
+  display:inline-block;
+  font-size: 12px;
+}

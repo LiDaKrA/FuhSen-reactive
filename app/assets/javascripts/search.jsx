@@ -53,6 +53,17 @@ var ContainerSearch = React.createClass({
                         </div>
                     </div>
                 </div>
+
+                <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
+                    <div id="logo-mini" title={getTranslation("sponsored_by")}/>
+                </a>
+
+                <div id="contact-mini">
+                    {getTranslation("need_help")}<a href="mailto:lidakra-support@@ontos.com">{getTranslation("contact")}<img class="thumbnail" src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/></a>
+                </div>
+
+
+
             </div>
         );
     }
@@ -216,6 +227,15 @@ var SearchForm = React.createClass({
     getInitialState: function() {
         return { showSourcesTypesDiv: false, sources: [] , types: [] };
     },
+    handleSubmit : function(e){
+        var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources);
+        var selected_types_list = this.getKeysFromSelectedChecks(this.state.types);
+        if(selected_sources_list.length === 0 || selected_types_list.length === 0){
+            alert("Datasource or EntityType is not selected!!.Please Select at least one Datasource and entitytype");
+            return false;
+        }
+        return true;
+    },
     render: function() {
 
         var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources)
@@ -274,7 +294,7 @@ var SearchForm = React.createClass({
                 <div className="row">
                     <div className="col-md-3"/>
                     <div className="col-md-6">
-                        <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
+                        <form method="get" id={this.props.id_class} role="search" action={context+"/results"} onSubmit={this.handleSubmit}>
                             <div>
                                 <label ><span>Search: </span></label>
                                 <input type="search" name="query" placeholder={getTranslation("yoursearch")}/>&nbsp;
@@ -499,6 +519,18 @@ var AccessTokenForm = React.createClass({
             <div align="center">
                 {getTranslation("checkingtoken")}
             </div> )
+    }
+});
+
+var SupportContact = React.createClass({
+    render: function () {
+        return (
+            <div id="contact-footer">
+                <img class="thumbnail" src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/>
+                <h6>{getTranslation("need_help")}</h6>
+                <h6><a class="no-external-link-icon" href="mailto:lidakra-support@ontos.com">{getTranslation("contact")}</a></h6>
+            </div>
+        );
     }
 });
 

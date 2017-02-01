@@ -77,6 +77,11 @@ var ContainerResults = React.createClass({
                 <div className="row search-results-container">
                     <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000}/>
                 </div>
+
+                <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
+                    <div id="logo-mini" title={getTranslation("sponsored_by")}/>
+                </a>
+
             </div>
         );
     }
@@ -271,6 +276,108 @@ var FacetList = React.createClass({
             this.loadFacetsFromServer(this.props.entityType,nextProps.orgFacetsDict);
         }
     },
+    facets2CSV: function () {
+        var JSONData = JSON.stringify(this.state.data);
+        var ReportTitle = "Current results in CSV format"
+        var ShowLabel = true;
+
+        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+
+        var CSV = '';
+        //Set Report title in first row or line
+
+        //CSV += ReportTitle + '\r\n\n';
+
+        //This condition will generate the Label/Header
+        if (ShowLabel) {
+            var row = "";
+
+            //This loop will extract the label from 1st index of on array
+            for (var index in arrData[0]) {
+
+                //Now convert each value to string and comma-seprated
+                row += index + ',';
+            }
+
+            row = row.slice(0, -1);
+
+            //append Label row with line break
+            CSV += row + '\r\n';
+        }
+
+        //1st loop is to extract each row
+        for (var i = 0; i < arrData.length; i++) {
+            if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
+                var row = "";
+                var value_number_pair;
+                //2nd loop will extract each column and convert it in string comma-seprated
+                for (var index in arrData[i]) {
+                    if(index==="http://vocab.lidakra.de/fuhsen/hasFacet"){
+                        if(Object.prototype.toString.call(arrData[i][index]) === '[object Array]'){
+                            for (var j = 0; j < arrData[i][index].length; j++){
+                                value_number_pair=arrData[i][index][j].split("^")
+                                for (var k = 0; k < value_number_pair.length; k++){
+                                    row += '"' + value_number_pair[k] + '",';
+                                }
+                            }
+                        }else{
+                            value_number_pair=arrData[i][index].split("^")
+                            for (var k = 0; k < value_number_pair.length; k++){
+                                row += '"' + value_number_pair[k] + '",';
+                            }
+                        }
+                    }else{
+                        row += '"' + arrData[i][index] + '",';
+                    }
+                }
+
+                row.slice(0, row.length - 1);
+
+                //add a line break after each row
+                CSV += row + '\r\n';
+            }
+        }
+
+        if (CSV == '') {
+            alert("Invalid data");
+            return;
+        }
+
+        //Generate a file name
+        var fileName = "Fuhsen_Facets_";
+        //this will remove the blank-spaces from the title and replace it with an underscore
+        fileName += ReportTitle.replace(/ /g, "_");
+
+        //Initialize file format you want csv or xls
+        var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+
+        // Now the little tricky part.
+        // you can use either>> window.open(uri);
+        // but this will not work in some browsers
+        // or you will not get the correct file extension
+
+        //this trick will generate a temp <a /> tag
+        var link = document.createElement("a");
+        link.href = uri;
+
+        //set the visibility hidden so it will not effect on your web-layout
+        link.style = "visibility:hidden";
+        link.download = fileName + ".csv";
+
+        //this part will append the anchor tag and remove it after automatic click
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        this.setState({
+            resultsData: this.state.resultsData,
+            selected: this.state.selected,
+            loading: this.state.loading,
+            underDev: false,
+            view: this.state.view
+        });
+    },
     render: function () {
 
         if (this.state.data && this.state.data !== undefined) {
@@ -294,7 +401,10 @@ var FacetList = React.createClass({
             return (
                 <div id="facetsDiv" className="col-md-3 facets-container hidden-phone">
                     <div className="facets-head">
-                        <h3>{getTranslation("resultfilters")}</h3>
+                        <h3>{getTranslation("resultfilters")}
+                            <span className="export-facets-btn">(<a href="#" title={getTranslation("export_facets")} onClick={this.facets2CSV} className="no-external-link-icon">{getTranslation("export")}</a>)</span>
+                        </h3>
+
                     </div>
                     <div className="js facets-list bt bb">
                         {MItems}
@@ -725,6 +835,8 @@ var ResultsContainer = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
+                if(Object.keys(this.state.results_stat).length == 0)
+                    this.computeDataStatistics();
                 data_to_handle = JSON.parse(JSON.stringify(data));
                 //alert(JSON.stringify(data_to_handle));
                 if (data_to_handle["@graph"] !== undefined)
@@ -755,6 +867,34 @@ var ResultsContainer = React.createClass({
             }.bind(this)
         });
     },
+    computeDataStatistics: function(){
+      var stat_url = context + "/engine/api/searches/" + this.props.searchUid + "/results_stat";
+      $.ajax({
+          url: stat_url,
+          dataType: 'json',
+          cache: true,
+          success: function (data) {
+              var stat = {};
+              stat["person"] = stat["organization"] = stat["product"] = stat["website"] = stat["document"] = 0;
+              if (data["@graph"] === undefined && data["http://vocab.lidakra.de/fuhsen#value"] !== undefined)
+                  data = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
+
+              if(data["@graph"] !== undefined) {
+                  data["@graph"].map(function (result) {
+                      stat[result["http://vocab.lidakra.de/fuhsen#value"]] = result["http://vocab.lidakra.de/fuhsen#count"];
+                  });
+              }
+
+              this.setState({
+                    results_stat: stat
+                });
+
+          }.bind(this),
+          error: function (xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+          }.bind(this)
+      });
+    },
     getInitialState: function () {
         return {
             resultsData: "",
@@ -763,7 +903,8 @@ var ResultsContainer = React.createClass({
             underDev: false,
             crawled: false,
             view: this.props.view,
-            selectedChecks: []
+            selectedChecks: [],
+            results_stat: {}
         };
     },
     componentDidMount: function () {
@@ -777,31 +918,32 @@ var ResultsContainer = React.createClass({
     },
     render: function () {
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="1">{getTranslation("people")}</li>
+                               data-id="1">{getTranslation("people")+'(' + this.state.results_stat["person"]+ ')'}</li>
         var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                                     data-id="2">{getTranslation("organisations")}</li>
+                                     data-id="2">{getTranslation("organisations")+'(' + this.state.results_stat["organization"]+ ')'}</li>
         var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="3">{getTranslation("products")}</li>
+                               data-id="3">{getTranslation("products")+'(' + this.state.results_stat["product"]+ ')'}</li>
         var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                              data-id="4">{getTranslation("tor_websites")}</li>
+                              data-id="4">{getTranslation("tor_websites")+'(' + this.state.results_stat["website"]+ ')'}</li>
         var documentItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="5">{getTranslation("documents")}</li>
+                               data-id="5">{getTranslation("documents")+'(' + this.state.results_stat["document"]+ ')'}</li>
+
 
         if (this.state.selected === "person") {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
-                <b>{getTranslation("people")}</b></p></li>
+                <b>{getTranslation("people")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "organization") {
             organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p>
-                <b>{getTranslation("organisations")}</b></p></li>
+                <b>{getTranslation("organisations")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "product") {
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
-                <b>{getTranslation("products")}</b></p></li>
+                <b>{getTranslation("products")+'(' +  this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "website") {
             darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
-                <b>{getTranslation("tor_websites")}</b></p></li>
+                <b>{getTranslation("tor_websites")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         } else if (this.state.selected === "document") {
             documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p>
-                <b>{getTranslation("documents")}</b></p></li>
+                <b>{getTranslation("documents")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         }
 
         if (this.state.loading) {
@@ -811,9 +953,9 @@ var ResultsContainer = React.createClass({
                     <div className="row">
                         <div className="col-md-8 tabulator">
                             <ul className="list-inline">
-                                <li>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
+                                {/*<li>*/}
+                                    {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                                {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
                                 {produkteItem}
@@ -880,7 +1022,6 @@ var ResultsContainer = React.createClass({
         else {
             final_data = this.state.originalData;
         }
-
         //No results
         if (final_data === undefined) {
             return <div className="col-md-9">
@@ -889,10 +1030,10 @@ var ResultsContainer = React.createClass({
                     <div className="row">
                         <div className="col-md-8 tabulator">
                             <ul className="list-inline">
-                                <li>
-                                    <span className="total-results">0</span>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
+                                {/*<li>*/}
+                                    {/*<span className="total-results">0</span>*/}
+                                    {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                                {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
                                 {produkteItem}
@@ -919,6 +1060,24 @@ var ResultsContainer = React.createClass({
             </div>
         }
 
+        var stat_text = (final_data.length <  this.state.results_stat[this.state.selected] ?  final_data.length + '/' : "")+ this.state.results_stat[this.state.selected];
+        if (this.state.selected === "person") {
+            personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
+                <b>{getTranslation("people")+'(' + stat_text + ')'}</b></p></li>
+        } else if (this.state.selected === "organization") {
+            organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p>
+                <b>{getTranslation("organisations")+'(' + stat_text+ ')'}</b></p></li>
+        } else if (this.state.selected === "product") {
+            produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
+                <b>{getTranslation("products")+'(' + stat_text + ')'}</b></p></li>
+        } else if (this.state.selected === "website") {
+            darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
+                <b>{getTranslation("tor_websites")+'(' + stat_text + ')'}</b></p></li>
+        } else if (this.state.selected === "document") {
+            documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p>
+                <b>{getTranslation("documents")+'(' + stat_text + ')'}</b></p></li>
+        }
+
         if (this.state.underDev) {
             return <div className="col-md-9">
                 <div id="results-paginator-options" className="results-paginator-options">
@@ -926,10 +1085,10 @@ var ResultsContainer = React.createClass({
                     <div className="row">
                         <div className="col-md-8 tabulator">
                             <ul className="list-inline">
-                                <li>
-                                    <span className="total-results">{final_data.length}</span>
-                                    <span className="total-results-label"> {getTranslation("results")}:</span>
-                                </li>
+                                {/*<li>*/}
+                                    {/*<span className="total-results">{final_data.length}</span>*/}
+                                    {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                                {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
                                 {produkteItem}
@@ -962,10 +1121,10 @@ var ResultsContainer = React.createClass({
                 <div className="row">
                     <div className="col-md-8 tabulator">
                         <ul className="list-inline">
-                            <li>
-                                <span className="total-results">{final_data.length}</span>
-                                <span className="total-results-label"> {getTranslation("results")}:</span>
-                            </li>
+                            {/*<li>*/}
+                                {/*<span className="total-results">{final_data.length}</span>*/}
+                                {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                            {/*</li>*/}
                             {personenItem}
                             {organizationenItem}
                             {produkteItem}
@@ -974,9 +1133,9 @@ var ResultsContainer = React.createClass({
                         </ul>
                     </div>
                     <div className="col-md-4 text-right">
-                        { this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"
-                                                                          func={this.crawlAll}/> : null }
-                        { this.state.selected === "website" ? <div className="divider"/> : null }
+                        {/*{ this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"*/}
+                                                                          {/*func={this.crawlAll}/> : null }*/}
+                        {/*{ this.state.selected === "website" ? <div className="divider"/> : null }*/}
                         <CustomForm id="btn_view_selector"
     class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
     func={this.toggleResultsView}/>
@@ -1169,8 +1328,30 @@ var WebResultElement = React.createClass({
             dataType: "text",
             contentType: "application/json; charset=utf-8",
             cache: false,
-            success: function () {
-                this.setState({crawlJobCreated: true});
+            success: function (response) {
+                var idx = response.lastIndexOf('/');
+                var crawlID = null;
+                if(idx !== -1)
+                    crawlID = response.substr(idx+1);
+                var timer = setInterval(this.getCrawlJobStatus,5000);
+                this.setState({crawlJobCreated: true,crawlID: crawlID,jobStatus: "crawlJobCreated",timerJobStatus : timer });
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    getCrawlJobStatus: function(){
+      var jobStatusUrl = context + "/crawling/jobs/" + this.state.crawlID + "/status";
+        $.ajax({
+            url: jobStatusUrl,
+            contentType: "application/json; charset=utf-8",
+            cache: false,
+            success: function (response) {
+                var status = response['crawlStatus'];
+                if(status === "FINISHED" || status === "FAILED")
+                    clearInterval(this.state.timerJobStatus);
+                this.setState({jobStatus: "crawlJob"+ status});
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -1178,10 +1359,11 @@ var WebResultElement = React.createClass({
         });
     },
     onCreateCrawlJobClick: function () {
-        this.checkOnionSite()
+        this.checkOnionSite();
+        this.setState({jobStatus:"validatingUrl"});
     },
     getInitialState: function () {
-        return {crawlJobCreated: false, validTORSite: true};
+        return {crawlJobCreated: false, validTORSite: true,crawlID: null,jobStatus: null,timerJobStatus: null };
     },
     onClickLink : function(url,e){
         e.preventDefault();
@@ -1218,8 +1400,8 @@ var WebResultElement = React.createClass({
                                      title={this.props.source}/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true ?
-                                <label>{getTranslation("crawlJobCreated")}</label> : <button
+                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
+                                <label>{getTranslation(this.state.jobStatus)}</label> : <button
                                 onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
                             </div>
                         </div>

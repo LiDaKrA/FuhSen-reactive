@@ -76,12 +76,17 @@ var dictEng = {
     "underdevelopment": "Feature under development.",
     "nodata": "No data to export to CSV.",
     "csv_icon": "Export results to CSV.",
+    "export_facets" : "Export facets to CSV.",
     "graph_icon": "View the relations among the results.",
     "map_icon": "View the results in a Map.",
     "table_icon": "View the results in a Table.",
     "list_icon": "View the results in a List.",
     "crawl_icon": "Crawl all the websites.",
     "crawlJobCreated": "Crawl Job Created.",
+    "crawlJobRUNNING" : "Crawl Job Running.",
+    "crawlJobFINISHED" : "Crawl Job Done.",
+    "crawlJobFAILED" : "Crawl Job Failed.",
+    "validatingUrl" : "Validating Url.",
     "createCrawlJob": "Crawl it!",
     "documents": "Documents",
     "websites": "Websites",
@@ -107,7 +112,11 @@ var dictEng = {
     "types" : "Types",
     "all" : "all",
     "none" : "none",
-    "fuhsen" : "Federated Hybrid Search"
+    "fuhsen" : "Federated Hybrid Search",
+    "export": "Export",
+    "need_help": "Need Help. ",
+    "contact": "Send us an e-mail",
+    "sponsored_by": "Sponsored by the German Ministry of Education and Research - Project LiDaKrA"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -196,10 +205,15 @@ var dictGer = {
     "underdevelopment": "Diese Funktion wird gerade entwickelt.",
     "nodata": "Es gibt keine Daten, die als CSV exportiert werden können.",
     "csv_icon": "Exportiere die Ergebnisse als CSV-Datei.",
+    "export_facets" : "Exportiere die Facetten als CSV-Datei.",
     "graph_icon": "Verbindungen zwischen den Ergebnissen anzeigen.",
     "map_icon": "Ergebnisse auf der Karte anzeigen.",
     "crawl_icon": "Crawle die Webseiten.",
     "crawlJobCreated": "Crawl-Auftrag erstellt.",
+    "crawlJobRUNNING" : "Crawl-Auftrag im Gange.",
+    "crawlJobFINISHED" : "Crawl-Auftrag fertig.",
+    "crawlJobFAILED" : "Crawl-Auftrag fehlgeschlagen.",
+    "validatingUrl" : "überprüfend Url.",
     "createCrawlJob": "Crawl-Auftrag!",
     "documents": "Dokumente",
     "websites": "Webseiten",
@@ -225,7 +239,11 @@ var dictGer = {
     "types" : "Typen",
     "all" : "alle",
     "none" : "keiner",
-    "fuhsen" : "Föderierte Hybride Suche"
+    "fuhsen" : "Föderierte Hybride Suche",
+    "export" : "Exportieren",
+    "need_help": "Brauchen sie hilfe. ",
+    "contact": "Nachricht schreiben",
+    "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung - Projekt LiDaKrA"
 };
 
 window.dictGer = dictGer;
