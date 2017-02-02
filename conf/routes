@@ -30,7 +30,7 @@ GET     /engine/api/schema/entitytypes                      controllers.de.fuhse
 
 # REST API Wrappers
 POST    /ldw/restApiWrapper/id/:wrapperId/search            controllers.de.fuhsen.wrappers.WrapperController.searchBeta(wrapperId: String, query: String)
-POST    /ldw/restApiWrapper/search                          controllers.de.fuhsen.wrappers.WrapperController.searchMultiple2(query: String, wrapperIds: String)
+POST    /ldw/restApiWrapper/search                          controllers.de.fuhsen.wrappers.WrapperController.searchMultipleBeta(query: String, wrapperIds: String)
 GET     /ldw/restApiWrapper                                 controllers.de.fuhsen.wrappers.WrapperController.wrapperIds()
 
 GET     /:wrapperId/getToken                                controllers.de.fuhsen.wrappers.security.TokenRetrievalController.getToken(wrapperId: String)

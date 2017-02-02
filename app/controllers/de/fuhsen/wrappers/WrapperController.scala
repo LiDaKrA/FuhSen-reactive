@@ -54,7 +54,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     WrapperController.wrapperMap.get(wrapperId) match {
       case Some(wrapper) =>
         Logger.info(s"Starting $wrapperId Search with query: " + query)
-        execQueryAgainstWrapperBeta(query, wrapper, createWrapperMetaData(request.body) ) map {
+        execQueryAgainstWrapperBeta(query, wrapper, createWrapperMetaData(request.body)) map {
           case errorResult: ApiError =>
             InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode)
           case success: ApiSuccess =>
@@ -150,6 +150,29 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         val model = RDFUtil.rdfStringToModel(success.responseBody, Lang.JSONLD)
         model.add(FuhsenVocab.createProvModel(wrapper.sourceLocalName,"200","OK")) //Adding PROV metadata
         ApiSuccess(RDFUtil.modelToTripleString(model, Lang.JSONLD))
+      }
+    }
+  }
+
+  def searchMultipleBeta(query: String, wrapperIds: String) = Action.async { request =>
+    val wrappers = (wrapperIds.split(",") map WrapperController.wrapperMap.get).toSeq
+    if (wrappers.exists(_.isEmpty)) {
+      Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
+        WrapperController.sortedWrapperIds.mkString(", ")))
+    } else {
+      val requestMerger = new RequestMerger()
+      val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapperBeta(query, wrapper, createWrapperMetaData(request.body)))
+      Future.sequence(resultFutures) map { results =>
+        for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
+          wrapperResult match {
+            case ApiSuccess(responseBody) => Logger.debug("POST-SILK:" + responseBody)
+              val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
+              requestMerger.addWrapperResult(model, wrapper.sourceUri)
+            case e: ApiError =>
+              Logger.error(s"Error code ${e.statusCode} in response of wrapper " + wrapper.sourceLocalName + ": " + e.errorMessage)
+          }
+        }
+        Ok(requestMerger.serializeMergedModel(Lang.JSONLD))
       }
     }
   }
@@ -380,9 +403,11 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       case Some(customFn) =>
         apiResponse.flatMap {
           case ApiSuccess(body) =>
+            Logger.info("Custom Api Handling: Api Success")
             customFn(body).
                 map(customResult => ApiSuccess(customResult))
           case r: ApiError =>
+            Logger.info("Custom Api Handling: Api Error")
             Future(r)
         }
       case None =>
@@ -424,16 +449,22 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   def handleSilkTransformation(wrapper: RestApiWrapperTrait,
                                content: String,
                                acceptType: String = "text/turtle"): Future[ApiResponse] = {
-    //acceptType: String = "text/csv"): Future[ApiResponse] = {
     wrapper match {
       case silkTransform: SilkTransformableTrait if silkTransform.silkTransformationRequestTasks.nonEmpty =>
         Logger.info("Execute Silk Transformations")
         val lang = acceptTypeToRdfLang(acceptType)
-        val futureResponses = executeTransformation(content, acceptType, silkTransform)
-        val rdf = convertToRdf(lang, futureResponses)
-        rdf.map(content => ApiSuccess(content))
+        try {
+          val futureResponses = executeTransformation(content, acceptType, silkTransform)
+          val rdf = convertToRdf(lang, futureResponses)
+          rdf.map(content => ApiSuccess(content))
+        } catch {
+          //Handling error in SILK Transformation task
+          case e: Exception =>
+            Logger.error("Error during SILK Transformation task: "+e.getMessage)
+            Future(ApiError(500,e.getMessage))
+        }
       case _ =>
-        // No transformation to be executed
+        Logger.info("No transformation to be executed")
         Future(ApiSuccess(content))
     }
   }
@@ -456,6 +487,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   }
 
   private def convertToApiResponse(serviceName: String)(response: WSResponse): ApiResponse = {
+    Logger.info("Reponse Status: "+response.status)
     if (response.status >= 400) {
       ApiError(response.status, s"There was a problem with the $serviceName. Service response:\n\n" + response.body)
     } else if (response.status >= 300) {
