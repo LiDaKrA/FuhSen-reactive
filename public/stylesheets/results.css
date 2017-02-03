@@ -1457,3 +1457,49 @@ color: #44639A;
   display:inline-block;
   font-size: 12px;
 }
+
+/* The actual popup */
+.contextual-help .popuptext {
+  visibility: hidden;
+  width: 300px;
+  background-color: #999;
+  color: #fff;
+  text-align: justify;
+  border-radius: 2px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: -360%;
+  margin-left: -80px;
+}
+
+/* Popup arrow */
+.contextual-help .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.contextual-help .popupshow {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}

@@ -17,7 +17,12 @@ object ModelBodyParser {
   def parse(body: AnyContent): Option[Model] = {
     body.asText match {
       case Some(textBody) =>
-        Some(parse(textBody))
+        if (textBody.isEmpty) {
+          Logger.info("No meta-model sent - string empty")
+          None
+        }
+        else
+          Some(parse(textBody))
       case None =>
         Logger.info("No meta-model sent")
         None

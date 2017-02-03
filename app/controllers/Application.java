@@ -67,7 +67,7 @@ public class Application extends Controller {
 
             if (conn.getResponseCode() != 200) {
                 System.err.println("NOT OK "+conn.getResponseCode()+" "+conn.getResponseMessage());
-                return "NOT OK "+conn.getResponseCode()+" "+conn.getResponseMessage();
+                return "NOT OK-"+conn.getResponseCode()+"-"+conn.getResponseMessage();
             }
             else {
                 BufferedReader br = new BufferedReader(new InputStreamReader(

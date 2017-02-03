@@ -120,7 +120,12 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         case oAuthWrapper: RestApiOAuthTrait =>
           Logger.info("Using JAVA impl to call the rest api")
           val bodyJava = new Application().javaRequest(oAuthWrapper, request.url)
-          Future(ApiSuccess(bodyJava))
+          if (bodyJava.startsWith("NOT OK")) {
+            val erroDetails = bodyJava.split("-")
+            Future(ApiError(erroDetails(1).toInt,erroDetails(2)))
+          }
+          else
+            Future(ApiSuccess(bodyJava))
         case _ => Future(ApiError(INTERNAL_SERVER_ERROR, "Not correct wrapper definition"))
       }
     }
@@ -433,7 +438,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       wrapper match {
         case oAuthWrapper: RestApiOAuthTrait =>
           val bodyJava = new Application().javaRequest(oAuthWrapper, apiUrl)
-          Logger.debug("PRE-SILK (Java): " + bodyJava )
+          Logger.debug("PRE-SILK (Java): " + bodyJava)
           handleSilkTransformation(wrapper, bodyJava)
       }
     }
@@ -530,6 +535,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
           model.add(rdfStringToModel(body, lang))
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
+          //throw new Exception("SILK Error")
       }
       modelToTripleString(model, "application/ld+json")
     }

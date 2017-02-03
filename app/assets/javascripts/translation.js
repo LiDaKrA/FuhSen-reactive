@@ -116,7 +116,8 @@ var dictEng = {
     "export": "Export",
     "need_help": "Need Help. ",
     "contact": "Send us an e-mail",
-    "sponsored_by": "Sponsored by the German Ministry of Education and Research - Project LiDaKrA"
+    "sponsored_by": "Sponsored by the German Ministry of Education and Research - Project LiDaKrA",
+    "facets_help": "You can reduce the result list by setting filters. Click on the category and then on the filter term that you are interested in."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -243,7 +244,8 @@ var dictGer = {
     "export" : "Exportieren",
     "need_help": "Brauchen sie hilfe. ",
     "contact": "Nachricht schreiben",
-    "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung - Projekt LiDaKrA"
+    "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung - Projekt LiDaKrA",
+    "facets_help": "Ergebnislisten können Sie mithilfe von Filtern weiter eingrenzen. Klicken Sie auf die gewünschte Kategorie und dann auf den Filterbegriff, der Sie interessiert."
 };
 
 window.dictGer = dictGer;

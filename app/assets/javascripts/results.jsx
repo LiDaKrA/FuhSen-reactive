@@ -404,7 +404,7 @@ var FacetList = React.createClass({
                         <h3>{getTranslation("resultfilters")}
                             <span className="export-facets-btn">(<a href="#" title={getTranslation("export_facets")} onClick={this.facets2CSV} className="no-external-link-icon">{getTranslation("export")}</a>)</span>
                         </h3>
-
+                        <ContextualHelp type="contextual-help help" message={getTranslation("facets_help")}/>
                     </div>
                     <div className="js facets-list bt bb">
                         {MItems}
@@ -1669,6 +1669,29 @@ var DocumentResultElement = React.createClass({
                     </div>
                 </div>
             </li>
+        );
+    }
+});
+
+var ContextualHelp = React.createClass({
+    onChange: function() {
+        if(this.state.showSourcesTypesDiv) {
+            this.setState({ showSourcesTypesDiv: false});
+        } else {
+            this.setState({ showSourcesTypesDiv: true});
+        }
+    },
+    getInitialState: function() {
+        return { showSourcesTypesDiv: false };
+    },
+    render: function () {
+        var floatingDivStyle = this.state.showSourcesTypesDiv ? "popuptext popupshow" : "popuptext"
+        return (
+            <div className={this.props.type} onClick={this.onChange}>
+                <span className={floatingDivStyle}>
+                    {this.props.message}
+                </span>
+            </div>
         );
     }
 });
