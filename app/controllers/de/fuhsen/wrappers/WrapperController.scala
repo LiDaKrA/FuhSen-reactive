@@ -535,7 +535,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
           model.add(rdfStringToModel(body, lang))
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
-          //throw new Exception("SILK Error")
       }
       modelToTripleString(model, "application/ld+json")
     }
