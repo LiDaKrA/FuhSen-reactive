@@ -1400,8 +1400,8 @@ var WebResultElement = React.createClass({
                                      title={this.props.source}/>
                             </div>
                             <div>
-                                &nbsp;&nbsp;{this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
-                                <label>{getTranslation(this.state.jobStatus)}</label> : <button
+                                {this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
+                                <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label> : <button
                                 onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
                             </div>
                         </div>

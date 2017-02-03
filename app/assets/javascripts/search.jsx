@@ -134,7 +134,7 @@ var LangSwitcher = React.createClass({
 var SearchForm = React.createClass({
     getSelectionLabel: function(){
         var sources_list = this.getLabelsFromSelectedChecks(this.state.sources)
-        var types_list = this.getLabelsFromSelectedChecks(this.state.types)
+        var types_list = this.getLabelsFromSelectedAllowedChecks(this.state.types)
 
         var sources_label = ""
         var types_label = ""
@@ -170,6 +170,24 @@ var SearchForm = React.createClass({
         for(var k in checks_data){
             if(checks_data[k]["selected"]){
                 keys.push(checks_data[k]["id"])
+            }
+        }
+        return keys
+    },
+    getLabelsFromSelectedAllowedChecks: function(checks_data) {
+        var keys = [];
+        for(var k in checks_data){
+            if(checks_data[k]["selected"] && checks_data[k]["allowed"]){
+                keys.push(checks_data[k]["id"])
+            }
+        }
+        return keys
+    },
+    getKeysFromSelectedAllowedChecks(checks_data){
+        var keys = [];
+        for(var k in checks_data){
+            if(checks_data[k]["selected"] && checks_data[k]["allowed"]){
+                keys.push(checks_data[k]["key"])
             }
         }
         return keys
@@ -224,12 +242,33 @@ var SearchForm = React.createClass({
     componentWillUnmount: function() {
         document.removeEventListener('click', this.OnDocumentClick);
     },
+    getAllowedTypes : function(sources){
+        var allowed_types = []
+        for(var idx in sources){
+            Array.prototype.push.apply(allowed_types, this.state.typesForSource[sources[idx]]);
+        }
+        return allowed_types.filter(function(item,idx){
+            return allowed_types.indexOf(item) === idx
+        });
+    },
     getInitialState: function() {
-        return { showSourcesTypesDiv: false, sources: [] , types: [] };
+        var typesForSource= {};
+        typesForSource["facebook"] = ["person"];
+        typesForSource["twitter"] = ["person"];
+        typesForSource["xing"] = ["person"];
+        typesForSource["gplus"] = ["person","organization"];
+        typesForSource["linkedleaks"] = ["person","organization"];
+        typesForSource["gkb"] = ["person","organization"];
+        typesForSource["ebay"] = ["product"];
+        typesForSource["occrp"] = ["document"];
+        typesForSource["tor2web"]  = ["website"];
+        typesForSource["elasticsearch"]  = ["website"];
+
+        return { showSourcesTypesDiv: false, sources: [] , types: [],typesForSource: typesForSource};
     },
     handleSubmit : function(e){
         var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources);
-        var selected_types_list = this.getKeysFromSelectedChecks(this.state.types);
+        var selected_types_list = this.getKeysFromSelectedAllowedChecks(this.state.types);
         if(selected_sources_list.length === 0 || selected_types_list.length === 0){
             alert("Datasource or EntityType is not selected!!.Please Select at least one Datasource and entitytype");
             return false;
@@ -239,7 +278,8 @@ var SearchForm = React.createClass({
     render: function() {
 
         var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources)
-        var selected_types_list = this.getKeysFromSelectedChecks(this.state.types)
+        var allowed_types = this.getAllowedTypes(selected_sources_list);
+        var selected_types_list = this.getKeysFromSelectedAllowedChecks(this.state.types)
 
         var selected_sources = selected_sources_list.length === 0 ? this.getAllKeysFromChecks(this.state.sources): selected_sources_list
         var selected_types = selected_types_list.length === 0 ? this.getAllKeysFromChecks(this.state.types): selected_types_list
@@ -254,7 +294,7 @@ var SearchForm = React.createClass({
         {
             return (
                 <div>
-                    <form method="get" id={this.props.id_class} role="search" action={context+"/results"}>
+                    <form method="get" id={this.props.id_class} role="search" action={context+"/results"} onSubmit={this.handleSubmit}>
                         <div>
                             <label ><span>Search: </span></label>
                             <input type="text" name="query" defaultValue={this.props.keyword} placeholder={getTranslation("yoursearch")}/>&nbsp;
@@ -275,10 +315,10 @@ var SearchForm = React.createClass({
                         <div className={floatingDivStyle}>
                             <div className="row" id="filterList">
                                 <div className="col-md-6 separator">
-                                    <FilterCheckList filterType="datasources" lang = {this.props.lang} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                    <FilterCheckList filterType="datasources" lang = {this.props.lang} AllowedTypes = {[]} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                                 <div className="col-md-6">
-                                    <FilterCheckList filterType="entitytypes" lang = {this.props.lang} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                    <FilterCheckList filterType="entitytypes" lang = {this.props.lang} AllowedTypes = {allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                             </div>
                         </div>
@@ -320,10 +360,10 @@ var SearchForm = React.createClass({
                     <div className={floatingDivStyle}>
                         <div className="row" id="filterList">
                             <div className="col-md-6 separator">
-                                <FilterCheckList filterType="datasources" lang = {this.props.lang} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="datasources" lang = {this.props.lang} AllowedTypes = {[]} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                             <div className="col-md-6">
-                                <FilterCheckList filterType="entitytypes" lang = {this.props.lang} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="entitytypes" lang = {this.props.lang} AllowedTypes = {allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                         </div>
                     </div>
@@ -370,13 +410,16 @@ var FilterCheckList = React.createClass({
                     if(Object.prototype.toString.call(current_label) === '[object Array]'){
                         for(var j in current_label){
                             if(current_label[j]["@language"] === window.localStorage.getItem("lang")){
-                                processed_data.push({ id: current_label[j]["@value"], selected: checked, key: current_key})
+                                processed_data.push({ id: current_label[j]["@value"], selected: checked, key: current_key, allowed: true})
                             }
                         }
                     }else{
-                        processed_data.push({ id: current_label, selected: checked, key: current_key})
+                        processed_data.push({ id: current_label, selected: checked, key: current_key,allowed: true})
                     }
                 }
+                // if(this.props.filterType === "entitytypes"){
+                //     processed_data = this.updateChecks(processed_data,this.props.AllowedTypes);
+                // }
                 this.setState({data: processed_data});
                 this.props.onSourceChangedFunction(processed_data)
             }.bind(this),
@@ -385,9 +428,27 @@ var FilterCheckList = React.createClass({
             }.bind(this)
         });
     },
+    updateChecks: function (checks,allowedTypes) {
+        if(checks !== undefined) {
+            return checks.map(function (d) {
+                var found = allowedTypes.indexOf(d.key) > -1;
+                return {
+                    id: d.id,
+                    selected: d.selected,
+                    allowed: found,
+                    key: d.key
+                };
+            });
+        }
+        return undefined;
+    },
     componentWillReceiveProps: function (nextProps) {
         if(nextProps.lang != this.props.lang)
             this.loadListFromServer(this.props.filterType);
+        if(nextProps.AllowedTypes.length !== this.props.AllowedTypes.length && this.props.filterType === "entitytypes"){
+            var updatedData = this.updateChecks(this.state.data,nextProps.AllowedTypes);
+            this.setState({data: updatedData});
+        }
     },
     componentDidMount: function () {
         this.loadListFromServer(this.props.filterType);
@@ -397,6 +458,7 @@ var FilterCheckList = React.createClass({
             return {
                 id: d.id,
                 selected: (d.id === id ? !d.selected : d.selected),
+                allowed: d.allowed,
                 key: d.key
             };
         });
@@ -411,6 +473,7 @@ var FilterCheckList = React.createClass({
             return {
                 id: d.id,
                 selected: !this.state.selectAll,//!d.selected,//(d.id === id ? !d.selected : d.selected),
+                allowed: d.allowed,
                 key: d.key
             };
         },this);
@@ -426,13 +489,27 @@ var FilterCheckList = React.createClass({
                 var filter_title = getTranslation(this.props.filterType);//(this.props.filterType).charAt(0).toUpperCase() + (this.props.filterType).slice(1);
 
                 var checks = this.state.data.map(function(d) {
-                    return (
-                        <div>
-                            &emsp;<input type="checkbox" checked={d.selected} onChange={this.__changeSelection.bind(this, d.id)}/>
-                            {d.id}
-                            <br />
-                        </div>
-                    );
+                    if(d.allowed) {
+                        return (
+                            <div>
+                                &emsp;<input type="checkbox" checked={d.selected}
+                                             onChange={this.__changeSelection.bind(this, d.id)}/>
+                                {d.id}
+                                <br />
+                            </div>
+                        );
+                    }
+                    else{
+                        return (
+                            <div>
+                                &emsp;<s><input type="checkbox" checked="false" disabled="true"
+                                                     onChange={this.__changeSelection.bind(this, d.id)}/>
+                                {d.id}
+                            </s>
+                                <br />
+                            </div>
+                        );
+                    }
                 }.bind(this));
                 return (
                     <div>
