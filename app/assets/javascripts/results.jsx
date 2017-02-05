@@ -179,7 +179,7 @@ var Container = React.createClass({
                 //Todo remove this hardcoded value
                 window.location.href = "/fuhsen";
             }.bind(this)
-            ,timeout: 60000 // sets timeout to 60 seconds
+            ,timeout: 120000 // sets timeout to 60 seconds
         });
     },
     componentDidMount: function () {
@@ -404,7 +404,7 @@ var FacetList = React.createClass({
                         <h3>{getTranslation("resultfilters")}
                             <span className="export-facets-btn">(<a href="#" title={getTranslation("export_facets")} onClick={this.facets2CSV} className="no-external-link-icon">{getTranslation("export")}</a>)</span>
                         </h3>
-
+                        <ContextualHelp type="contextual-help help" message={getTranslation("facets_help")}/>
                     </div>
                     <div className="js facets-list bt bb">
                         {MItems}
@@ -1120,17 +1120,20 @@ var ResultsContainer = React.createClass({
                 <div class="off result-pages-count"></div>
                 <div className="row">
                     <div className="col-md-8 tabulator">
-                        <ul className="list-inline">
-                            {/*<li>*/}
-                                {/*<span className="total-results">{final_data.length}</span>*/}
-                                {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
-                            {/*</li>*/}
-                            {personenItem}
-                            {organizationenItem}
-                            {produkteItem}
-                            {darkWebItem}
-                            {documentItem}
-                        </ul>
+                        <div className="tabs-head">
+                            <ul className="list-inline">
+                                {/*<li>*/}
+                                    {/*<span className="total-results">{final_data.length}</span>*/}
+                                    {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
+                                {/*</li>*/}
+                                {personenItem}
+                                {organizationenItem}
+                                {produkteItem}
+                                {darkWebItem}
+                                {documentItem}
+                            </ul>
+                            <SearchMetadataInfo searchUid={this.props.searchUid}/>
+                        </div>
                     </div>
                     <div className="col-md-4 text-right">
                         {/*{ this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"*/}
@@ -1669,6 +1672,84 @@ var DocumentResultElement = React.createClass({
                     </div>
                 </div>
             </li>
+        );
+    }
+});
+
+var ContextualHelp = React.createClass({
+    onChange: function() {
+        if(this.state.showSourcesTypesDiv) {
+            this.setState({ showSourcesTypesDiv: false});
+        } else {
+            this.setState({ showSourcesTypesDiv: true});
+        }
+    },
+    getInitialState: function() {
+        return { showSourcesTypesDiv: false };
+    },
+    render: function () {
+        var floatingDivStyle = this.state.showSourcesTypesDiv ? "popuptext popupshow" : "popuptext"
+        return (
+            <div className={this.props.type} onClick={this.onChange}>
+                <span className={floatingDivStyle}>
+                    {this.props.message}
+                </span>
+            </div>
+        );
+    }
+});
+
+var SearchMetadataInfo = React.createClass({
+    loadSearchMetadata: function () {
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/metadata";
+        var messageBuilder = "";
+        if (!this.state.isDataLoad) {
+            $.ajax({
+                url: searchUrl,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (data["@graph"] === undefined && data["fs:wrapperLabel"] !== undefined)
+                        data = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
+
+                    if(data["@graph"] !== undefined) {
+                        data["@graph"].map(function (result) {
+                            if (result["rdfs:label"] === "200") {
+                                messageBuilder = messageBuilder + result["fs:wrapperLabel"] + getTranslation("search_ok");
+                            }
+                            else {
+                                messageBuilder = messageBuilder + result["fs:wrapperLabel"] + getTranslation("search_error");
+                            }
+                        });
+                    }
+
+                    messageBuilder = messageBuilder.replace("ebay", "eBay");
+                    messageBuilder = messageBuilder.replace("elasticsearch", "Crawled Onion websites");
+                    messageBuilder = messageBuilder.replace("facebook", "Facebook");
+                    messageBuilder = messageBuilder.replace("gkb", "Google Knowledge Graph");
+                    messageBuilder = messageBuilder.replace("gplus", "Google+");
+                    messageBuilder = messageBuilder.replace("linkedleaks", "Linked Leaks");
+                    messageBuilder = messageBuilder.replace("occrp", "OCCRP");
+                    messageBuilder = messageBuilder.replace("tor2web", "Onion websites");
+                    messageBuilder = messageBuilder.replace("twitter", "Twitter");
+                    messageBuilder = messageBuilder.replace("xing", "Xing");
+                    messageBuilder = messageBuilder.replace(",", ", ");
+
+                    this.setState({isDataLoad: true, message: messageBuilder});
+
+                }.bind(this)
+            });
+        }
+    },
+    componentDidMount: function () {
+        this.loadSearchMetadata();
+    },
+    getInitialState: function() {
+        return { isDataLoad: false, message: "" };
+    },
+    render: function () {
+        return (
+            <ContextualHelp type="contextual-help info" message={this.state.message}/>
         );
     }
 });

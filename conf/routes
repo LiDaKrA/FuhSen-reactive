@@ -15,7 +15,8 @@ POST    /engine/api/searches                                controllers.de.fuhse
 GET     /engine/api/searches/:uid/results                   controllers.de.fuhsen.engine.SearchEngineController.search(uid: String, entityType: String, facets: Option[String], sources: String, types: String)
 DELETE  /engine/api/searches/:uid                           controllers.de.fuhsen.engine.SearchEngineController.stopSession(uid: String)
 POST    /engine/api/searches/:uid/facets                    controllers.de.fuhsen.engine.FacetsController.getGeneratedFacets(uid: String, entityType: String, lang: String)
-GET     /engine/api/searches/:uid/results_stat              controllers.de.fuhsen.engine.SearchEngineController.calculateModelStat(uid: String)
+GET     /engine/api/searches/:uid/results_stat              controllers.de.fuhsen.engine.SearchEngineController.calculateSearchStat(uid: String)
+GET     /engine/api/searches/:uid/metadata                  controllers.de.fuhsen.engine.SearchEngineController.getSearchMetadata(uid: String)
 
 #Mini-task services enriching the results graph
 #POST    /engine/api/queryprocessing                         controllers.de.fuhsen.engine.QueryProcessingController.execute
@@ -29,8 +30,8 @@ GET     /engine/api/schema/datasources                      controllers.de.fuhse
 GET     /engine/api/schema/entitytypes                      controllers.de.fuhsen.engine.SchemaController.getEntityTypeList
 
 # REST API Wrappers
-GET     /ldw/restApiWrapper/id/:wrapperId/search            controllers.de.fuhsen.wrappers.WrapperController.search(wrapperId: String, query: String)
-GET     /ldw/restApiWrapper/search                          controllers.de.fuhsen.wrappers.WrapperController.searchMultiple2(query: String, wrapperIds: String)
+POST    /ldw/restApiWrapper/id/:wrapperId/search            controllers.de.fuhsen.wrappers.WrapperController.search(wrapperId: String, query: String)
+POST    /ldw/restApiWrapper/search                          controllers.de.fuhsen.wrappers.WrapperController.searchMultiple(query: String, wrapperIds: String)
 GET     /ldw/restApiWrapper                                 controllers.de.fuhsen.wrappers.WrapperController.wrapperIds()
 
 GET     /:wrapperId/getToken                                controllers.de.fuhsen.wrappers.security.TokenRetrievalController.getToken(wrapperId: String)
@@ -41,7 +42,6 @@ GET     /:wrapperId/getTokenLifeLength                      controllers.Applicat
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                                       controllers.Assets.versioned(path="/public", file: Asset)
 GET     /webjars/*file                                      controllers.WebJarAssets.at(file)
-
 
 # Crawling
 GET     /crawling/jobs                                      controllers.de.fuhsen.crawling.CrawlerController.crawlJobs

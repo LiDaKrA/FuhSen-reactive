@@ -15,10 +15,13 @@
  */
 package controllers.de.fuhsen
 
-import java.util.Optional
+import java.util.{UUID, Optional}
 
 import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
-import org.apache.jena.rdf.model.Model
+import org.apache.jena.rdf.model.{ModelFactory, Model}
+import org.apache.jena.riot.Lang
+import play.Logger
+import utils.dataintegration.RDFUtil
 
 /**
   * Created by andreas on 2/26/16.
@@ -53,6 +56,9 @@ object FuhsenVocab {
   val FACET_NAME = NS + "#" + "facetName"
   val DATA_SOURCE = NS + "#" + "dataSource"
   val ENTITY_TYPE = NS + "#" + "entityType"
+  //prov
+  val PROV_RETRIEVAL_URI = NS + "/" + "search#"
+
 
   //SPARQL to get the keyword in a search results KB
   def getKeyword(model: Model): Option[String] = {
@@ -70,6 +76,35 @@ object FuhsenVocab {
       Some(resultSet.next.getLiteral("keyword").getString)
     else
       None
+  }
+
+  def createProvModel(wrapperName : String, endedByCode: String, endedByReason: String) : Model = {
+    Logger.info("Creating prov metadata for: "+wrapperName+" "+endedByCode+" "+endedByReason)
+    val model = ModelFactory.createDefaultModel()
+    val irUid = UUID.randomUUID.toString()
+    val query = s"""
+         |@prefix fs: <http://vocab.lidakra.de/fuhsen#> .
+         |@prefix dc: <http://purl.org/dc/elements/1.1/> .
+         |@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+         |@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+         |@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+         |@prefix prov: <http://www.w3.org/ns/prov#> .
+         |@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+         |
+         |fs:$wrapperName a prov:Agent;
+         |				        rdfs:label "$wrapperName" .
+         |
+         |fs:$irUid a prov:Activity ;
+         |					prov:startedAtTime "2017-01-16" ;
+         |					prov:endedAtTime "2017-01-17" ;
+         |					prov:wasAssociatedWith fs:$wrapperName;
+         |					prov:wasEndedBy fs:$endedByCode .
+         |
+         |fs:$endedByCode a prov:Entity ;
+         |					      rdfs:label "$endedByCode";
+         |					      rdfs:comment "$endedByReason" .
+      """.stripMargin
+    RDFUtil.rdfStringToModel(query, Lang.TURTLE)
   }
 
 }

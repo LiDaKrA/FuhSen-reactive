@@ -19,6 +19,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
   * Micro-Task service that calls the RDF-Wrappers to extract the information.
   */
 class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
+  final val SEARCH_ENDPOINT = "/ldw/restApiWrapper/search"
 
   def execute = Action.async {
     request =>
@@ -41,6 +42,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       Logger.info("Selected Entity Types: "+entityTypes)
       Logger.info("Enabled Data Sources By Entity Types: "+enabledDataSourcesByTypes)
       Logger.info("Final Data Sources: "+finalSelectedDataSources)
+      Logger.info("Keyword: "+keyword)
 
 
       if(finalSelectedDataSources.indexOf("facebook") > -1 && TokenManager.getTokenLifeLength("facebook") == "-1"){
@@ -59,11 +61,15 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         Ok(textBody.get)
 
       //Calling the RDF-Wrappers to get the information //engine.microtask.url
-      ws.url(ConfigFactory.load.getString("engine.microtask.url")+"/ldw/restApiWrapper/search?query="+keyword.get+"&wrapperIds="+finalSelectedDataSources).get.map {
+      ws.url(ConfigFactory.load.getString("engine.microtask.url") +
+          s"$SEARCH_ENDPOINT?query=${keyword.get}&wrapperIds=$finalSelectedDataSources").
+            // TODO: Add wrapper meta data to request
+            post("").map {
         response =>
-          if(finalSelectedDataSources.length == 0) {
-            Ok("NO VALID TOKEN")
-          }else{
+          if (response.status / 100 != 2) {
+            InternalServerError(s"Got ${response.status} code from $SEARCH_ENDPOINT endpoint. Response body (truncated): " + response.body.take(1000))
+          } else {
+            //Logger.info("Federated Search Model: "+response.body)
             val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
             model.add(wrappersResult)
             Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
@@ -77,7 +83,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       s"""
          |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
          |SELECT ?keyword WHERE {
-         |?search fs:keyword ?keyword .
+         |?search fs:keyword ?keyword .winwww
          |} limit 10
       """.stripMargin)
     val resultSet = QueryExecutionFactory.create(keywordQuery, model).execSelect()

@@ -94,7 +94,40 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
   }
 
-  def calculateModelStat(uid: String) = Action { request =>
+  def getSearchMetadata(uid: String) = Action {
+    GraphResultsCache.getModel(uid) match {
+      case Some(model) =>
+        val query = QueryFactory.create(
+          s"""
+             |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+             |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+             |PREFIX prov: <http://www.w3.org/ns/prov#>
+             |
+             CONSTRUCT   {
+             |  ?apiResponse a prov:Entity .
+             |  ?apiResponse rdfs:label ?label .
+             |  ?apiResponse rdfs:comment ?comment .
+             |  ?apiResponse fs:wrapperLabel ?w_label .
+             |}
+             |WHERE {
+             |  ?s a prov:Activity .
+             |  ?s prov:wasEndedBy ?apiResponse .
+             |  ?s prov:wasAssociatedWith ?wrapper .
+             |  ?wrapper rdfs:label ?w_label .
+             |  ?apiResponse rdfs:label ?label .
+             |	?apiResponse rdfs:comment ?comment .
+             |}
+          """.stripMargin)
+        val results_model = QueryExecutionFactory.create(query, model).execConstruct()
+        Ok(RDFUtil.modelToTripleString(results_model, Lang.JSONLD))
+      case None =>
+        InternalServerError("The provided UID has not a model associated in the cache.")
+    }
+  }
+
+  def calculateSearchStat(uid: String) = Action {
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
         val query = QueryFactory.create(
@@ -166,6 +199,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
         InternalServerError("The provided UID has not a model associated in the cache.")
     }
   }
+
   def startSession(query: String) = Action { request =>
     Logger.info("Starting Search Session with Query: " + query)
 
@@ -317,7 +351,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
              |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
              |
-             |CONSTRUCT   {
+             |CONSTRUCT {
              |?s ?p ?o .
              |?s rdf:type foaf:Document .
              |?s fs:url ?url .

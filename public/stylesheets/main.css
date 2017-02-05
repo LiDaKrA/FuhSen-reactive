@@ -1574,8 +1574,16 @@ select {
     display: block;
     width: 17px;
     height: 17px;
+    /*background: url("../images/icons/tooltips.png") no-repeat 0 -60px;*/
+    /* text-indent: -999em; */
+}
+
+.help {
     background: url("../images/icons/tooltips.png") no-repeat 0 -60px;
-    text-indent: -999em;
+}
+
+.info {
+    background: url("../images/icons/infotips.png") no-repeat 0 -60px;
 }
 
 .contextual-help,.contextual-help a,.contextual-help img {
