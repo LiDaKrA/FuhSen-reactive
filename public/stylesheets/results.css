@@ -104,14 +104,26 @@
   font-size: 1em;
 }
 
+.tabs-head {
+  padding: 0;
+  margin: 0;
+  /*line-height: 42px;*/
+  font-size: 1em;
+}
+
 .facets-head .contextual-help, .compare-header .contextual-help, .fields .contextual-help,
-.time-restriction .contextual-help {
+.time-restriction .contextual-help, .tabs-head .contextual-help {
   position: absolute;
 }
 
 .facets-head .contextual-help, .compare-header .contextual-help, .time-restriction .contextual-help {
   right: 0;
   top: 14px;
+}
+
+.tabs-head .contextual-help {
+  right: 0;
+  top: 5px;
 }
 
 .compare-header .contextual-help{
