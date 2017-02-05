@@ -117,7 +117,9 @@ var dictEng = {
     "need_help": "Need Help. ",
     "contact": "Send us an e-mail",
     "sponsored_by": "Sponsored by the German Ministry of Education and Research - Project LiDaKrA",
-    "facets_help": "You can reduce the result list by setting filters. Click on the category and then on the filter term that you are interested in."
+    "facets_help": "You can reduce the result list by setting filters. Click on the category and then on the filter term that you are interested in.",
+    "search_ok": " finished successfully. ",
+    "search_error":" had problems during query and results are not shown. "
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -245,7 +247,9 @@ var dictGer = {
     "need_help": "Brauchen sie hilfe. ",
     "contact": "Nachricht schreiben",
     "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung - Projekt LiDaKrA",
-    "facets_help": "Ergebnislisten können Sie mithilfe von Filtern weiter eingrenzen. Klicken Sie auf die gewünschte Kategorie und dann auf den Filterbegriff, der Sie interessiert."
+    "facets_help": "Ergebnislisten können Sie mithilfe von Filtern weiter eingrenzen. Klicken Sie auf die gewünschte Kategorie und dann auf den Filterbegriff, der Sie interessiert.",
+    "search_ok": " Erfolgreich beendet. ",
+    "search_error":" hatten Probleme während der Abfrage und die Ergebnisse werden nicht angezeigt. "
 };
 
 window.dictGer = dictGer;

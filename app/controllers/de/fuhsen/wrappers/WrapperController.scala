@@ -50,11 +50,11 @@ import scala.concurrent.Future
 class WrapperController @Inject()(ws: WSClient) extends Controller {
   val requestCounter = new AtomicInteger(0)
 
-  def searchBeta(wrapperId: String, query: String) = Action.async { request =>
+  def search(wrapperId: String, query: String) = Action.async { request =>
     WrapperController.wrapperMap.get(wrapperId) match {
       case Some(wrapper) =>
         Logger.info(s"Starting $wrapperId Search with query: " + query)
-        execQueryAgainstWrapperBeta(query, wrapper, createWrapperMetaData(request.body)) map {
+        execQueryAgainstWrapper(query, wrapper, createWrapperMetaData(request.body)) map {
           case errorResult: ApiError =>
             InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode)
           case success: ApiSuccess =>
@@ -71,19 +71,20 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     //ToDo: Validate that the provided model is PROV data.
   }
 
-  private def execQueryAgainstWrapperBeta(query: String,
+  private def execQueryAgainstWrapper(query: String,
                                           wrapper: RestApiWrapperTrait,
                                           searchMetaData: Option[Model]): Future[ApiResponse] = {
-    val apiRequest = createApiRequestBeta(wrapper, query, searchMetaData)
-    val apiResponse = executeApiRequestBeta(wrapper, apiRequest)
+    val apiRequest = createApiRequest(wrapper, query, searchMetaData)
+    val apiResponse = executeApiRequest(wrapper, apiRequest)
     val customApiResponse = customApiHandling(wrapper, apiResponse)
-    val transformedApiResponse = transformApiResponseBeta(wrapper, customApiResponse)
+    val transformedApiResponse = transformApiResponse(wrapper, customApiResponse)
     addProvMetaData(wrapper, transformedApiResponse)
   }
 
-  def createApiRequestBeta( wrapper: RestApiWrapperTrait,
-                            query: String,
-                            searchMetaData: Option[Model]): WSRequest = {
+  /** Creates the complete API REST request */
+  def createApiRequest(wrapper: RestApiWrapperTrait,
+                       query: String,
+                       searchMetaData: Option[Model]): WSRequest = {
     val apiRequest: WSRequest = ws.url(wrapper.apiUrl)
     val apiRequestWithApiParams = addQueryParameters(wrapper, apiRequest, query)
     val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
@@ -110,7 +111,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     apiRequest.withHeaders(wrapper.headersParams.toSeq: _*)
   }
 
-  private def executeApiRequestBeta(wrapper: RestApiWrapperTrait,
+  /** Executes the complete API REST request asynchronously. */
+  private def executeApiRequest(wrapper: RestApiWrapperTrait,
                                         request: WSRequest) : Future[ApiResponse] = {
 
     if(!wrapper.requestType.equals("JAVA"))
@@ -131,7 +133,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  private def transformApiResponseBeta(wrapper: RestApiWrapperTrait,
+  /** Handles transformation if configured for the wrapper */
+  private def transformApiResponse(wrapper: RestApiWrapperTrait,
                                    apiResponse: Future[ApiResponse]): Future[ApiResponse] = {
 
     apiResponse.flatMap {
@@ -159,14 +162,14 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  def searchMultipleBeta(query: String, wrapperIds: String) = Action.async { request =>
+  def searchMultiple(query: String, wrapperIds: String) = Action.async { request =>
     val wrappers = (wrapperIds.split(",") map WrapperController.wrapperMap.get).toSeq
     if (wrappers.exists(_.isEmpty)) {
       Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
         WrapperController.sortedWrapperIds.mkString(", ")))
     } else {
       val requestMerger = new RequestMerger()
-      val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapperBeta(query, wrapper, createWrapperMetaData(request.body)))
+      val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper, createWrapperMetaData(request.body)))
       Future.sequence(resultFutures) map { results =>
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
@@ -184,104 +187,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   //-----------------------------------------------------------
 
-  def search(wrapperId: String, query: String) = Action.async {
-    WrapperController.wrapperMap.get(wrapperId) match {
-      case Some(wrapper) =>
-        Logger.info(s"Starting $wrapperId Search with query: " + query)
-        execQueryAgainstWrapper(query, wrapper, WrapperSearchMetaData()) map {
-          case errorResult: ApiError =>
-            InternalServerError(errorResult.errorMessage + " API status code: " + errorResult.statusCode)
-          case success: ApiSuccess =>
-            Ok(success.responseBody)
-        }
-      case None =>
-        Future(NotFound("Wrapper " + wrapperId + " not found! Supported wrapper: " +
-            WrapperController.sortedWrapperIds.mkString(", ")))
-    }
-  }
-
-  private def execQueryAgainstWrapper(query: String,
-                                      wrapper: RestApiWrapperTrait,
-                                      wrapperSearchMetaData: WrapperSearchMetaData): Future[ApiResponse] = {
-    val apiRequest = createApiRequest(wrapper, query, wrapperSearchMetaData)
-
-    if(!wrapper.requestType.equals("JAVA")){
-      Logger.info("GET wrapper request")
-
-      val apiResponse = executeApiRequest(apiRequest)
-      val customApiResponse = customApiHandling(wrapper, apiResponse)
-      transformApiResponse(wrapper, customApiResponse, null)
-
-    }else{
-      Logger.info("POST wrapper request")
-      transformApiResponse(wrapper, null, apiRequest.url)
-    }
-
-
-  }
-
-  /**
-    * Returns the merged result from multiple wrappers in N-Quads format.
-    *
-    * @param query      for each wrapper
-    * @param wrapperIds a comma-separated list of wrapper ids
-    */
-  def searchMultiple(query: String, wrapperIds: String) = Action.async {
-    val wrappers = (wrapperIds.split(",") map WrapperController.wrapperMap.get).toSeq
-    if (wrappers.exists(_.isEmpty)) {
-      Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
-          WrapperController.sortedWrapperIds.mkString(", ")))
-    } else {
-      fetchAndIntegrateWrapperResults(wrappers, query)
-    }
-  }
-
-  /**
-    * Returns the merged result from multiple wrappers in JSON-LD format.
-    *
-    * @param query      for each wrapper
-    * @param wrapperIds a comma-separated list of wrapper ids
-    */
-  def searchMultiple2(query: String, wrapperIds: String) = Action.async(BodyParsers.parse.json) { request =>
-    request.body.validate[WrapperSearchMetaData] match {
-      case JsSuccess(wsm, _) =>
-        val wrappers = (wrapperIds.split(",") map WrapperController.wrapperMap.get).toSeq
-        if (wrappers.exists(_.isEmpty)) {
-          Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
-              WrapperController.sortedWrapperIds.mkString(", ")))
-        } else {
-          var wrapperSearchMetaData = wsm
-          val requestMerger = new RequestMerger()
-          val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper, wsm))
-          Future.sequence(resultFutures) map { results =>
-            for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
-              wrapperResult match {
-                case ApiSuccess(responseBody) => Logger.debug("POST-SILK:" + responseBody)
-                  val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
-                  requestMerger.addWrapperResult(model, wrapper.sourceUri)
-                  wrapperSearchMetaData = updateWrapperSearchMetaData(wrapperSearchMetaData, wrapper, responseBody)
-                case e: ApiError =>
-                  Logger.warn(s"Error code ${e.statusCode} in response of wrapper " + wrapper.sourceLocalName + ": " + e.errorMessage)
-              }
-            }
-            val jsonData = requestMerger.serializeMergedModel(Lang.JSONLD)
-            val jsonSearchResult = WrapperSearchResult(Json.parse(jsonData), wrapperSearchMetaData)
-            //val resultDataset = requestMerger.constructQuadDataset()
-            Ok(Json.toJson(jsonSearchResult))
-          }
-        }
-      case JsError(errors) =>
-        val errorsJson = errors map { case (path, validationErrors) =>
-          Json.obj(
-            "path" -> path.toString(),
-            "validationErrors" -> JsArray(validationErrors.map(Json.toJson(_)))
-          )
-        }
-        val errorsJsonResult = JsArray(errorsJson)
-        Future(BadRequest(errorsJsonResult))
-    }
-  }
-
   private implicit val validationErrorsWrites: Writes[ValidationError] = new Writes[ValidationError] {
     override def writes(o: ValidationError): JsValue = {
       Json.obj(
@@ -290,7 +195,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       )
     }
   }
-
 
   private def updateWrapperSearchMetaData(wrapperSearchMetaData: WrapperSearchMetaData,
                                           wrapper: RestApiWrapperTrait,
@@ -319,7 +223,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   private def fetchAndIntegrateWrapperResults(wrappers: Seq[Option[RestApiWrapperTrait]],
                                               query: String): Future[Result] = {
     // Fetch the transformed results from each wrapper
-    val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper, WrapperSearchMetaData()))
+    val resultFutures = wrappers.flatten map (wrapper => execQueryAgainstWrapper(query, wrapper, null))
     Future.sequence(resultFutures) flatMap { results =>
       // Merge results
       val requestMerger = mergeWrapperResults(wrappers, results)
@@ -420,35 +324,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  /** Handles transformation if configured for the wrapper */
-  private def transformApiResponse(wrapper: RestApiWrapperTrait,
-                                   apiResponse: Future[ApiResponse],
-                                   apiUrl:String): Future[ApiResponse] = {
-
-    if(apiResponse != null){
-      apiResponse.flatMap {
-        case error: ApiError =>
-          // There has been an error previously, don't go on.
-          Future(error)
-        case ApiSuccess(body) =>
-          Logger.debug("PRE-SILK: "+body)
-          handleSilkTransformation(wrapper, body)
-      }
-    }else{
-      wrapper match {
-        case oAuthWrapper: RestApiOAuthTrait =>
-          val bodyJava = new Application().javaRequest(oAuthWrapper, apiUrl)
-          Logger.debug("PRE-SILK (Java): " + bodyJava)
-          handleSilkTransformation(wrapper, bodyJava)
-      }
-    }
-
-  }
-
-  /** Executes the request to the wrapped REST API */
-  private def executeApiRequest(apiRequest: WSRequest): Future[ApiResponse] = {
-    apiRequest.get.map(convertToApiResponse("Wrapper or the wrapped service"))
-  }
 
   /** If transformations are configured then execute them via the Silk REST API */
   def handleSilkTransformation(wrapper: RestApiWrapperTrait,
@@ -538,48 +413,6 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       }
       modelToTripleString(model, "application/ld+json")
     }
-  }
-
-  /** Creates the complete API REST request and executes it asynchronously. */
-  def createApiRequest(wrapper: RestApiWrapperTrait,
-                       query: String,
-                       wrapperSearchMetaData: WrapperSearchMetaData): WSRequest = {
-    val apiRequestWithApiParams = apiRequest(wrapper, query, wrapperSearchMetaData)
-    val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
-    apiRequestWithOAuthIfNeeded
-  }
-
-  /** Add all query parameters to the request. */
-  def apiRequest(wrapper: RestApiWrapperTrait,
-                 queryString: String,
-                 wrapperSearchMetaData: WrapperSearchMetaData): WSRequest = {
-
-    var url_with_params = wrapper.apiUrl + "?"
-
-    for ((k, v) <- wrapper.searchQueryAsParam(queryString)) {
-      url_with_params = url_with_params.concat(k + "=" + v + "&")
-    }
-
-    val nextPageParameter = nextPageQueryParameter(wrapper, wrapperSearchMetaData)
-
-    for ((k, v) <- wrapper.queryParams) {
-      url_with_params = url_with_params.concat(k + "=" + v + "&")
-    }
-
-    val apiRequest: WSRequest = ws.url(url_with_params.dropRight(1))
-
-    apiRequest.withHeaders(wrapper.headersParams.toSeq ++ nextPageParameter: _*)
-  }
-
-  /** Returns the query parameter and value to request the next "page" of the API or an empty Seq if not applicable. */
-  private def nextPageQueryParameter(wrapper: RestApiWrapperTrait,
-                                     wrapperSearchMetaData: WrapperSearchMetaData): Seq[(String, String)] = {
-    wrapperSearchMetaData.nextPageMap.get(wrapper.sourceLocalName).
-        filter(_ => wrapper.isInstanceOf[PaginatingApiTrait]). // make sure that pagination is supported
-        map { nextPageValue =>
-      val queryParam = wrapper.asInstanceOf[PaginatingApiTrait].nextPageQueryParameter
-      Seq(queryParam -> nextPageValue)
-    }.getOrElse(Seq.empty)
   }
 
   /** Signs the request if the [[RestApiOAuthTrait]] is configured. */

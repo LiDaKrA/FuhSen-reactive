@@ -1715,10 +1715,10 @@ var SearchMetadataInfo = React.createClass({
                     if(data["@graph"] !== undefined) {
                         data["@graph"].map(function (result) {
                             if (result["rdfs:label"] === "200") {
-                                messageBuilder = messageBuilder + result["fs:wrapperLabel"] + " finished succefully. ";
+                                messageBuilder = messageBuilder + result["fs:wrapperLabel"] + getTranslation("search_ok");
                             }
                             else {
-                                messageBuilder = messageBuilder + result["fs:wrapperLabel"] + " had problems during query and results are not shown. ";
+                                messageBuilder = messageBuilder + result["fs:wrapperLabel"] + getTranslation("search_error");
                             }
                         });
                     }
@@ -1733,6 +1733,7 @@ var SearchMetadataInfo = React.createClass({
                     messageBuilder = messageBuilder.replace("tor2web", "Onion websites");
                     messageBuilder = messageBuilder.replace("twitter", "Twitter");
                     messageBuilder = messageBuilder.replace("xing", "Xing");
+                    messageBuilder = messageBuilder.replace(",", ", ");
 
                     this.setState({isDataLoad: true, message: messageBuilder});
 
