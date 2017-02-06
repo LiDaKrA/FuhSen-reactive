@@ -16,9 +16,8 @@ import scala.collection.JavaConversions.asScalaIterator
   */
 class FacetsController @Inject()(ws: WSClient) extends Controller {
 
-  def getGeneratedFacets(uid: String, entityType: String,lang: String) = Action { request =>
+  def getGeneratedFacets(uid: String, entityType: String,lang: String, exact: Boolean) = Action { request =>
     val selectedFacets = if(request.body.asJson != null) request.body.asJson.get.as[Map[String,List[String]]] else null
-
     var subFilterQuery = ""
     if(selectedFacets != null){
         val predicates = selectedFacets.keys.mkString(" ")
@@ -61,8 +60,8 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
 
         var queryModel = model
         Logger.info("Model size: "+queryModel.size())
-        if(subFilterQuery != "") {
-          queryModel = getGenericSubModel(model, subFilterQuery)
+        if(subFilterQuery != "" || exact) {
+          queryModel = getGenericSubModel(model, subFilterQuery, exact, typeEntity)
           Logger.info("After Filtering Model size: " + queryModel.size())
         }
         val query = s"""
@@ -93,7 +92,8 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  private def getGenericSubModel(model :Model,subFilterQuery :String ) : Model = {
+  private def getGenericSubModel(model :Model,subFilterQuery :String , exact:Boolean, typeEntity:String) : Model = {
+    val keyword = FuhsenVocab.getKeyword(model).get
     val query = s"""
                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                        PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
@@ -112,10 +112,16 @@ class FacetsController @Inject()(ws: WSClient) extends Controller {
                        {
                          ?s ?p ?o .
                          $subFilterQuery
-                          OPTIONAL { ?p ?prop ?moreData . }
-                          OPTIONAL { ?o ?metaProp ?metaValue .}
-                       }
-                    """
+                         OPTIONAL { ?p ?prop ?moreData . }
+                         OPTIONAL { ?o ?metaProp ?metaValue .}
+                      ${ if (exact) { s"""?s rdfs:label ?exact_name .
+                                      FILTER(${if(typeEntity == "foaf:Document") {
+                                                      s"""regex(?exact_name, '^$keyword'))}"""
+                                                    }else{
+                                                      s"""?exact_name = '$keyword')}"""
+                                                    }
+                                              }"""
+                      }else{s"""}"""}}"""
     //Logger.info("Filter Model Query: \n" + query)
     val subModel = QueryExecutionFactory.create(query, model).execConstruct()
     subModel

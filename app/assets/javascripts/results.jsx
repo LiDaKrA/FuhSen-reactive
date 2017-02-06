@@ -157,9 +157,7 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
     },
     loadCommentsFromServer: function () {
-
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty;
-
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + this.state.exactMatching
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -181,7 +179,7 @@ var Container = React.createClass({
                 //Todo remove this hardcoded value
                 window.location.href = "/fuhsen";
             }.bind(this)
-            ,timeout: 120000 // sets timeout to 120 seconds
+            ,timeout: 120000 // sets timeout to 60 seconds
         });
     },
     componentDidMount: function () {
@@ -204,7 +202,7 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType: type, facetsDict: {}, orgFacetsDict: {}});
+        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}});
     },
     render: function () {
         if (this.state.initData) {
@@ -870,8 +868,7 @@ var ResultsContainer = React.createClass({
         });
     },
     computeDataStatistics: function(){
-        var stat_url = context + "/engine/api/searches/" + this.props.searchUid + "/results_stat";
-        var moreResultsHelper = false;
+      var stat_url = context + "/engine/api/searches/" + this.props.searchUid + "/results_stat";
       $.ajax({
           url: stat_url,
           dataType: 'json',
@@ -884,16 +881,12 @@ var ResultsContainer = React.createClass({
 
               if(data["@graph"] !== undefined) {
                   data["@graph"].map(function (result) {
-                      if (result["http://vocab.lidakra.de/fuhsen#nextPage"] !== undefined)
-                          moreResultsHelper = true;
-                      else
-                        stat[result["http://vocab.lidakra.de/fuhsen#value"]] = result["http://vocab.lidakra.de/fuhsen#count"];
+                      stat[result["http://vocab.lidakra.de/fuhsen#value"]] = result["http://vocab.lidakra.de/fuhsen#count"];
                   });
               }
 
               this.setState({
-                    results_stat: stat,
-                    areThereMoreResults: moreResultsHelper
+                    results_stat: stat
                 });
 
           }.bind(this),
@@ -911,8 +904,7 @@ var ResultsContainer = React.createClass({
             crawled: false,
             view: this.props.view,
             selectedChecks: [],
-            results_stat: {},
-            areThereMoreResults: false
+            results_stat: {}
         };
     },
     componentDidMount: function () {
@@ -925,12 +917,6 @@ var ResultsContainer = React.createClass({
         }
     },
     render: function () {
-
-        var loadMoreResultsItem = <div id="load-more-results" className="hidden">Load More Results</div>
-        if (this.state.areThereMoreResults) {
-            loadMoreResultsItem = <a href="mailto:lidakra-support@@ontos.com"><div id="load-more-results">Load More Results</div></a>
-        }
-
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange}
                                data-id="1">{getTranslation("people")+'(' + this.state.results_stat["person"]+ ')'}</li>
         var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange}
@@ -941,6 +927,7 @@ var ResultsContainer = React.createClass({
                               data-id="4">{getTranslation("tor_websites")+'(' + this.state.results_stat["website"]+ ')'}</li>
         var documentItem = <li className="headers-li" onClick={this.props.onTypeChange}
                                data-id="5">{getTranslation("documents")+'(' + this.state.results_stat["document"]+ ')'}</li>
+
 
         if (this.state.selected === "person") {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
@@ -1185,7 +1172,6 @@ var ResultsContainer = React.createClass({
                     }
                 </div>
             </div>
-            {loadMoreResultsItem}
         </div>
     }
 });

@@ -119,7 +119,8 @@ var dictEng = {
     "sponsored_by": "Sponsored by the German Ministry of Education and Research - Project LiDaKrA",
     "facets_help": "You can reduce the result list by setting filters. Click on the category and then on the filter term that you are interested in.",
     "search_ok": " finished successfully. ",
-    "search_error":" had problems during query and results are not shown. "
+    "search_error":" had problems during query and results are not shown. ",
+    "exact_match": "Display exact matches only"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -249,7 +250,8 @@ var dictGer = {
     "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung - Projekt LiDaKrA",
     "facets_help": "Ergebnislisten können Sie mithilfe von Filtern weiter eingrenzen. Klicken Sie auf die gewünschte Kategorie und dann auf den Filterbegriff, der Sie interessiert.",
     "search_ok": " Erfolgreich beendet. ",
-    "search_error":" hatten Probleme während der Abfrage und die Ergebnisse werden nicht angezeigt. "
+    "search_error":" hatten Probleme während der Abfrage und die Ergebnisse werden nicht angezeigt. ",
+    "exact_match": "Nur exakte Übereinstimmungen anzeigen"
 };
 
 window.dictGer = dictGer;
