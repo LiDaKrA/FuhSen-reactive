@@ -157,7 +157,7 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
     },
     loadCommentsFromServer: function () {
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty;
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + this.state.exactMatching
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -186,7 +186,10 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}};
+        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:false};
+    },
+    onExactMatchingChange: function () {
+        this.setState({exactMatching:!this.state.exactMatching})
     },
     onTypeChange: function (event) {
         var optionSelected = event.currentTarget.dataset.id;
@@ -213,14 +216,17 @@ var Container = React.createClass({
                            onFacetSelection={this.onFacetSelection}
                            onFacetRemoval={this.onFacetRemoval}
                            currentTab={this.state.entityType}
-                           orgFacetsDict = {this.state.orgFacetsDict}/>
+                           orgFacetsDict = {this.state.orgFacetsDict}
+                           onExactMatchingChange = {this.onExactMatchingChange}
+                           exactMatching={this.state.exactMatching}/>
                 <ResultsContainer searchUid={this.props.searchUid}
                                   keyword={this.props.keyword}
                                   entityType={this.state.entityType}
                                   view={this.state.view}
                                   facets={this.state.facets}
                                   onTypeChange={this.onTypeChange}
-                                  facetsDict={this.state.facetsDict}/>
+                                  facetsDict={this.state.facetsDict}
+                                  exactMatching={this.state.exactMatching}/>
             </div>);
         }
         return <div className="row">
@@ -244,8 +250,8 @@ var FacetList = React.createClass({
     onFacetRemoval: function (facetName,propertyName, valueSelected) {
         this.props.onFacetRemoval(facetName,propertyName, valueSelected)
     },
-    loadFacetsFromServer: function (eType,selectedFacets) {
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType + "&lang=" + window.localStorage.lang;
+    loadFacetsFromServer: function (eType,selectedFacets, exact) {
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/facets?entityType=" + eType + "&lang=" + window.localStorage.lang + "&exact=" + exact
         $.ajax({
             type: 'POST',
             url: searchUrl,
@@ -254,7 +260,11 @@ var FacetList = React.createClass({
             data:JSON.stringify(selectedFacets),
             contentType: 'application/json',
             success: function (response) {
-                this.setState({data: response["@graph"]});
+                if(exact && JSON.stringify(response["@graph"]) == undefined){
+                    alert("NO RESULTS WERE MATCHED.")
+                }else{
+                    this.setState({data: response["@graph"]})
+                }
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -262,19 +272,22 @@ var FacetList = React.createClass({
         });
     },
     getInitialState: function () {
-        return {data: null};
+        return {data: null, exactMatching:false};
     },
     componentDidMount: function () {
-        this.loadFacetsFromServer(this.props.entityType,this.props.orgFacetsDict);
+        this.loadFacetsFromServer(this.props.entityType,this.props.orgFacetsDict, this.props.exactMatching);
     },
     componentWillReceiveProps: function (nextProps) {
         // see if it actually changed
-        if (nextProps.entityType !== this.props.entityType) {
-            this.loadFacetsFromServer(nextProps.entityType,nextProps.orgFacetsDict);
+        if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching) {
+            this.loadFacetsFromServer(nextProps.entityType,nextProps.orgFacetsDict, nextProps.exactMatching);
         }
         else{
-            this.loadFacetsFromServer(this.props.entityType,nextProps.orgFacetsDict);
+            this.loadFacetsFromServer(this.props.entityType,nextProps.orgFacetsDict, this.props.exactMatching);
         }
+    },
+    handleExactMatchingChange: function () {
+        this.props.onExactMatchingChange();
     },
     facets2CSV: function () {
         var JSONData = JSON.stringify(this.state.data);
@@ -379,7 +392,6 @@ var FacetList = React.createClass({
         });
     },
     render: function () {
-
         if (this.state.data && this.state.data !== undefined) {
             var _searchUid = this.props.searchUid;
             var _entityType = this.props.entityType;
@@ -398,6 +410,30 @@ var FacetList = React.createClass({
                                        selectedFacets ={this.props.orgFacetsDict}/>
                 }
             }, this);
+            var exact_text = "Exact matching."
+            var exact_property = ""
+
+            switch (this.props.currentTab) {
+                case "person":
+                    exact_property="Regarding the full name (blue title)."
+                    break;
+                case "organization":
+                    exact_property="Regarding the full name (blue title)."
+                    break;
+                case "product":
+                    exact_property="Regarding the product description (blue title)."
+                    break;
+                case "website":
+                    exact_text = "Match results starting with."
+                    exact_property="Regarding the web title."
+                    break;
+                case "document":
+                    exact_property="Regarding the document title (blue title)."
+                    break;
+            }
+
+            const tooltipStyle = { display: this.state.hover ? 'block' : 'none'}
+
             return (
                 <div id="facetsDiv" className="col-md-3 facets-container hidden-phone">
                     <div className="facets-head">
@@ -408,6 +444,14 @@ var FacetList = React.createClass({
                     </div>
                     <div className="js facets-list bt bb">
                         {MItems}
+                    </div>
+                    <div>
+                        <input
+                            name="isGoing"
+                            type="checkbox"
+                            checked={this.props.exactMatching}
+                            onChange={this.handleExactMatchingChange} />
+                        {exact_text} <img src={context + "/assets/images/icons/actions-help-about-icon.png"} title={exact_property}/>
                     </div>
                 </div>
             )
@@ -634,7 +678,7 @@ var FacetSubMenuItems = React.createClass({
                 }
             }
         }
-       return facetData;
+        return facetData;
     },
     componentDidMount: function () {
         //this.loadFacetsFromServer(this.props.facetName);
@@ -827,40 +871,50 @@ var ResultsContainer = React.createClass({
             view: this.state.view
         });
     },
-    loadDataFromServer: function (eType) {
+    loadDataFromServer: function (eType, exactMatching) {
         this.setState({selected: eType, loading: true});
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + eType + "&sources=" + sourcesDirty + "&types=" + typesDirty
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + eType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + exactMatching
         $.ajax({
             url: searchUrl,
             dataType: 'json',
             cache: false,
             success: function (data) {
-                if(Object.keys(this.state.results_stat).length == 0)
-                    this.computeDataStatistics();
-                data_to_handle = JSON.parse(JSON.stringify(data));
-                //alert(JSON.stringify(data_to_handle));
-                if (data_to_handle["@graph"] !== undefined)
-                    data_to_handle = data_to_handle["@graph"].sort(compareRank);
-                else {
-                    if (data_to_handle["fs:source"] !== undefined) {
-                        data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
+                if(exactMatching && JSON.stringify(data["@graph"]) == undefined){
+                    this.setState({
+                        resultsData: this.state.resultsData,
+                        selected: eType,
+                        loading: false,
+                        underDev: false,
+                        originalData: this.state.originalData
+                    })
+                }else{
+                    if(Object.keys(this.state.results_stat).length == 0)
+                        this.computeDataStatistics();
+                    data_to_handle = JSON.parse(JSON.stringify(data));
+                    //alert(JSON.stringify(data_to_handle));
+                    if (data_to_handle["@graph"] !== undefined)
                         data_to_handle = data_to_handle["@graph"].sort(compareRank);
+                    else {
+                        if (data_to_handle["fs:source"] !== undefined) {
+                            data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(data) + "]}");
+                            data_to_handle = data_to_handle["@graph"].sort(compareRank);
+                        }
+                        else
+                            data_to_handle = undefined;
                     }
-                    else
-                        data_to_handle = undefined;
-                }
 
-                data_to_maintain = data_to_handle;
-                //alert(JSON.stringify(data_to_handle));
-                //data_to_handle = JSON.parse(JSON.stringify(data))
-                //data_to_maintain = JSON.parse(JSON.stringify(data))
-                this.setState({
-                    resultsData: data_to_handle,
-                    selected: eType,
-                    loading: false,
-                    underDev: false,
-                    originalData: data_to_maintain
-                });
+                    data_to_maintain = data_to_handle;
+                    //alert(JSON.stringify(data_to_handle));
+                    //data_to_handle = JSON.parse(JSON.stringify(data))
+                    //data_to_maintain = JSON.parse(JSON.stringify(data))
+                    this.setState({
+                        resultsData: data_to_handle,
+                        selected: eType,
+                        loading: false,
+                        underDev: false,
+                        originalData: data_to_maintain
+                    });
+                }
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -908,12 +962,12 @@ var ResultsContainer = React.createClass({
         };
     },
     componentDidMount: function () {
-        this.loadDataFromServer(this.props.entityType);
+        this.loadDataFromServer(this.props.entityType, this.props.exactMatching);
     },
     componentWillReceiveProps: function (nextProps) {
         // see if it actually changed
-        if (nextProps.entityType !== this.props.entityType) {
-            this.loadDataFromServer(nextProps.entityType);
+        if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching) {
+            this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching);
         }
     },
     render: function () {
@@ -1269,6 +1323,7 @@ var ResultsList = React.createClass({
                             onion_url={result["url"]}
                             comment={result["fs:comment"]}
                             source={result["fs:source"]}
+                            onion_label={result["rdfs:label"]}
                             crawled={already_crawled}>
                         </WebResultElement>
                     );
@@ -1389,6 +1444,7 @@ var WebResultElement = React.createClass({
                                 {this.props.onion_url}
                             </h2>
                             <div className="subtitle">
+                                <p><b>Web title</b>: {this.props.onion_label}</p>
                                 <p><b>{getTranslation("comment")}</b>: {this.props.comment}</p>
                                 <p><b>Link: </b><a href={this.props.onion_url}
                                                      onClick={this.onClickLink.bind(this,this.props.onion_url)}>{getTranslation("clickhere")}</a></p>
