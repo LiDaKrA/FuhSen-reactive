@@ -112,6 +112,7 @@ keytool -list -keystore cacerts | grep occrp
 keytool -delete -alias occrp -keystore cacerts
 
 3- For confirmation repeat step 1, nothing should be listed as result.
+
 4- The new certificate can be added with the same (or different) alias. (Follow steps 1 to 3 from 'OCCRP SSL Certificate installation')
 
 #### License
