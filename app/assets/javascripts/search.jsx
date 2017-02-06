@@ -268,7 +268,7 @@ var SearchForm = React.createClass({
         var searchKeyword = $( "input[name='query']" ).val();
 
         if(!searchKeyword || searchKeyword.trim() === ""){
-            alert("Search Keyword is not valid or empty !!. Please write a valid keyword");
+            alert(getTranslation("empty_keyword"));
             return false;
         }
         if(selected_sources_list.length === 0 || selected_types_list.length === 0){

@@ -122,7 +122,8 @@ var dictEng = {
     "search_error":" had problems during query and results are not shown. ",
     "exact_match": "Display exact matches only",
     "no_exact_match_results":"No exact match results found, shown all results.",
-    "show_more_results":"SHOW MORE RESULTS"
+    "show_more_results":"SHOW MORE RESULTS",
+    "empty_keyword": "Search Keyword cannot be empty !!. Please write a keyword."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -255,7 +256,8 @@ var dictGer = {
     "search_error":" hatten Probleme während der Abfrage und die Ergebnisse werden nicht angezeigt. ",
     "exact_match": "Nur exakte Übereinstimmungen anzeigen",
     "no_exact_match_results":"Keine genauen Ergebnisse gefunden, alle Ergebnisse angezeigt.",
-    "show_more_results":"ZEIGEN SIE MEHR ERGEBNISSE"
+    "show_more_results":"ZEIGEN SIE MEHR ERGEBNISSE",
+    "empty_keyword": "Bitte geben Sie einen Suchbegriff ein."
 };
 
 window.dictGer = dictGer;
