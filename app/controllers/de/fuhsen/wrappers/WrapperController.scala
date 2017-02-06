@@ -163,6 +163,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   }
 
   def searchMultiple(query: String, wrapperIds: String) = Action.async { request =>
+    Logger.info("Starting search multiple: "+query+" "+wrapperIds)
     val wrappers = (wrapperIds.split(",") map WrapperController.wrapperMap.get).toSeq
     if (wrappers.exists(_.isEmpty)) {
       Future(BadRequest("Invalid wrapper requested! Supported wrappers: " +
