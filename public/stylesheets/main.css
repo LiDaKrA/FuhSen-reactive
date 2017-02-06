@@ -32,7 +32,7 @@
     background: #195E9D;
     cursor: inherit;
     display: block;
-    color: white
+    color: white;
 }
 
 .btn-primary {
@@ -2096,6 +2096,20 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     height: 30px;
     margin: 2px;
 }
+
+#load-more-results {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    width: 150px;
+    height: 30px;
+    background-size: 100%;
+    /*opacity: 0.5;*/
+    background-color: #44639A;
+    color: #ffffff;
+    text-align: center;
+}
+
 /* Vertical Divider Style */
 
 .vertical-separator:after {

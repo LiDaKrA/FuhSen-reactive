@@ -76,6 +76,6 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
     */
   override def extractNextPageQueryValue(resultBody: String, lastValue: Option[String]): Option[String] = {
     val jsonBody = Json.parse(resultBody)
-    (jsonBody \ "paging" \ "cursors" \ "after").toOption map (_.as[String])
+    (jsonBody \ "paging" \ "next").toOption map (_.as[String])
   }
 }

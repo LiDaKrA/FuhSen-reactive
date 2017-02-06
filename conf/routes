@@ -12,7 +12,7 @@ GET     /checkOnionSite                                     controllers.de.fuhse
 
 # Search Engine API routes
 POST    /engine/api/searches                                controllers.de.fuhsen.engine.SearchEngineController.startSession(query: String)
-GET     /engine/api/searches/:uid/results                   controllers.de.fuhsen.engine.SearchEngineController.search(uid: String, entityType: String, facets: Option[String], sources: String, types: String)
+GET     /engine/api/searches/:uid/results                   controllers.de.fuhsen.engine.SearchEngineController.search(uid: String, entityType: String, facets: Option[String], sources: String, types: String, loadMoreResults: Option[Boolean])
 DELETE  /engine/api/searches/:uid                           controllers.de.fuhsen.engine.SearchEngineController.stopSession(uid: String)
 POST    /engine/api/searches/:uid/facets                    controllers.de.fuhsen.engine.FacetsController.getGeneratedFacets(uid: String, entityType: String, lang: String)
 GET     /engine/api/searches/:uid/results_stat              controllers.de.fuhsen.engine.SearchEngineController.calculateSearchStat(uid: String)

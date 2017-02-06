@@ -33,7 +33,7 @@ import play.api.libs.json._
 
 class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
-  def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String) = Action.async { request =>
+  def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String, loadMoreResults: Option[Boolean]) = Action.async { request =>
 
     Logger.info("Starting Search Engine Search : "+uid)
     Logger.info("Sources : "+sources+" types: "+types)
@@ -105,7 +105,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
              |PREFIX prov: <http://www.w3.org/ns/prov#>
              |
-             CONSTRUCT   {
+             |CONSTRUCT   {
              |  ?apiResponse a prov:Entity .
              |  ?apiResponse rdfs:label ?label .
              |  ?apiResponse rdfs:comment ?comment .
@@ -194,10 +194,37 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
             resource.addProperty(results_model.createProperty(FuhsenVocab.FACET_COUNT), count)
           }
         }
+
+        //Adding metadata about more results
+        results_model.add(addNextPageFlag(model))
+
         Ok(RDFUtil.modelToTripleString(results_model, Lang.JSONLD))
       case None =>
         InternalServerError("The provided UID has not a model associated in the cache.")
     }
+  }
+
+  private def addNextPageFlag(model: Model) : Model = {
+    val results_model = ModelFactory.createDefaultModel()
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |PREFIX prov: <http://www.w3.org/ns/prov#>
+         |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         |
+         |ASK {
+         |  ?s a prov:Activity .
+         |  ?s fs:nextPage ?nextPage .
+         |}
+        """.stripMargin)
+    val result = QueryExecutionFactory.create(query, model).execAsk()
+
+    if (result) {
+      val resource = results_model.createResource("http://www.w3.org/ns/prov#Activity")
+      resource.addProperty(results_model.createProperty(FuhsenVocab.NS+"#nextPage"), "true")
+    }
+    results_model
   }
 
   def startSession(query: String) = Action { request =>
