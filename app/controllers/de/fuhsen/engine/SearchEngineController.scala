@@ -74,7 +74,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
                 Logger.info("Search results stored in cache: "+uid)
 
                 //Return sub model by type
-                Ok(RDFUtil.modelToTripleString(getSubModel(entityType, finalModel), Lang.JSONLD))
+                Ok(RDFUtil.modelToTripleString(getSubModel(entityType, finalModel, exact), Lang.JSONLD))
               }else{
                 NotAcceptable(r.body)
               }
@@ -83,7 +83,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
         //Search results are already in storage
         else {
           Logger.info("Results are in cache.")
-          Future.successful(Ok(RDFUtil.modelToTripleString(getSubModel(entityType, model), Lang.JSONLD)))
+          Future.successful(Ok(RDFUtil.modelToTripleString(getSubModel(entityType, model, exact), Lang.JSONLD)))
         }
 
 
@@ -193,10 +193,37 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
             resource.addProperty(results_model.createProperty(FuhsenVocab.FACET_COUNT), count)
           }
         }
+
+        //Adding metadata about more results
+        results_model.add(addNextPageFlag(model))
+
         Ok(RDFUtil.modelToTripleString(results_model, Lang.JSONLD))
       case None =>
         InternalServerError("The provided UID has not a model associated in the cache.")
     }
+  }
+
+  private def addNextPageFlag(model: Model) : Model = {
+    val results_model = ModelFactory.createDefaultModel()
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |PREFIX prov: <http://www.w3.org/ns/prov#>
+         |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         |
+         |ASK {
+         |  ?s a prov:Activity .
+         |  ?s fs:nextPage ?nextPage .
+         |}
+        """.stripMargin)
+    val result = QueryExecutionFactory.create(query, model).execAsk()
+
+    if (result) {
+      val resource = results_model.createResource("http://www.w3.org/ns/prov#Activity")
+      resource.addProperty(results_model.createProperty(FuhsenVocab.NS+"#nextPage"), "true")
+    }
+    results_model
   }
 
   def startSession(query: String) = Action { request =>
@@ -242,8 +269,8 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
   }
 
-  private def getSubModel(entityType :String, model :Model) : Model = {
-
+  private def getSubModel(entityType :String, model :Model, exact :Boolean) : Model = {
+    val keyword = FuhsenVocab.getKeyword(model).get;
     entityType match {
       case "person" =>
                 val query = QueryFactory.create(
@@ -279,8 +306,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |    FILTER(isURI(?resource))
              |    }
              |  }
-             |}
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (?exact_name = '$keyword')
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "product" =>
         val query = QueryFactory.create(
@@ -311,8 +339,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:country ?country } .
              |OPTIONAL { ?p fs:priceLabel ?price } .
              |OPTIONAL { ?p fs:condition ?condition } .
-             |}
-                  """.stripMargin)
+             ${if (exact) {s"""|?p fs:description ?exact_name .
+                               |FILTER (?exact_name = '$keyword') .
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "organization" =>
         val query = QueryFactory.create(
@@ -338,9 +367,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?s fs:img ?img } .
              |OPTIONAL { ?s ?p ?o .
              |     FILTER(isLiteral(?o)) }
-             |
-             |}
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (?exact_name = '$keyword') .
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "website" =>
         val query = QueryFactory.create(
@@ -369,8 +398,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |    FILTER(isURI(?resource))
              |    }
              |  }
-             |}
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (regex(?exact_name, '^$keyword'))
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "document" =>
         val query = QueryFactory.create(
@@ -392,8 +422,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?s ?p ?o .
              |     FILTER(isLiteral(?o)) } .
              |OPTIONAL { ?s fs:url ?url } .
-             }
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (?exact_name = '$keyword') .
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
     }
 
