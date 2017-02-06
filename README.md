@@ -101,7 +101,7 @@ The demo server address is:  http://rdfsearchengine-fuhsen.rhcloud.com/fuhsen/
 
 (The keystore cacerts default password is: changeit)
 
-## In case the certificate expires or gets deprecated, it can be deleted from the keystore ('cacerts' in this example) as follows:
+##### In case the certificate expires or gets deprecated, it can be deleted from the keystore ('cacerts' in this example) as follows:
 
 1- First confirm the certificate is in the 'cacerts' keystore: ('occrp' is the alias given when added)
 
