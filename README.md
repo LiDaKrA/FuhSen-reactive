@@ -101,6 +101,19 @@ The demo server address is:  http://rdfsearchengine-fuhsen.rhcloud.com/fuhsen/
 
 (The keystore cacerts default password is: changeit)
 
+## In case the certificate expires or gets deprecated, it can be deleted from the keystore ('cacerts' in this example) as follows:
+
+1- First confirm the certificate is in the 'cacerts' keystore: ('occrp' is the alias given when added)
+
+keytool -list -keystore cacerts | grep occrp
+
+2- To delete the certificate from the keystore (cacerts):
+
+keytool -delete -alias occrp -keystore cacerts
+
+3- For confirmation repeat step 1, nothing should be listed as result.
+4- The new certificate can be added with the same (or different) alias. (Follow steps 1 to 3 from 'OCCRP SSL Certificate installation')
+
 #### License
 
 * Copyright (C) 2015-2016 EIS Uni-Bonn
