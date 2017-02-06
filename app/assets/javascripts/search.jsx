@@ -265,8 +265,14 @@ var SearchForm = React.createClass({
     handleSubmit : function(e){
         var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources);
         var selected_types_list = this.getKeysFromSelectedAllowedChecks(this.state.types);
+        var searchKeyword = $( "input[name='query']" ).val();
+
+        if(!searchKeyword || searchKeyword.trim() === ""){
+            alert("Search Keyword is not valid or empty !!. Please write a valid keyword");
+            return false;
+        }
         if(selected_sources_list.length === 0 || selected_types_list.length === 0){
-            alert("Datasource or EntityType is not selected!!.Please Select at least one Datasource and entitytype");
+            alert("Datasource or EntityType is not selected!!. Please Select at least one Datasource and entitytype");
             return false;
         }
         return true;
