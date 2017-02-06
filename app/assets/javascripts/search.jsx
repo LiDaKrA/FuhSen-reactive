@@ -151,7 +151,6 @@ var SearchForm = React.createClass({
         }else{
             alert("[Error] Well, seems like something went wrong...")
         }
-
         if(types_list.length === 0){
             types_label = prefix_types_label + ": "+ getTranslation("none") + "."
         }
@@ -209,13 +208,10 @@ var SearchForm = React.createClass({
         return keys
     },
     sourcesChanged: function(sources_data) {
-        this.setState({ sources: sources_data, selectionLabel: this.getSelectionLabel()});
+        this.setState({ sources: sources_data, selectionLabel: this.getSelectionLabel(),allowed_types : this.getAllowedTypes(this.getKeysFromSelectedChecks(sources_data))});
     },
     typesChanged: function(types_data) {
-        this.setState({ types: types_data, selectionLabel: this.getSelectionLabel()},
-            function () {
-
-            });
+        this.setState({ types: types_data, selectionLabel: this.getSelectionLabel()});
     },
     onClick: function() {
         if(this.state.showSourcesTypesDiv) {
@@ -264,7 +260,7 @@ var SearchForm = React.createClass({
         typesForSource["tor2web"]  = ["website"];
         typesForSource["elasticsearch"]  = ["website"];
 
-        return { showSourcesTypesDiv: false, sources: [] , types: [],typesForSource: typesForSource};
+        return { showSourcesTypesDiv: false, sources: [] , types: [],typesForSource: typesForSource,allowed_types: []};
     },
     handleSubmit : function(e){
         var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources);
@@ -278,9 +274,8 @@ var SearchForm = React.createClass({
     render: function() {
 
         var selected_sources_list = this.getKeysFromSelectedChecks(this.state.sources)
-        var allowed_types = this.getAllowedTypes(selected_sources_list);
+        //var allowed_types = this.getAllowedTypes(selected_sources_list);
         var selected_types_list = this.getKeysFromSelectedAllowedChecks(this.state.types)
-
         var selected_sources = selected_sources_list.length === 0 ? this.getAllKeysFromChecks(this.state.sources): selected_sources_list
         var selected_types = selected_types_list.length === 0 ? this.getAllKeysFromChecks(this.state.types): selected_types_list
 
@@ -318,7 +313,7 @@ var SearchForm = React.createClass({
                                     <FilterCheckList filterType="datasources" lang = {this.props.lang} AllowedTypes = {[]} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                                 <div className="col-md-6">
-                                    <FilterCheckList filterType="entitytypes" lang = {this.props.lang} AllowedTypes = {allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                    <FilterCheckList filterType="entitytypes" lang = {this.props.lang} AllowedTypes = {this.state.allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                                 </div>
                             </div>
                         </div>
@@ -363,7 +358,7 @@ var SearchForm = React.createClass({
                                 <FilterCheckList filterType="datasources" lang = {this.props.lang} AllowedTypes = {[]} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                             <div className="col-md-6">
-                                <FilterCheckList filterType="entitytypes" lang = {this.props.lang} AllowedTypes = {allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="entitytypes" lang = {this.props.lang} AllowedTypes = {this.state.allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                         </div>
                     </div>
@@ -434,7 +429,7 @@ var FilterCheckList = React.createClass({
                 var found = allowedTypes.indexOf(d.key) > -1;
                 return {
                     id: d.id,
-                    selected: d.selected,
+                    selected: found,
                     allowed: found,
                     key: d.key
                 };
@@ -447,7 +442,15 @@ var FilterCheckList = React.createClass({
             this.loadListFromServer(this.props.filterType);
         if(nextProps.AllowedTypes.length !== this.props.AllowedTypes.length && this.props.filterType === "entitytypes"){
             var updatedData = this.updateChecks(this.state.data,nextProps.AllowedTypes);
-            this.setState({data: updatedData});
+
+            if(updatedData !== undefined) {
+                var filteredTypes = updatedData.filter(function(item) { return item.allowed;});
+                var allselected = filteredTypes.length >0 ? filteredTypes.every(function (item) {
+                        return item.selected;
+                    }) : false;
+                this.props.onSourceChangedFunction(updatedData);
+                this.setState({data: updatedData, selectAll: allselected});
+            }
         }
     },
     componentDidMount: function () {
@@ -462,17 +465,18 @@ var FilterCheckList = React.createClass({
                 key: d.key
             };
         });
-        var allselected = state.every(function(item){
-           return item.selected;
-        });
-        this.props.onSourceChangedFunction(state)
+        var filteredData = state.filter(function(item) { return item.allowed;});
+        var allselected = filteredData.length >0 ? filteredData.every(function (item) {
+                return item.selected;
+            }) : false;
+        this.props.onSourceChangedFunction(state);
         this.setState({ data: state, selectAll:allselected });
     },
     __changeSelectAll: function(){
         var state = this.state.data.map(function(d) {
             return {
                 id: d.id,
-                selected: !this.state.selectAll,//!d.selected,//(d.id === id ? !d.selected : d.selected),
+                selected: (d.allowed ? !this.state.selectAll : d.selected),
                 allowed: d.allowed,
                 key: d.key
             };
@@ -502,7 +506,7 @@ var FilterCheckList = React.createClass({
                     else{
                         return (
                             <div>
-                                &emsp;<s><input type="checkbox" checked="false" disabled="true"
+                                &emsp;<s><input type="checkbox" checked={d.selected} disabled="true"
                                                      onChange={this.__changeSelection.bind(this, d.id)}/>
                                 {d.id}
                             </s>
