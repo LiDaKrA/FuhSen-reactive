@@ -15,6 +15,7 @@
  */
 package controllers.de.fuhsen
 
+import java.text.SimpleDateFormat
 import java.util.{UUID, Optional}
 
 import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
@@ -22,6 +23,7 @@ import org.apache.jena.rdf.model.{ModelFactory, Model}
 import org.apache.jena.riot.Lang
 import play.Logger
 import utils.dataintegration.RDFUtil
+import java.util.Calendar
 
 /**
   * Created by andreas on 2/26/16.
@@ -78,10 +80,26 @@ object FuhsenVocab {
       None
   }
 
-  def createProvModel(wrapperName : String, endedByCode: String, endedByReason: String) : Model = {
+  def createProvModel(wrapperName : String, endedByCode: String, endedByReason: String, nextPage : Option[String] ) : Model = {
     Logger.info("Creating prov metadata for: "+wrapperName+" "+endedByCode+" "+endedByReason)
+
+    val now = Calendar.getInstance().getTime()
+    val minuteFormat = new SimpleDateFormat("yyyy.MM.dd")
+    val currentDateFormat = minuteFormat.format(now)
+
     val model = ModelFactory.createDefaultModel()
     val irUid = UUID.randomUUID.toString()
+
+    //nextPage
+    var nextPageTriple = ""
+    if (!nextPage.isEmpty) {
+      Logger.info("Next page added...")
+      nextPage.map( value => nextPageTriple =  s"""
+                                                  |fs:nextPage "$value";
+                        """.stripMargin )
+    }
+
+
     val query = s"""
          |@prefix fs: <http://vocab.lidakra.de/fuhsen#> .
          |@prefix dc: <http://purl.org/dc/elements/1.1/> .
@@ -95,9 +113,10 @@ object FuhsenVocab {
          |				        rdfs:label "$wrapperName" .
          |
          |fs:$irUid a prov:Activity ;
-         |					prov:startedAtTime "2017-01-16" ;
-         |					prov:endedAtTime "2017-01-17" ;
+         |					prov:startedAtTime "$currentDateFormat" ;
+         |					prov:endedAtTime "$currentDateFormat" ;
          |					prov:wasAssociatedWith fs:$wrapperName;
+         |          $nextPageTriple
          |					prov:wasEndedBy fs:$endedByCode .
          |
          |fs:$endedByCode a prov:Entity ;

@@ -33,28 +33,35 @@ import play.api.libs.json._
 
 class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
-  def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String, exact: Boolean) = Action.async { request =>
+  def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String, exact: Boolean, loadMoreResults: Option[Boolean]) = Action.async { request =>
     Logger.info("Starting Search Engine Search : "+uid)
     Logger.info("Sources : "+sources+" types: "+types)
+    Logger.info("Load more results: "+loadMoreResults.toString)
 
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
 
-        if (getQueryDate(model) == null) {
+        if (getQueryDate(model) == null || !loadMoreResults.isEmpty) {
           //Search results are not in storage, searching process starting
 
           //Adding query date property
-          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.QUERY_DATE), Calendar.getInstance.getTime.toString)
-          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.DATA_SOURCE), sources)
-          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.ENTITY_TYPE), types)
+          if (getQueryDate(model) == null) {
+            model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.QUERY_DATE), Calendar.getInstance.getTime.toString)
+            model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.DATA_SOURCE), sources)
+            model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.ENTITY_TYPE), types)
+          }
 
+          //Load more results
+          var parameter = "?loadMoreResults=false"
+          if(!loadMoreResults.isEmpty)
+            parameter = "?loadMoreResults=true"
 
           //Micro-task services executed
           val data = RDFUtil.modelToTripleString(model, Lang.TURTLE)
           val microtaskServer = ConfigFactory.load.getString("engine.microtask.url")
           val futureResponse: Future[WSResponse] = for {
             //responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing").post(data)
-            responseOne <- ws.url(microtaskServer+"/engine/api/federatedquery").post(data)
+            responseOne <- ws.url(microtaskServer+"/engine/api/federatedquery"+parameter).post(data)
             responseTwo <- ws.url(microtaskServer+"/engine/api/datacuration").post(responseOne.body)
             responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization").post(responseTwo.body)
             responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking").post(responseThree.body)
@@ -193,10 +200,37 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
             resource.addProperty(results_model.createProperty(FuhsenVocab.FACET_COUNT), count)
           }
         }
+
+        //Adding metadata about more results
+        results_model.add(addNextPageFlag(model))
+
         Ok(RDFUtil.modelToTripleString(results_model, Lang.JSONLD))
       case None =>
         InternalServerError("The provided UID has not a model associated in the cache.")
     }
+  }
+
+  private def addNextPageFlag(model: Model) : Model = {
+    val results_model = ModelFactory.createDefaultModel()
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |PREFIX prov: <http://www.w3.org/ns/prov#>
+         |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         |
+         |ASK {
+         |  ?s a prov:Activity .
+         |  ?s fs:nextPage ?nextPage .
+         |}
+        """.stripMargin)
+    val result = QueryExecutionFactory.create(query, model).execAsk()
+
+    if (result) {
+      val resource = results_model.createResource("http://www.w3.org/ns/prov#Activity")
+      resource.addProperty(results_model.createProperty(FuhsenVocab.NS+"#nextPage"), "true")
+    }
+    results_model
   }
 
   def startSession(query: String) = Action { request =>

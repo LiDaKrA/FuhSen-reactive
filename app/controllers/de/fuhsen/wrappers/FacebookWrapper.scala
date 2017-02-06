@@ -47,7 +47,7 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
   //RestApiOAuth2Trait implementation:
   override def oAuth2ClientKey : String =  ConfigFactory.load.getString("facebook.app.key")
   override def oAuth2ClientSecret : String =  ConfigFactory.load.getString("facebook.app.secret")
-  override def oAuth2AccessToken : String =  TokenManager.getAccessTokenByProvider("facebook").get.access_token
+  override def oAuth2AccessToken : String = {if (!TokenManager.getAccessTokenByProvider("facebook").isEmpty) TokenManager.getAccessTokenByProvider("facebook").get.access_token else ""}
 
   //SilkTransformableTrait implementation:
   override def silkTransformationRequestTasks = Seq(
@@ -76,6 +76,6 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
     */
   override def extractNextPageQueryValue(resultBody: String, lastValue: Option[String]): Option[String] = {
     val jsonBody = Json.parse(resultBody)
-    (jsonBody \ "paging" \ "cursors" \ "after").toOption map (_.as[String])
+    (jsonBody \ "paging" \ "next").toOption map (_.as[String])
   }
 }
