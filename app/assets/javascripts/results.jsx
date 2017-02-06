@@ -157,6 +157,7 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
     },
     loadCommentsFromServer: function () {
+        alert("Loading results Container ");
         var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + this.state.exactMatching;
         $.ajax({
             url: searchUrl,
@@ -186,10 +187,13 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:false};
+        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:false, loadMoreResults:false};
     },
     onExactMatchingChange: function () {
         this.setState({exactMatching:!this.state.exactMatching})
+    },
+    onLoadMoreResults: function () {
+        this.setState({loadMoreResults: true})
     },
     onTypeChange: function (event) {
         var optionSelected = event.currentTarget.dataset.id;
@@ -226,7 +230,9 @@ var Container = React.createClass({
                                   facets={this.state.facets}
                                   onTypeChange={this.onTypeChange}
                                   facetsDict={this.state.facetsDict}
-                                  exactMatching={this.state.exactMatching}/>
+                                  exactMatching={this.state.exactMatching}
+                                  onLoadMoreResults={this.onLoadMoreResults}
+                                  loadMoreResults={this.state.loadMoreResults}/>
             </div>);
         }
         return <div className="row">
@@ -261,9 +267,9 @@ var FacetList = React.createClass({
             contentType: 'application/json',
             success: function (response) {
                 if(exact && JSON.stringify(response["@graph"]) == undefined){
-                    alert("NO RESULTS WERE MATCHED.")
+                    alert(getTranslation("no_exact_match_results"));
                 }else{
-                    this.setState({data: response["@graph"]})
+                    this.setState({data: response["@graph"]});
                 }
             }.bind(this),
             error: function (xhr, status, err) {
@@ -871,9 +877,16 @@ var ResultsContainer = React.createClass({
             view: this.state.view
         });
     },
-    loadDataFromServer: function (eType, exactMatching) {
+    loadDataFromServer: function (eType, exactMatching, loadmore) {
         this.setState({selected: eType, loading: true});
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + eType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + exactMatching
+
+        alert("Loading results ResultsContainer "+loadmore);
+        var loadMore = "";
+        if (loadmore)
+            loadMore = "&loadMoreResults=true";
+
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + eType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + exactMatching + loadMore;
+
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -968,19 +981,19 @@ var ResultsContainer = React.createClass({
         };
     },
     componentDidMount: function () {
-        this.loadDataFromServer(this.props.entityType, this.props.exactMatching);
+        this.loadDataFromServer(this.props.entityType, this.props.exactMatching, false);
     },
     componentWillReceiveProps: function (nextProps) {
         // see if it actually changed
-        if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching) {
-            this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching);
+        if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching || nextProps.loadMoreResults === true) {
+            this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
         }
     },
     render: function () {
 
-        var loadMoreResultsItem = <div id="load-more-results" className="hidden">Load More Results</div>
+        var loadMoreResultsItem = <div id="load-more-results" className="hidden">{getTranslation("show_more_results")}</div>
         if (this.state.areThereMoreResults) {
-            loadMoreResultsItem = <a href="mailto:lidakra-support@@ontos.com"><div id="load-more-results">Load More Results</div></a>
+            loadMoreResultsItem = <a href='#' onClick={this.props.onLoadMoreResults}><div id="load-more-results">{getTranslation("show_more_results")}</div></a>
         }
 
         var personenItem = <li className="headers-li" onClick={this.props.onTypeChange}

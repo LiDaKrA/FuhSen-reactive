@@ -36,6 +36,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
   def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String, exact: Boolean, loadMoreResults: Option[Boolean]) = Action.async { request =>
     Logger.info("Starting Search Engine Search : "+uid)
     Logger.info("Sources : "+sources+" types: "+types)
+    Logger.info("Load more results: "+loadMoreResults.toString)
 
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
