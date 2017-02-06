@@ -33,8 +33,7 @@ import play.api.libs.json._
 
 class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
-  def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String) = Action.async { request =>
-
+  def search(uid: String, entityType: String, facets: Option[String], sources: String, types: String, exact: Boolean) = Action.async { request =>
     Logger.info("Starting Search Engine Search : "+uid)
     Logger.info("Sources : "+sources+" types: "+types)
 
@@ -75,7 +74,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
                 Logger.info("Search results stored in cache: "+uid)
 
                 //Return sub model by type
-                Ok(RDFUtil.modelToTripleString(getSubModel(entityType, finalModel), Lang.JSONLD))
+                Ok(RDFUtil.modelToTripleString(getSubModel(entityType, finalModel, exact), Lang.JSONLD))
               }else{
                 NotAcceptable(r.body)
               }
@@ -84,7 +83,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
         //Search results are already in storage
         else {
           Logger.info("Results are in cache.")
-          Future.successful(Ok(RDFUtil.modelToTripleString(getSubModel(entityType, model), Lang.JSONLD)))
+          Future.successful(Ok(RDFUtil.modelToTripleString(getSubModel(entityType, model, exact), Lang.JSONLD)))
         }
 
 
@@ -243,8 +242,8 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
   }
 
-  private def getSubModel(entityType :String, model :Model) : Model = {
-
+  private def getSubModel(entityType :String, model :Model, exact :Boolean) : Model = {
+    val keyword = FuhsenVocab.getKeyword(model).get;
     entityType match {
       case "person" =>
                 val query = QueryFactory.create(
@@ -280,8 +279,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |    FILTER(isURI(?resource))
              |    }
              |  }
-             |}
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (?exact_name = '$keyword')
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "product" =>
         val query = QueryFactory.create(
@@ -312,8 +312,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:country ?country } .
              |OPTIONAL { ?p fs:priceLabel ?price } .
              |OPTIONAL { ?p fs:condition ?condition } .
-             |}
-                  """.stripMargin)
+             ${if (exact) {s"""|?p fs:description ?exact_name .
+                               |FILTER (?exact_name = '$keyword') .
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "organization" =>
         val query = QueryFactory.create(
@@ -339,9 +340,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?s fs:img ?img } .
              |OPTIONAL { ?s ?p ?o .
              |     FILTER(isLiteral(?o)) }
-             |
-             |}
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (?exact_name = '$keyword') .
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "website" =>
         val query = QueryFactory.create(
@@ -370,8 +371,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |    FILTER(isURI(?resource))
              |    }
              |  }
-             |}
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (regex(?exact_name, '^$keyword'))
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "document" =>
         val query = QueryFactory.create(
@@ -393,8 +395,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?s ?p ?o .
              |     FILTER(isLiteral(?o)) } .
              |OPTIONAL { ?s fs:url ?url } .
-             }
-          """.stripMargin)
+             ${if (exact) {s"""|?s rdfs:label ?exact_name .
+                               |FILTER (?exact_name = '$keyword') .
+                               |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
     }
 
