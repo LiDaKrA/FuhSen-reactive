@@ -451,7 +451,7 @@ var FacetList = React.createClass({
                             type="checkbox"
                             checked={this.props.exactMatching}
                             onChange={this.handleExactMatchingChange} />
-                        {exact_text} <img src={context + "/assets/images/icons/actions-help-about-icon.png"} title={exact_property}/>
+                        {getTranslation("exact_match")}
                     </div>
                 </div>
             )
