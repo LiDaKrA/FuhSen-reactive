@@ -21,10 +21,10 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
   final val SEARCH_ENDPOINT = "/ldw/restApiWrapper/search"
 
-  def execute = Action.async {
+  def execute(loadMoreResults: Option[Boolean]) = Action.async {
     request =>
 
-      Logger.info("Federated Query")
+      Logger.info("Federated Query "+loadMoreResults)
 
       //ToDo: Replace this with an extension to String class, .toRdfModel
       //Constructing the rdf results graph model

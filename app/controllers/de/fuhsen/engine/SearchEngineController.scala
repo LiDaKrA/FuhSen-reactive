@@ -41,21 +41,27 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
 
-        if (getQueryDate(model) == null) {
+        if (getQueryDate(model) == null || !loadMoreResults.isEmpty) {
           //Search results are not in storage, searching process starting
 
           //Adding query date property
-          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.QUERY_DATE), Calendar.getInstance.getTime.toString)
-          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.DATA_SOURCE), sources)
-          model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.ENTITY_TYPE), types)
+          if (getQueryDate(model) == null) {
+            model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.QUERY_DATE), Calendar.getInstance.getTime.toString)
+            model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.DATA_SOURCE), sources)
+            model.getResource(FuhsenVocab.SEARCH_URI + uid).addProperty(model.createProperty(FuhsenVocab.ENTITY_TYPE), types)
+          }
 
+          //Load more results
+          var parameter = "?loadMoreResults=false"
+          if(!loadMoreResults.isEmpty)
+            parameter = "?loadMoreResults=true"
 
           //Micro-task services executed
           val data = RDFUtil.modelToTripleString(model, Lang.TURTLE)
           val microtaskServer = ConfigFactory.load.getString("engine.microtask.url")
           val futureResponse: Future[WSResponse] = for {
             //responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing").post(data)
-            responseOne <- ws.url(microtaskServer+"/engine/api/federatedquery").post(data)
+            responseOne <- ws.url(microtaskServer+"/engine/api/federatedquery"+parameter).post(data)
             responseTwo <- ws.url(microtaskServer+"/engine/api/datacuration").post(responseOne.body)
             responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization").post(responseTwo.body)
             responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking").post(responseThree.body)

@@ -20,7 +20,7 @@ GET     /engine/api/searches/:uid/metadata                  controllers.de.fuhse
 
 #Mini-task services enriching the results graph
 #POST    /engine/api/queryprocessing                         controllers.de.fuhsen.engine.QueryProcessingController.execute
-POST    /engine/api/federatedquery                          controllers.de.fuhsen.engine.FederatedQueryController.execute
+POST    /engine/api/federatedquery                          controllers.de.fuhsen.engine.FederatedQueryController.execute(loadMoreResults: Option[Boolean])
 POST    /engine/api/datacuration                            controllers.de.fuhsen.engine.DataCurationController.execute
 POST    /engine/api/entitysummarization                     controllers.de.fuhsen.engine.EntitySummarizationController.execute
 POST    /engine/api/semanticranking                         controllers.de.fuhsen.engine.SemanticRankingController.execute

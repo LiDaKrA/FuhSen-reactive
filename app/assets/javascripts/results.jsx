@@ -157,7 +157,7 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
     },
     loadCommentsFromServer: function () {
-        alert("Loading results Container ");
+        //alert("Loading results Container ");
         var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + this.state.exactMatching;
         $.ajax({
             url: searchUrl,
@@ -880,7 +880,7 @@ var ResultsContainer = React.createClass({
     loadDataFromServer: function (eType, exactMatching, loadmore) {
         this.setState({selected: eType, loading: true});
 
-        alert("Loading results ResultsContainer "+loadmore);
+        //alert("Loading results ResultsContainer "+loadmore);
         var loadMore = "";
         if (loadmore)
             loadMore = "&loadMoreResults=true";
