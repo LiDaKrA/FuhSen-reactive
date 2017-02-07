@@ -126,7 +126,7 @@ object FuhsenVocab {
          |					      rdfs:label "$endedByCode";
          |					      rdfs:comment "$endedByReason" .
       """.stripMargin
-    Logger.info("PROV string: "+provString)
+    //Logger.info("PROV string: "+provString)
     RDFUtil.rdfStringToModel(provString, Lang.TURTLE)
   }
 
