@@ -1107,17 +1107,20 @@ var ResultsContainer = React.createClass({
                     <div class="off result-pages-count"></div>
                     <div className="row">
                         <div className="col-md-8 tabulator">
-                            <ul className="list-inline">
-                                {/*<li>*/}
+                            <div className="tabs-head">
+                                <ul className="list-inline">
+                                    {/*<li>*/}
                                     {/*<span className="total-results">0</span>*/}
                                     {/*<span className="total-results-label"> {getTranslation("results")}:</span>*/}
-                                {/*</li>*/}
-                                {personenItem}
-                                {organizationenItem}
-                                {produkteItem}
-                                {darkWebItem}
-                                {documentItem}
-                            </ul>
+                                    {/*</li>*/}
+                                    {personenItem}
+                                    {organizationenItem}
+                                    {produkteItem}
+                                    {darkWebItem}
+                                    {documentItem}
+                                </ul>
+                                <SearchMetadataInfo searchUid={this.props.searchUid}/>
+                            </div>
                         </div>
                         <div className="col-md-4 text-right">
                             &nbsp;

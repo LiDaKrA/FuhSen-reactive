@@ -92,11 +92,15 @@ object FuhsenVocab {
     val irUid = UUID.randomUUID.toString()
 
     //nextPage
+    val nextPageString = ""
+    /*
+    //Load More Results Functionality Disabled
     var nextPageString = ""
     if (!nextPage.isEmpty) {
       Logger.info("Next page added...")
       nextPage.map( value => nextPageString = value )
     }
+    */
 
 
     val provString = s"""
