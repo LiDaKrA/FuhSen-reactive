@@ -220,8 +220,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
          |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
          |
          |ASK {
-         |  ?s a prov:Activity .
+         |  ?s a prov:Agent .
          |  ?s fs:nextPage ?nextPage .
+         |  FILTER( STRLEN(?nextPage) > 0)
          |}
         """.stripMargin)
     val result = QueryExecutionFactory.create(query, model).execAsk()

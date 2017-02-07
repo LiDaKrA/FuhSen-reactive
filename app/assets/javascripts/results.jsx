@@ -209,7 +209,7 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}});
+        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false});
     },
     render: function () {
         if (this.state.initData) {

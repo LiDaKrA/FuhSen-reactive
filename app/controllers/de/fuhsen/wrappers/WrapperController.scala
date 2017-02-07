@@ -85,10 +85,28 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   def createApiRequest(wrapper: RestApiWrapperTrait,
                        query: String,
                        searchMetaData: Option[Model]): WSRequest = {
-    val apiRequest: WSRequest = ws.url(wrapper.apiUrl)
+    val apiRequest: WSRequest = getWrapperApiUrl(wrapper, searchMetaData)
     val apiRequestWithApiParams = addQueryParameters(wrapper, apiRequest, query)
     val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
     apiRequestWithOAuthIfNeeded
+  }
+
+  private def getWrapperApiUrl(wrapper: RestApiWrapperTrait,
+                               searchMetaData: Option[Model]): WSRequest = {
+
+    searchMetaData match {
+      case Some(model) =>
+        Logger.info("Loading next page results URL")
+        val nextPageResults = FuhsenVocab.getProvAgentNextPage(model, wrapper.sourceLocalName)
+        if (nextPageResults.isEmpty)
+          ws.url(wrapper.apiUrl)
+        else {
+          Logger.info("Next Page URL loaded successfully: "+nextPageResults)
+          ws.url(nextPageResults)
+        }
+      case None =>
+        ws.url(wrapper.apiUrl)
+    }
   }
 
   /** Add all query parameters to the request. */
@@ -266,12 +284,12 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                                                sameAs: Future[Option[Traversable[Triple]]]): Future[Dataset] = {
     sameAs map {
       case Some(sameAsTriples) =>
-        val it = inputDataset.asDatasetGraph().find()
-        val quads = ArrayBuffer.empty[Quad]
-        while (it.hasNext) {
-          quads.append(it.next())
-        }
-        rewriteDatasetBasedOnSameAsLinks(sameAsTriples, quads)
+      val it = inputDataset.asDatasetGraph().find()
+      val quads = ArrayBuffer.empty[Quad]
+      while (it.hasNext) {
+        quads.append(it.next())
+      }
+      rewriteDatasetBasedOnSameAsLinks(sameAsTriples, quads)
       case None =>
         inputDataset
     }

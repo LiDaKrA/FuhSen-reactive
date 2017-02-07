@@ -59,15 +59,23 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         finalSelectedDataSources = sources_list.mkString(",")
       }
 
-      Logger.info("Empty: "+finalSelectedDataSources.isEmpty)
+      var metaData = ""
+      if (loadMoreResults.get) {
+        //Load metadata when more results are requested
+        val metaDataModel = FuhsenVocab.getProvModel(model)
+        finalSelectedDataSources = FuhsenVocab.getWrappersFromMetadata(metaDataModel).mkString(",")
+        Logger.info("Final Data Sources Changed by Load More Results: "+finalSelectedDataSources)
+        metaData = RDFUtil.modelToTripleString(metaDataModel, Lang.TURTLE)
+        Logger.info("Metadata: "+metaData)
+      }
+
       if (keyword.isEmpty || finalSelectedDataSources.isEmpty)
         Future(Ok(textBody.get))
       else {
         //Calling the RDF-Wrappers to get the information //engine.microtask.url
         ws.url(ConfigFactory.load.getString("engine.microtask.url") +
           s"$SEARCH_ENDPOINT?query=${keyword.get}&wrapperIds=$finalSelectedDataSources").
-          // TODO: Add wrapper meta data to request
-          post("").map {
+          post(metaData).map {
           response =>
             if (response.status / 100 != 2) {
               InternalServerError(s"Got ${response.status} code from $SEARCH_ENDPOINT endpoint. Response body (truncated): " + response.body.take(1000))
