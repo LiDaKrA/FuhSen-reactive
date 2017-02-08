@@ -231,6 +231,7 @@ var Container = React.createClass({
                                   onTypeChange={this.onTypeChange}
                                   facetsDict={this.state.facetsDict}
                                   exactMatching={this.state.exactMatching}
+                                  onExactMatchingChange = {this.onExactMatchingChange}
                                   onLoadMoreResults={this.onLoadMoreResults}
                                   loadMoreResults={this.state.loadMoreResults}/>
             </div>);
@@ -900,6 +901,8 @@ var ResultsContainer = React.createClass({
                         underDev: false,
                         originalData: this.state.originalData
                     })
+
+                    this.props.onExactMatchingChange();
                 }else{
                     if(Object.keys(this.state.results_stat).length == 0)
                         this.computeDataStatistics();
