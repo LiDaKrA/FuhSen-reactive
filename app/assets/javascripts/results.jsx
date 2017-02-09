@@ -209,7 +209,7 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false});
+        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false});
     },
     render: function () {
         if (this.state.initData) {
@@ -268,7 +268,7 @@ var FacetList = React.createClass({
             contentType: 'application/json',
             success: function (response) {
                 if(exact && JSON.stringify(response["@graph"]) == undefined){
-                    alert(getTranslation("no_exact_match_results"));
+                    //alert(getTranslation("no_exact_match_results"));
                 }else{
                     this.setState({data: response["@graph"]});
                 }
@@ -893,7 +893,7 @@ var ResultsContainer = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (data) {
-                if(exactMatching && JSON.stringify(data["@graph"]) == undefined){
+                if(exactMatching && (data["@graph"] === undefined && data["@id"] === undefined)){
                     this.setState({
                         resultsData: this.state.resultsData,
                         selected: eType,
@@ -901,7 +901,7 @@ var ResultsContainer = React.createClass({
                         underDev: false,
                         originalData: this.state.originalData
                     })
-
+                    alert(getTranslation("no_exact_match_results"));
                     this.props.onExactMatchingChange();
                 }else{
                     if(Object.keys(this.state.results_stat).length == 0)

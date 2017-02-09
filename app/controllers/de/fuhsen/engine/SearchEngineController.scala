@@ -325,6 +325,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
              |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
              |PREFIX gr: <http://purl.org/goodrelations/v1#>
+             |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
              |
              |CONSTRUCT   {
              |?p rdf:type gr:ProductOrService .
@@ -347,7 +348,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:country ?country } .
              |OPTIONAL { ?p fs:priceLabel ?price } .
              |OPTIONAL { ?p fs:condition ?condition } .
-             ${if (exact) {s"""|?p fs:description ?exact_name .
+             ${if (exact) {s"""|?p rdfs:label ?exact_name .
                                |FILTER (?exact_name = '$keyword') .
                                |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
@@ -374,9 +375,9 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?s fs:url ?url } .
              |OPTIONAL { ?s fs:img ?img } .
              |OPTIONAL { ?s ?p ?o .
-             |     FILTER(isLiteral(?o)) }
+             |FILTER(isLiteral(?o)) }
              ${if (exact) {s"""|?s rdfs:label ?exact_name .
-                               |FILTER (?exact_name = '$keyword') .
+                               |FILTER (?exact_name = '$keyword')
                                |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "website" =>
