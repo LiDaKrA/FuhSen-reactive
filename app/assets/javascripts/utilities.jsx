@@ -255,7 +255,7 @@ var RetunToTopBtn =  React.createClass({
     },
     render : function () {
        return(
-           <a href="javascript:" id="return-to-top" onClick={this.onClickHandle}><i className="fa fa-angle-double-up"></i></a>
+           <a href="javascript:" id="return-to-top" title="Return to top"  onClick={this.onClickHandle}><i className="fa fa-angle-double-up"></i></a>
        )
    } 
 });
