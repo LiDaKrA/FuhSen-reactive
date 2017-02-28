@@ -22,7 +22,8 @@ libraryDependencies ++= Seq(
   "org.webjars" % "bootstrap" % "3.3.7",
   "org.webjars"       %  "flat-ui"            % "bcaf2de95e",
   "org.webjars" 		%  "react" 				% "0.13.3",
-  "org.webjars" 		%  "marked" 			% "0.3.2"
+  "org.webjars" 		%  "marked" 			% "0.3.2",
+  "org.webjars" 		%  "font-awesome" 			% "4.7.0"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

@@ -1203,6 +1203,7 @@ var ResultsContainer = React.createClass({
             </div>
             <div className="search-results-content">
                 <div className="row">
+                    <RetunToTopBtn />
                     { this.state.view == "list" ?
                         <div className="col-md-12">
                             <ul id="search-results" className="search-results">

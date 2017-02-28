@@ -233,3 +233,29 @@ var Graph = React.createClass({
         );
     }
 });
+
+var RetunToTopBtn =  React.createClass({
+   onClickHandle: function(){
+       $('body,html').animate({
+           scrollTop : 0                       // Scroll to top of body
+       }, 500);
+   },
+    onScrollHandle: function(){
+        if ($(window).scrollTop() >= 50) {        // If page is scrolled more than 50px
+            $('#return-to-top').fadeIn(200);    // Fade in the arrow
+        } else {
+            $('#return-to-top').fadeOut(200);   // Else fade out the arrow
+        }
+    },
+    componentDidMount: function(){
+        document.addEventListener('scroll',this.onScrollHandle);
+    },
+    componentWillUnmount: function() {
+        document.removeEventListener('scroll', this.onScrollHandle);
+    },
+    render : function () {
+       return(
+           <a href="javascript:" id="return-to-top" onClick={this.onClickHandle}><i className="fa fa-angle-double-up"></i></a>
+       )
+   } 
+});
