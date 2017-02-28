@@ -123,7 +123,8 @@ var dictEng = {
     "exact_match": "Display exact matches only",
     "no_exact_match_results":"No exact match results found, shown all results.",
     "show_more_results":"SHOW MORE RESULTS",
-    "empty_keyword": "Search Keyword cannot be empty !!. Please write a keyword."
+    "empty_keyword": "Search Keyword cannot be empty !!. Please write a keyword.",
+    "see_snapshot": "See Snapshot"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -257,7 +258,8 @@ var dictGer = {
     "exact_match": "Nur exakte Übereinstimmungen anzeigen",
     "no_exact_match_results":"Keine exakten Ergebnisse, alle Ergebnisse werden angezeigt.",
     "show_more_results":"MEHR ERGEBNISSE ZEIGEN",
-    "empty_keyword": "Bitte geben Sie einen Suchbegriff ein."
+    "empty_keyword": "Bitte geben Sie einen Suchbegriff ein.",
+    "see_snapshot": "Screenshot anzeigen"
 };
 
 window.dictGer = dictGer;

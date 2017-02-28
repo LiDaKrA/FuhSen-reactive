@@ -1509,7 +1509,7 @@ var SnapshotLink = React.createClass({
     },
     render: function () {
         return (
-            <a href="#" onClick={this.showPDF}> --- (See Snapshot!)</a>
+            <a href="#" onClick={this.showPDF}> --- ({getTranslation("see_snapshot")})</a>
         );
     }
 });
