@@ -15,13 +15,16 @@
  */
 package controllers.de.fuhsen
 
-import java.util.{UUID, Optional}
+import java.text.SimpleDateFormat
+import java.util.UUID
 
 import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.rdf.model.{ModelFactory, Model}
 import org.apache.jena.riot.Lang
 import play.Logger
 import utils.dataintegration.RDFUtil
+import java.util.Calendar
+import scala.collection.JavaConversions.asScalaIterator
 
 /**
   * Created by andreas on 2/26/16.
@@ -78,11 +81,29 @@ object FuhsenVocab {
       None
   }
 
-  def createProvModel(wrapperName : String, endedByCode: String, endedByReason: String) : Model = {
+  def createProvModel(wrapperName : String, endedByCode: String, endedByReason: String, nextPage : Option[String] ) : Model = {
     Logger.info("Creating prov metadata for: "+wrapperName+" "+endedByCode+" "+endedByReason)
+
+    val now = Calendar.getInstance().getTime()
+    val minuteFormat = new SimpleDateFormat("yyyy.MM.dd")
+    val currentDateFormat = minuteFormat.format(now)
+
     val model = ModelFactory.createDefaultModel()
     val irUid = UUID.randomUUID.toString()
-    val query = s"""
+
+    //nextPage
+    val nextPageString = ""
+    /*
+    //Load More Results Functionality Disabled
+    var nextPageString = ""
+    if (!nextPage.isEmpty) {
+      Logger.info("Next page added...")
+      nextPage.map( value => nextPageString = value )
+    }
+    */
+
+
+    val provString = s"""
          |@prefix fs: <http://vocab.lidakra.de/fuhsen#> .
          |@prefix dc: <http://purl.org/dc/elements/1.1/> .
          |@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -92,11 +113,12 @@ object FuhsenVocab {
          |@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
          |
          |fs:$wrapperName a prov:Agent;
+         |                fs:nextPage "$nextPageString" ;
          |				        rdfs:label "$wrapperName" .
          |
          |fs:$irUid a prov:Activity ;
-         |					prov:startedAtTime "2017-01-16" ;
-         |					prov:endedAtTime "2017-01-17" ;
+         |					prov:startedAtTime "$currentDateFormat" ;
+         |					prov:endedAtTime "$currentDateFormat" ;
          |					prov:wasAssociatedWith fs:$wrapperName;
          |					prov:wasEndedBy fs:$endedByCode .
          |
@@ -104,7 +126,80 @@ object FuhsenVocab {
          |					      rdfs:label "$endedByCode";
          |					      rdfs:comment "$endedByReason" .
       """.stripMargin
-    RDFUtil.rdfStringToModel(query, Lang.TURTLE)
+    //Logger.info("PROV string: "+provString)
+    RDFUtil.rdfStringToModel(provString, Lang.TURTLE)
+  }
+
+  def getProvModel (model: Model): Model = {
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         |PREFIX prov: <http://www.w3.org/ns/prov#>
+         |
+         |CONSTRUCT   {
+         |  ?s a prov:Activity .
+         |  ?s ?p ?o .
+         |  ?s1 a prov:Agent .
+         |  ?s1 ?p1 ?o1 .
+         |}
+         |WHERE {
+         |  ?s a prov:Activity .
+         |  ?s ?p ?o .
+         |  ?s1 a prov:Agent .
+         |  ?s1 ?p1 ?o1 .
+         |}
+      """.stripMargin)
+    QueryExecutionFactory.create(query, model).execConstruct()
+  }
+
+  def getProvAgentNextPage (model: Model, wrapperName: String): String = {
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         |PREFIX prov: <http://www.w3.org/ns/prov#>
+         |
+         |SELECT ?nextPage
+         |WHERE {
+         |  ?s a prov:Agent .
+         |  ?s rdfs:label "$wrapperName" .
+         |  ?s fs:nextPage ?nextPage .
+         |}
+      """.stripMargin)
+    val resultSet = QueryExecutionFactory.create(query, model).execSelect()
+
+    if(resultSet.hasNext) {
+      resultSet.next.getLiteral("nextPage").getString
+    }
+    else
+      ""
+  }
+
+  def getWrappersFromMetadata(model: Model) : List[String] = {
+    val query = QueryFactory.create(
+                s"""
+                  |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                  |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                  |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                  |PREFIX prov: <http://www.w3.org/ns/prov#>
+                  |
+                  |SELECT ?label ?nextPage
+                  |WHERE {
+                  |  ?s a prov:Agent .
+                  |  ?s rdfs:label ?label .
+                  |  ?s fs:nextPage ?nextPage .
+                  |}
+                """.stripMargin)
+    val resultSet = QueryExecutionFactory.create(query, model).execSelect()
+    resultSet.map { r =>
+      if (!r.getLiteral("nextPage").getString.isEmpty)
+        r.getLiteral("label").getString
+      else
+        ""
+    }.toList
   }
 
 }

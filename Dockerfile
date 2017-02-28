@@ -7,7 +7,7 @@
 #
 #    $ docker run --rm -it -p 9000:9000 --network=fuhsen-net --name fuhsen lidakra/fuhsen:v1.1.0 /bin/bash
 #
-# 3) Fuhsen needs API keys to access social networs. The keys are stored in conf/application.conf
+# 3) Fuhsen needs API keys to access social networks. The keys are stored in conf/application.conf
 # For security reason the application.conf file on Github does not contain the keys. The config file
 # must be provided in a Docker data volume loaded with the config file. As an example copy the config file in 
 # a folder in the server host (e.g. /home/lidakra/fuhsen-conf) then run a container using an image
@@ -64,11 +64,11 @@ RUN apt-get update && \
     apt-get install -y vim
 
 # Copy OCCRP SSL Certificate
-COPY  certs/data.occrp.org.cer $JAVA_HOME/jre/lib/security/
+COPY  certs/dataoccrporg.crt $JAVA_HOME/jre/lib/security/
 
 # Install the OCCRP SSL certificate
 WORKDIR $JAVA_HOME/jre/lib/security/
-RUN keytool -importcert -alias occrp -keystore cacerts -storepass changeit -file data.occrp.org.cer -noprompt
+RUN keytool -importcert -alias occrp -keystore cacerts -storepass changeit -file dataoccrporg.crt -noprompt
 
 #Install Fuhsen package from the project folder (create a package using "sbt universal:package-zip-tarball" command)
 COPY target/universal/fuhsen-1.1.0.tgz /home/lidakra/

@@ -14,6 +14,8 @@ import javax.inject.Inject
 import controllers.de.fuhsen.wrappers.security.TokenManager
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+import scala.concurrent.Future
+
 /**
   * Created by dcollarana on 5/23/2016.
   * Micro-Task service that calls the RDF-Wrappers to extract the information.
@@ -21,10 +23,10 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
   final val SEARCH_ENDPOINT = "/ldw/restApiWrapper/search"
 
-  def execute = Action.async {
+  def execute(loadMoreResults: Option[Boolean]) = Action.async {
     request =>
 
-      Logger.info("Federated Query")
+      Logger.info("Federated Query "+loadMoreResults)
 
       //ToDo: Replace this with an extension to String class, .toRdfModel
       //Constructing the rdf results graph model
@@ -57,23 +59,33 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         finalSelectedDataSources = sources_list.mkString(",")
       }
 
-      if (keyword.isEmpty)
-        Ok(textBody.get)
+      var metaData = ""
+      if (loadMoreResults.get) {
+        //Load metadata when more results are requested
+        val metaDataModel = FuhsenVocab.getProvModel(model)
+        finalSelectedDataSources = FuhsenVocab.getWrappersFromMetadata(metaDataModel).mkString(",")
+        Logger.info("Final Data Sources Changed by Load More Results: "+finalSelectedDataSources)
+        metaData = RDFUtil.modelToTripleString(metaDataModel, Lang.TURTLE)
+        Logger.info("Metadata: "+metaData)
+      }
 
-      //Calling the RDF-Wrappers to get the information //engine.microtask.url
-      ws.url(ConfigFactory.load.getString("engine.microtask.url") +
+      if (keyword.isEmpty || finalSelectedDataSources.isEmpty)
+        Future(Ok(textBody.get))
+      else {
+        //Calling the RDF-Wrappers to get the information //engine.microtask.url
+        ws.url(ConfigFactory.load.getString("engine.microtask.url") +
           s"$SEARCH_ENDPOINT?query=${keyword.get}&wrapperIds=$finalSelectedDataSources").
-            // TODO: Add wrapper meta data to request
-            post("").map {
-        response =>
-          if (response.status / 100 != 2) {
-            InternalServerError(s"Got ${response.status} code from $SEARCH_ENDPOINT endpoint. Response body (truncated): " + response.body.take(1000))
-          } else {
-            //Logger.info("Federated Search Model: "+response.body)
-            val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
-            model.add(wrappersResult)
-            Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
-          }
+          post(metaData).map {
+          response =>
+            if (response.status / 100 != 2) {
+              InternalServerError(s"Got ${response.status} code from $SEARCH_ENDPOINT endpoint. Response body (truncated): " + response.body.take(1000))
+            } else {
+              //Logger.info("Federated Search Model: "+response.body)
+              val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
+              model.add(wrappersResult)
+              Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
+            }
+        }
       }
   }
 

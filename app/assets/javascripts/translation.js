@@ -94,8 +94,8 @@ var dictEng = {
     "filename": "File name",
     "filetype": "File type",
     "active_email": "Active email",
-    "wants": "Wants",
-    "haves": "Haves",
+    "wants": "Interests",
+    "haves": "Skills",
     "top_haves": "Top haves",
     "interests": "Interests",
     "server_error": "There was an error during search or no active tokens where available... Please try again!",
@@ -117,10 +117,14 @@ var dictEng = {
     "need_help": "Need Help. ",
     "contact": "Send us an e-mail",
     "sponsored_by": "Sponsored by the German Ministry of Education and Research - Project LiDaKrA",
-    "facets_help": "You can reduce the result list by setting filters. Click on the category and then on the filter term that you are interested in.",
+    "facets_help": "You can reduce the result list by setting filters. Choose the category and then on the filter term that you are interested in.",
     "search_ok": " finished successfully. ",
     "search_error":" had problems during query and results are not shown. ",
-    "exact_match": "Display exact matches only"
+    "exact_match": "Display exact matches only",
+    "no_exact_match_results":"No exact match results found, shown all results.",
+    "show_more_results":"SHOW MORE RESULTS",
+    "empty_keyword": "Search Keyword cannot be empty !!. Please write a keyword.",
+    "see_snapshot": "See Snapshot"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -225,7 +229,7 @@ var dictGer = {
     "filename": "Dateiname",
     "filetype": "Dateityp",
     "active_email": "E-Mail",
-    "wants": "Wünsche",
+    "wants": "Interessen",
     "haves": "Kompetenzen",
     "top_haves": "Top Kompetenzen",
     "interests": "Interessen",
@@ -245,13 +249,17 @@ var dictGer = {
     "none" : "keiner",
     "fuhsen" : "Föderierte Hybride Suche",
     "export" : "Exportieren",
-    "need_help": "Brauchen sie hilfe. ",
+    "need_help": "Brauchen Sie Hilfe? ",
     "contact": "Nachricht schreiben",
-    "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung - Projekt LiDaKrA",
-    "facets_help": "Ergebnislisten können Sie mithilfe von Filtern weiter eingrenzen. Klicken Sie auf die gewünschte Kategorie und dann auf den Filterbegriff, der Sie interessiert.",
-    "search_ok": " Erfolgreich beendet. ",
+    "sponsored_by": "Gefördert durch das Bundesministerium für Bildung und Forschung – Projekt LiDaKrA",
+    "facets_help": "Ergebnislisten können Sie mithilfe von Filtern weiter eingrenzen. Wählen Sie auf die gewünschte Kategorie und dann auf den Filterbegriff, der Sie interessiert.",
+    "search_ok": " Erfolgreich abgeschlossen. ",
     "search_error":" hatten Probleme während der Abfrage und die Ergebnisse werden nicht angezeigt. ",
-    "exact_match": "Nur exakte Übereinstimmungen anzeigen"
+    "exact_match": "Nur exakte Übereinstimmungen anzeigen",
+    "no_exact_match_results":"Keine exakten Ergebnisse, alle Ergebnisse werden angezeigt.",
+    "show_more_results":"MEHR ERGEBNISSE ZEIGEN",
+    "empty_keyword": "Bitte geben Sie einen Suchbegriff ein.",
+    "see_snapshot": "Screenshot anzeigen"
 };
 
 window.dictGer = dictGer;
