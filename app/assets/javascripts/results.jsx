@@ -211,6 +211,9 @@ var Container = React.createClass({
         }
         this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false});
     },
+    setEntityType: function (type) {
+        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false});
+    },
     render: function () {
         if (this.state.initData) {
             return (<div class="row search-results-container">
@@ -233,7 +236,8 @@ var Container = React.createClass({
                                   exactMatching={this.state.exactMatching}
                                   onExactMatchingChange = {this.onExactMatchingChange}
                                   onLoadMoreResults={this.onLoadMoreResults}
-                                  loadMoreResults={this.state.loadMoreResults}/>
+                                  loadMoreResults={this.state.loadMoreResults}
+                                  setEntityType = {this.setEntityType}/>
             </div>);
         }
         return <div className="row">
@@ -958,10 +962,20 @@ var ResultsContainer = React.createClass({
                         stat[result["http://vocab.lidakra.de/fuhsen#value"]] = result["http://vocab.lidakra.de/fuhsen#count"];
                   });
               }
-
+              var selectedType = this.state.selected;
+              if(stat["person"] == 0){
+                  for(var key in stat){
+                      if(stat.hasOwnProperty(key) && key !== "person" && stat[key] > 0) {
+                          selectedType = key;
+                          this.props.setEntityType(selectedType);
+                          break;
+                      }
+                  }
+              }
               this.setState({
                     results_stat: stat,
-                    areThereMoreResults: moreResultsHelper
+                    areThereMoreResults: moreResultsHelper,
+                    selected: selectedType
                 });
 
           }.bind(this),
@@ -999,30 +1013,30 @@ var ResultsContainer = React.createClass({
             loadMoreResultsItem = <a href='#' onClick={this.props.onLoadMoreResults}><div id="load-more-results">{getTranslation("show_more_results")}</div></a>
         }
 
-        var personenItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="1">{getTranslation("people")+'(' + this.state.results_stat["person"]+ ')'}</li>
-        var organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                                     data-id="2">{getTranslation("organisations")+'(' + this.state.results_stat["organization"]+ ')'}</li>
-        var produkteItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="3">{getTranslation("products")+'(' + this.state.results_stat["product"]+ ')'}</li>
-        var darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                              data-id="4">{getTranslation("tor_websites")+'(' + this.state.results_stat["website"]+ ')'}</li>
-        var documentItem = <li className="headers-li" onClick={this.props.onTypeChange}
-                               data-id="5">{getTranslation("documents")+'(' + this.state.results_stat["document"]+ ')'}</li>
+        var personenItem = (this.state.results_stat["person"] > 0 ? <li className="headers-li" onClick={this.props.onTypeChange}
+                               data-id="1">{getTranslation("people")+'(' + this.state.results_stat["person"]+ ')'}</li> : null);
+        var organizationenItem = (this.state.results_stat["organization"] > 0 ? <li className="headers-li" onClick={this.props.onTypeChange}
+                                     data-id="2">{getTranslation("organisations")+'(' + this.state.results_stat["organization"]+ ')'}</li> : null);
+        var produkteItem = (this.state.results_stat["product"] >0 ? <li className="headers-li" onClick={this.props.onTypeChange}
+                               data-id="3">{getTranslation("products")+'(' + this.state.results_stat["product"]+ ')'}</li> : null);
+        var darkWebItem = (this.state.results_stat["website"] > 0 ? <li className="headers-li" onClick={this.props.onTypeChange}
+                              data-id="4">{getTranslation("tor_websites")+'(' + this.state.results_stat["website"]+ ')'}</li> : null);
+        var documentItem = ( this.state.results_stat["document"] >0 ? <li className="headers-li" onClick={this.props.onTypeChange}
+                               data-id="5">{getTranslation("documents")+'(' + this.state.results_stat["document"]+ ')'}</li> : null);
 
-        if (this.state.selected === "person") {
+        if (this.state.selected === "person" && personenItem !== null) {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
                 <b>{getTranslation("people")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
-        } else if (this.state.selected === "organization") {
+        } else if (this.state.selected === "organization" && organizationenItem !== null) {
             organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p>
                 <b>{getTranslation("organisations")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
-        } else if (this.state.selected === "product") {
+        } else if (this.state.selected === "product" && produkteItem !== null) {
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
                 <b>{getTranslation("products")+'(' +  this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
-        } else if (this.state.selected === "website") {
+        } else if (this.state.selected === "website" && darkWebItem !== null) {
             darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
                 <b>{getTranslation("tor_websites")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
-        } else if (this.state.selected === "document") {
+        } else if (this.state.selected === "document" && documentItem !== null) {
             documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p>
                 <b>{getTranslation("documents")+'(' + this.state.results_stat[this.state.selected]+ ')'}</b></p></li>
         }
@@ -1039,7 +1053,7 @@ var ResultsContainer = React.createClass({
                                 {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
-                                {produkteItem}
+                                {produkteItem}t
                                 {darkWebItem}
                                 {documentItem}
                             </ul>
@@ -1145,19 +1159,19 @@ var ResultsContainer = React.createClass({
         }
 
         var stat_text = (final_data.length <  this.state.results_stat[this.state.selected] ?  final_data.length + '/' : "")+ this.state.results_stat[this.state.selected];
-        if (this.state.selected === "person") {
+        if (this.state.selected === "person" && personenItem !== null) {
             personenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="1"><p>
                 <b>{getTranslation("people")+'(' + stat_text + ')'}</b></p></li>
-        } else if (this.state.selected === "organization") {
+        } else if (this.state.selected === "organization" && organizationenItem !== null) {
             organizationenItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="2"><p>
                 <b>{getTranslation("organisations")+'(' + stat_text+ ')'}</b></p></li>
-        } else if (this.state.selected === "product") {
+        } else if (this.state.selected === "product" && produkteItem !== null) {
             produkteItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="3"><p>
                 <b>{getTranslation("products")+'(' + stat_text + ')'}</b></p></li>
-        } else if (this.state.selected === "website") {
+        } else if (this.state.selected === "website" && darkWebItem !== null) {
             darkWebItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="4"><p>
                 <b>{getTranslation("tor_websites")+'(' + stat_text + ')'}</b></p></li>
-        } else if (this.state.selected === "document") {
+        } else if (this.state.selected === "document" && documentItem !== null) {
             documentItem = <li className="headers-li" onClick={this.props.onTypeChange} data-id="5"><p>
                 <b>{getTranslation("documents")+'(' + stat_text + ')'}</b></p></li>
         }
