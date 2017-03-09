@@ -225,7 +225,8 @@ var Container = React.createClass({
                            currentTab={this.state.entityType}
                            orgFacetsDict = {this.state.orgFacetsDict}
                            onExactMatchingChange = {this.onExactMatchingChange}
-                           exactMatching={this.state.exactMatching}/>
+                           exactMatching={this.state.exactMatching}
+                           loadMoreResults={this.state.loadMoreResults}/>
                 <ResultsContainer searchUid={this.props.searchUid}
                                   keyword={this.props.keyword}
                                   entityType={this.state.entityType}
@@ -908,7 +909,7 @@ var ResultsContainer = React.createClass({
                     alert(getTranslation("no_exact_match_results"));
                     this.props.onExactMatchingChange();
                 }else{
-                    if(Object.keys(this.state.results_stat).length == 0)
+                    if(Object.keys(this.state.results_stat).length == 0 || loadmore)
                         this.computeDataStatistics();
                     data_to_handle = JSON.parse(JSON.stringify(data));
                     //alert(JSON.stringify(data_to_handle));
