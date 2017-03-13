@@ -647,7 +647,7 @@ var FacetSubMenuItems = React.createClass({
         });
     },
     getInitialState: function () {
-        return {data: null};
+        return {data: null,searchFacetText: ""};
     },
     sortFacetsValues : function(facetsValues){
         if (facetsValues !== undefined) {
@@ -698,18 +698,26 @@ var FacetSubMenuItems = React.createClass({
         facetsValues = this.sortFacetsValues(facetsValues);
         this.setState({data: facetsValues});
     },
+    ontextChanged: function(e){
+        var text = e.target.value;
+        this.setState({searchFacetText: text});
+    },
     render: function () {
         var subMenuEle = [];
         if (this.state.data && this.state.data !== undefined) {
             var _onFacetItemClick = this.props.onFacetItemClick;
+            var searchRegPattern = (this.state.searchFacetText ? new RegExp('\\b' + this.state.searchFacetText,'i') : null);
             this.state.data.map(function (menuItems) {
                 if (menuItems["http://vocab.lidakra.de/fuhsen#value"] && menuItems["http://vocab.lidakra.de/fuhsen#value"] !== "blank") {
-                    subMenuEle.push(<li ><a href="#" id={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
-                                            onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}>
+                    var facetValue = menuItems["http://vocab.lidakra.de/fuhsen#value"];
+                    if(!searchRegPattern || (searchRegPattern && facetValue.match(searchRegPattern))) {
+                        subMenuEle.push(<li ><a href="#" id={menuItems["http://vocab.lidakra.de/fuhsen#value"]}
+                                                onClick={_onFacetItemClick.bind(this, menuItems["http://vocab.lidakra.de/fuhsen#value"])}>
                        <span
                            className="sub-item-result">({menuItems["http://vocab.lidakra.de/fuhsen#count"]})</span>
-                        {menuItems["http://vocab.lidakra.de/fuhsen#value"]}</a>
-                    </li>);
+                            {menuItems["http://vocab.lidakra.de/fuhsen#value"]}</a>
+                        </li>);
+                    }
                 }
             });
         }
@@ -718,7 +726,7 @@ var FacetSubMenuItems = React.createClass({
                 <div className="flyout-left-container">
                     <ul className="selected-items unstyled"></ul>
                     <div className="input-search-fct-container">
-                        <input type="text" className="input-search-fct"/>
+                        <input type="text" className="input-search-fct" placeholder="Facet Value to Search for" onChange={this.ontextChanged}/>
                     </div>
                 </div>
 
