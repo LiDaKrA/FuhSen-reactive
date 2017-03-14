@@ -71,10 +71,10 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
     * Extracts and returns the next page/offset value from the response body of the API.
     *
     * @param resultBody The body serialized as String as coming from the API.
-    * @param lastValue  The last value. This can be used if the value is not available in the result body, but instead
+    * @param apiUrl  The last value. This can be used if the value is not available in the result body, but instead
     *                   is calculated by the wrapper implementation.
     */
-  override def extractNextPageQueryValue(resultBody: String, lastValue: Option[String]): Option[String] = {
+  override def extractNextPageQueryValue(resultBody: String, apiUrl: Option[String]): Option[String] = {
     val jsonBody = Json.parse(resultBody)
     (jsonBody \ "paging" \ "next").toOption map (_.as[String])
   }

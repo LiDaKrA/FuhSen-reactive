@@ -81,7 +81,7 @@ object FuhsenVocab {
       None
   }
 
-  def createProvModel(wrapperName : String, endedByCode: String, endedByReason: String, nextPage : Option[String] ) : Model = {
+  def createProvModel(wrapperName : String, endedByCode: String, endedByReason: String, nextPage : Option[String], lastValue : Option[String] ) : Model = {
     Logger.info("Creating prov metadata for: "+wrapperName+" "+endedByCode+" "+endedByReason)
 
     val now = Calendar.getInstance().getTime()
@@ -91,17 +91,14 @@ object FuhsenVocab {
     val model = ModelFactory.createDefaultModel()
     val irUid = UUID.randomUUID.toString()
 
-    //nextPage
-    val nextPageString = ""
-    /*
+    //Load More Results Functionality
+    //val nextPageString = ""
     //Load More Results Functionality Disabled
     var nextPageString = ""
     if (!nextPage.isEmpty) {
       Logger.info("Next page added...")
       nextPage.map( value => nextPageString = value )
     }
-    */
-
 
     val provString = s"""
          |@prefix fs: <http://vocab.lidakra.de/fuhsen#> .

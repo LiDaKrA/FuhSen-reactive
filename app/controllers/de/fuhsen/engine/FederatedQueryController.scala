@@ -12,6 +12,7 @@ import utils.dataintegration.RDFUtil
 import javax.inject.Inject
 
 import controllers.de.fuhsen.wrappers.security.TokenManager
+import org.apache.jena.update.{UpdateAction, UpdateFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
@@ -77,16 +78,36 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
           s"$SEARCH_ENDPOINT?query=${keyword.get}&wrapperIds=$finalSelectedDataSources").
           post(metaData).map {
           response =>
+            val newModel = deleteNextPageTuples(model)
             if (response.status / 100 != 2) {
               InternalServerError(s"Got ${response.status} code from $SEARCH_ENDPOINT endpoint. Response body (truncated): " + response.body.take(1000))
             } else {
-              //Logger.info("Federated Search Model: "+response.body)
+              Logger.info("Model Size Before: "+newModel.size)
               val wrappersResult = RDFUtil.rdfStringToModel(response.body, Lang.JSONLD)
-              model.add(wrappersResult)
-              Ok(RDFUtil.modelToTripleString(model, Lang.TURTLE))
+              newModel.add(wrappersResult)
+              Logger.info("Model Size After: "+newModel.size)
+              Ok(RDFUtil.modelToTripleString(newModel, Lang.TURTLE))
             }
         }
       }
+  }
+
+  private def deleteNextPageTuples(model: Model) : Model = {
+    val query = UpdateFactory.create(s"""
+                   |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                   |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+                   |PREFIX prov: <http://www.w3.org/ns/prov#>
+                   |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                   |
+                   |DELETE
+                   | { ?agent fs:nextPage ?value }
+                   |WHERE {
+                   |  ?agent a prov:Agent .
+                   |  ?agent fs:nextPage ?value .
+                   | }
+      """.stripMargin)
+    UpdateAction.execute(query, model)
+    model
   }
 
   /*private def getKeywordQuery(model: Model): String = {

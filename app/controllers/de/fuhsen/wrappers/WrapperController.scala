@@ -85,13 +85,14 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   def createApiRequest(wrapper: RestApiWrapperTrait,
                        query: String,
                        searchMetaData: Option[Model]): WSRequest = {
-    val apiRequest: WSRequest = getWrapperApiUrl(wrapper, searchMetaData)
-    val apiRequestWithApiParams = addQueryParameters(wrapper, apiRequest, query)
+    val apiRequestWithApiParams: WSRequest = getWrapperApiUrl(wrapper, query, searchMetaData)
+    //val apiRequestWithApiParams = addQueryParameters(wrapper, query, searchMetaData)
     val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
     apiRequestWithOAuthIfNeeded
   }
 
   private def getWrapperApiUrl(wrapper: RestApiWrapperTrait,
+                               query: String,
                                searchMetaData: Option[Model]): WSRequest = {
 
     searchMetaData match {
@@ -99,19 +100,18 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         Logger.info("Loading next page results URL")
         val nextPageResults = FuhsenVocab.getProvAgentNextPage(model, wrapper.sourceLocalName)
         if (nextPageResults.isEmpty)
-          ws.url(wrapper.apiUrl)
+          addQueryParameters(wrapper, query)
         else {
           Logger.info("Next Page URL loaded successfully: "+nextPageResults)
           ws.url(nextPageResults)
         }
       case None =>
-        ws.url(wrapper.apiUrl)
+        addQueryParameters(wrapper, query)
     }
   }
 
   /** Add all query parameters to the request. */
   private def addQueryParameters(wrapper: RestApiWrapperTrait,
-                                 request: WSRequest,
                                  queryString: String): WSRequest = {
 
     var url_with_params = wrapper.apiUrl+"?"
@@ -134,7 +134,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                                         request: WSRequest) : Future[ApiResponse] = {
 
     if(!wrapper.requestType.equals("JAVA"))
-      request.get.map(convertToApiResponse("Wrapper or the wrapped service", Some(wrapper)))
+      request.get.map(convertToApiResponse("Wrapper or the wrapped service", Some(wrapper), Some(request.url))) //Add here the original API URI
     else {
       wrapper match {
         case oAuthWrapper: RestApiOAuthTrait =>
@@ -159,7 +159,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         case error: ApiError =>
           // There has been an error previously, don't go on.
           Future(error)
-        case ApiSuccess(body, nextPage) =>
+        case ApiSuccess(body, nextPage, lastValue) =>
           //Logger.info("PRE-SILK: "+body)
           handleSilkTransformation(wrapper, body, nextPage)
       }
@@ -168,13 +168,13 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   private def addProvMetaData(wrapper: RestApiWrapperTrait, apiResponse: Future[ApiResponse]) :  Future[ApiSuccess] = {
     apiResponse map {
       case errorResult: ApiError => {
-        val model = FuhsenVocab.createProvModel(wrapper.sourceLocalName,errorResult.statusCode.toString, errorResult.statusCode.toString, None)
+        val model = FuhsenVocab.createProvModel(wrapper.sourceLocalName,errorResult.statusCode.toString, errorResult.statusCode.toString, None, None)
         ApiSuccess(RDFUtil.modelToTripleString(model, Lang.JSONLD))
       }
       case success: ApiSuccess => {
-        //ToDo: Review and remove unnecesary transformation from model to string and string to model
+        //ToDo: Review and remove unnecessary transformation from model to string and string to model
         val model = RDFUtil.rdfStringToModel(success.responseBody, Lang.JSONLD)
-        model.add(FuhsenVocab.createProvModel(wrapper.sourceLocalName,"200","OK", success.nextPage)) //Adding PROV metadata
+        model.add(FuhsenVocab.createProvModel(wrapper.sourceLocalName,"200","OK", success.nextPage, success.lastValue)) //Adding PROV metadata
         ApiSuccess(RDFUtil.modelToTripleString(model, Lang.JSONLD))
       }
     }
@@ -192,7 +192,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       Future.sequence(resultFutures) map { results =>
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
-            case ApiSuccess(responseBody, nextPage) =>
+            case ApiSuccess(responseBody, nextPage, lastValue) =>
               //Logger.debug("POST-SILK:" + responseBody)
               val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
               requestMerger.addWrapperResult(model, wrapper.sourceUri)
@@ -217,12 +217,13 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
   }
 
   private def extractNextPageMetaData(wrapper: RestApiWrapperTrait,
-                                          responseBody: String): Option[String] = {
+                                      responseBody: String,
+                                      lastApiCallUrl: Option[String]): Option[String] = {
     Logger.info("Executing extractNextPageMetaData "+wrapper.sourceLocalName)
     wrapper match {
       case paginatingApi: PaginatingApiTrait =>
         Logger.info("It is a PaginatingApiTrait "+wrapper.sourceLocalName)
-        paginatingApi.extractNextPageQueryValue(responseBody, None)
+        paginatingApi.extractNextPageQueryValue(responseBody, lastApiCallUrl)
       case _ => // Wrapper does not support pagination, do nothing
         None
     }
@@ -263,7 +264,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     val requestMerger = new RequestMerger()
     for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
       wrapperResult match {
-        case ApiSuccess(responseBody, nextPage) =>
+        case ApiSuccess(responseBody, nextPage, lastValue) =>
           val model = rdfStringToModel(responseBody, Lang.JSONLD.getName)
           requestMerger.addWrapperResult(model, wrapper.sourceUri)
         case _: ApiError =>
@@ -312,7 +313,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
   def personLinking(entityRDF: String, acceptType: String): Future[Option[Traversable[Triple]]] = {
     executePersonLinking(entityRDF, acceptType) map {
-      case ApiSuccess(body, nextPage) =>
+      case ApiSuccess(body, nextPage, lastValue) =>
         Some(stringToTriple(body, acceptTypeToRdfLang(acceptType)))
       case ApiError(status, message) =>
         Logger.warn(s"Person linking service returned a status code of $status")
@@ -326,7 +327,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     wrapper.customResponseHandling(ws) match {
       case Some(customFn) =>
         apiResponse.flatMap {
-          case ApiSuccess(body, nextPage) =>
+          case ApiSuccess(body, nextPage, lastValue) =>
             Logger.info("Custom Api Handling: Api Success")
             customFn(body).
                 map(customResult => ApiSuccess(customResult))
@@ -377,12 +378,14 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       //.withHeaders("Accept" -> acceptType)
       val response = transformRequest
           .post(transform.silkTransformationRequestBodyGenerator(content))
-          .map(convertToApiResponse("Silk transformation endpoint", None))
+          .map(convertToApiResponse("Silk transformation endpoint", None, None))
       response
     }
   }
 
-  private def convertToApiResponse(serviceName: String, wrapper: Option[RestApiWrapperTrait])(response: WSResponse): ApiResponse = {
+  private def convertToApiResponse(serviceName: String,
+                                   wrapper: Option[RestApiWrapperTrait],
+                                   lastApiCallUrl: Option[String])(response: WSResponse): ApiResponse = {
     Logger.info("Reponse Status: "+response.status)
     if (response.status >= 400) {
       ApiError(response.status, s"There was a problem with the $serviceName. Service response:\n\n" + response.body)
@@ -391,7 +394,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     } else {
       wrapper match {
         case Some(wrapperImpl) =>
-          val nextPage = extractNextPageMetaData(wrapperImpl, response.body)
+          val nextPage = extractNextPageMetaData(wrapperImpl, response.body, lastApiCallUrl)
           Logger.info("Next Page: "+nextPage)
           ApiSuccess(response.body, nextPage)
         case _ => ApiSuccess(response.body)
@@ -419,7 +422,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         .withHeaders("Content-Type" -> "application/xml")
         .withHeaders("Accept" -> acceptType)
     linkRequest.post(entityLinking.linkTemplate(content, acceptTypeToRdfLang(acceptType)))
-        .map(convertToApiResponse("Silk linking service", None))
+        .map(convertToApiResponse("Silk linking service", None, None))
   }
 
   /** Merge all transformation results into a single model and return the serialized model */
@@ -428,7 +431,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
     Future.sequence(futureResponses) map { responses =>
       val model = ModelFactory.createDefaultModel()
       responses.foreach {
-        case ApiSuccess(body, nextPage) =>
+        case ApiSuccess(body, nextPage, lastValue) =>
           model.add(rdfStringToModel(body, lang))
         case ApiError(statusCode, errorMessage) =>
           Logger.warn(s"Got status code $statusCode with message: $errorMessage")
