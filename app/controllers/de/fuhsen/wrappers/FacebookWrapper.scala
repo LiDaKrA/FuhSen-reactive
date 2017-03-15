@@ -19,7 +19,8 @@ import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
 import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, TokenManager}
 import org.apache.jena.atlas.json.JSON
-import play.api.libs.json.Json
+import play.Logger
+import play.api.libs.json.{JsArray, Json}
 
 
 /**
@@ -76,6 +77,22 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
     */
   override def extractNextPageQueryValue(resultBody: String, apiUrl: Option[String]): Option[String] = {
     val jsonBody = Json.parse(resultBody)
-    (jsonBody \ "paging" \ "next").toOption map (_.as[String])
+    val numberOfResults = countIds(resultBody)
+    Logger.info("Calculating numer of results: "+numberOfResults)
+    if (numberOfResults < 24)
+      None
+    else
+      (jsonBody \ "paging" \ "next").toOption map (_.as[String])
   }
+
+  private def countIds(body: String) : Int = {
+    var count = 0
+    var index = body.indexOf("id")
+    while (index != -1) {
+      count = count + 1
+      index = body.indexOf("\"id\"", index + 2)
+    }
+    count
+  }
+
 }
