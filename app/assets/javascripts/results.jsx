@@ -55,7 +55,7 @@ var ContainerResults = React.createClass({
                             <div className="row">
                                 <div className="col-md-4">
                                     <a href={context === "" ? "/" : context}>
-                                        <img src={context + "/assets/images/logoBig2.png"} class="smallLogo"
+                                        <img src={context + "/assets/images/logoBig2.png"} className="smallLogo"
                                              alt="Logo_Description"/>
                                     </a>
                                 </div>
@@ -733,11 +733,6 @@ var FacetSubMenuItems = React.createClass({
                 <div className="flyout-right-container">
                     <div className="flyout-right-head">
                         <span>{getTranslation("sortedby")}</span>
-                        <div className="flyout-page-nav fr">
-                            <ul className="inline">
-                                <li className="pages-overall-index">{getTranslation("page")}<span>1</span></li>
-                            </ul>
-                        </div>
                     </div>
                     <div className="flyout-right-body">
                         <ul className="left-col unstyled">
