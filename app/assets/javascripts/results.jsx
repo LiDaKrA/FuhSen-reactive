@@ -805,44 +805,36 @@ var ResultsContainer = React.createClass({
         });
 
     },
-    csvFunction: function (e) {
+    csvFunction: function () {
         var JSONData = JSON.stringify(this.state.resultsData);
-        var ReportTitle = "Current results in CSV format"
-        var ShowLabel = true;
-
-        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
         var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+        var ReportTitle = "Current results in CSV format"
 
         var CSV = '';
-        //Set Report title in first row or line
+        var headers_set = new Set();
 
-        //CSV += ReportTitle + '\r\n\n';
-
-        //This condition will generate the Label/Header
-        if (ShowLabel) {
-            var row = "";
-
-            //This loop will extract the label from 1st index of on array
-            for (var index in arrData[0]) {
-
-                //Now convert each value to string and comma-seprated
-                row += index + ',';
+        for (var i = 0; i < arrData.length; i++) {
+            if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
+                for (var header in arrData[i]) {
+                    headers_set.add(header)
+                }
             }
-
-            row = row.slice(0, -1);
-
-            //append Label row with line break
-            CSV += row + '\r\n';
         }
 
-        //1st loop is to extract each row
+        let headers = Array.from(headers_set);
+        for (var i = 0; i < headers.length; i++) CSV += headers[i] + ',';
+        CSV = CSV.slice(0, -1);
+        CSV += '\r\n';
+
         for (var i = 0; i < arrData.length; i++) {
             if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
                 var row = "";
 
-                //2nd loop will extract each column and convert it in string comma-seprated
-                for (var index in arrData[i]) {
-                    row += '"' + arrData[i][index] + '",';
+                for (var index in headers) {
+                    //console.log(headers[index])
+                    var value = arrData[i][headers[index]]
+                    if( value === undefined || value === 'null') value=''
+                    row += '"' + value + '",';
                 }
 
                 row.slice(0, row.length - 1);
@@ -1016,7 +1008,6 @@ var ResultsContainer = React.createClass({
         }
     },
     render: function () {
-
         var loadMoreResultsItem = <div id="load-more-results" className="hidden">{getTranslation("show_more_results")}</div>
         if (this.state.areThereMoreResults) {
             loadMoreResultsItem = <a href='#' onClick={this.props.onLoadMoreResults}><div id="load-more-results">{getTranslation("show_more_results")}</div></a>
