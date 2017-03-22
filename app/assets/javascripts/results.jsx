@@ -322,7 +322,7 @@ var FacetList = React.createClass({
         CSV = CSV.slice(0, -1);
         CSV += '\r\n';
 
-        var CVS_values = ''
+        var CVS_values = '@facet_name, @facet_value, @count \r\n'
 
         for (var i = 0; i < arrData.length; i++) {
             if (this.state.selectedChecks === undefined
