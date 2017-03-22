@@ -303,97 +303,78 @@ var FacetList = React.createClass({
     },
     facets2CSV: function () {
         var JSONData = JSON.stringify(this.state.data);
-        var ReportTitle = "Current results in CSV format"
-        var ShowLabel = true;
-
-        //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
         var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
-
         var CSV = '';
-        //Set Report title in first row or line
+        var headers_set = new Set();
 
-        //CSV += ReportTitle + '\r\n\n';
-
-        //This condition will generate the Label/Header
-        if (ShowLabel) {
-            var row = "";
-
-            //This loop will extract the label from 1st index of on array
-            for (var index in arrData[0]) {
-
-                //Now convert each value to string and comma-seprated
-                row += index + ',';
-            }
-
-            row = row.slice(0, -1);
-
-            //append Label row with line break
-            CSV += row + '\r\n';
-        }
-
-        //1st loop is to extract each row
         for (var i = 0; i < arrData.length; i++) {
             if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
+                for (var header in arrData[i]) {
+                    headers_set.add(header)
+                }
+            }
+        }
+
+        headers_set.delete("http://vocab.lidakra.de/fuhsen/hasFacet")
+
+        let headers = Array.from(headers_set);
+        for (var i = 0; i < headers.length; i++) CSV += headers[i] + ',';
+        CSV = CSV.slice(0, -1);
+        CSV += '\r\n';
+
+        var CVS_values = ''
+
+        for (var i = 0; i < arrData.length; i++) {
+            if (this.state.selectedChecks === undefined
+                || this.state.selectedChecks === null
+                || this.state.selectedChecks.length == 0
+                || this.state.selectedChecks.indexOf(i) > -1){
+
                 var row = "";
-                var value_number_pair;
-                //2nd loop will extract each column and convert it in string comma-seprated
-                for (var index in arrData[i]) {
-                    if(index==="http://vocab.lidakra.de/fuhsen/hasFacet"){
-                        if(Object.prototype.toString.call(arrData[i][index]) === '[object Array]'){
-                            for (var j = 0; j < arrData[i][index].length; j++){
-                                value_number_pair=arrData[i][index][j].split("^")
-                                for (var k = 0; k < value_number_pair.length; k++){
-                                    row += '"' + value_number_pair[k] + '",';
-                                }
-                            }
-                        }else{
-                            value_number_pair=arrData[i][index].split("^")
-                            for (var k = 0; k < value_number_pair.length; k++){
-                                row += '"' + value_number_pair[k] + '",';
-                            }
-                        }
-                    }else{
-                        row += '"' + arrData[i][index] + '",';
-                    }
+
+                for (var index in headers) {
+                    var value = arrData[i][headers[index]]
+                    if (value === undefined || value === 'null') value = ''
+                    row += '"' + value + '",';
                 }
 
                 row.slice(0, row.length - 1);
 
                 //add a line break after each row
                 CSV += row + '\r\n';
+
+                var facet_values = arrData[i]["http://vocab.lidakra.de/fuhsen/hasFacet"]
+                var facet_name = arrData[i]["http://vocab.lidakra.de/fuhsen#facetLabel"]
+
+                if (Object.prototype.toString.call(facet_values) === '[object Array]') {
+                    for (var j = 0; j < facet_values.length; j++) {
+                        value_number_pair = facet_values[j].split("^")
+                        for (var k = 0; k < value_number_pair.length; k=k+2) {
+                            CVS_values += '"' + facet_name + '","' + value_number_pair[k] + '","' + value_number_pair[k+1] + '"\r\n';
+                        }
+                    }
+                } else {
+                    value_number_pair = facet_values.split("^")
+                    for (var k = 0; k < value_number_pair.length; k=k+2) {
+                        CVS_values += '"' + facet_name + '","' + value_number_pair[k] + '","' + value_number_pair[k+1] + '"\r\n';
+                    }
+                }
             }
         }
 
-        if (CSV == '') {
+        if (CSV == '' || CVS_values == '') {
             alert("Invalid data");
             return;
         }
 
-        //Generate a file name
-        var fileName = "Fuhsen_Facets_";
-        //this will remove the blank-spaces from the title and replace it with an underscore
-        fileName += ReportTitle.replace(/ /g, "_");
-
-        //Initialize file format you want csv or xls
-        var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
-
-        // Now the little tricky part.
-        // you can use either>> window.open(uri);
-        // but this will not work in some browsers
-        // or you will not get the correct file extension
-
-        //this trick will generate a temp <a /> tag
-        var link = document.createElement("a");
-        link.href = uri;
-
-        //set the visibility hidden so it will not effect on your web-layout
-        link.style = "visibility:hidden";
-        link.download = fileName + ".csv";
-
-        //this part will append the anchor tag and remove it after automatic click
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        var zip = new JSZip();
+        // create a file
+        zip.file("Facets_summary.csv", CSV);
+        zip.file("Facets_values.csv", CVS_values);
+        zip.generateAsync({type:"blob"})
+            .then(function (blob) {
+                saveAs(blob, "facets_csv_export.zip");
+            });
 
         this.setState({
             resultsData: this.state.resultsData,
