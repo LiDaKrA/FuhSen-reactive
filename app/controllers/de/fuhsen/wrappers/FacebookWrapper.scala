@@ -78,7 +78,7 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
   override def extractNextPageQueryValue(resultBody: String, apiUrl: Option[String]): Option[String] = {
     val jsonBody = Json.parse(resultBody)
     val numberOfResults = countIds(resultBody)
-    Logger.info("Calculating numer of results: "+numberOfResults)
+    Logger.info("Calculating number of results: "+numberOfResults)
     if (numberOfResults < 24)
       None
     else

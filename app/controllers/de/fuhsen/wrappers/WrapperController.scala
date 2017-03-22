@@ -330,7 +330,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
           case ApiSuccess(body, nextPage, lastValue) =>
             Logger.info("Custom Api Handling: Api Success")
             customFn(body).
-                map(customResult => ApiSuccess(customResult))
+                map(customResult => ApiSuccess(customResult, nextPage, lastValue))
           case r: ApiError =>
             Logger.info("Custom Api Handling: Api Error")
             Future(r)
