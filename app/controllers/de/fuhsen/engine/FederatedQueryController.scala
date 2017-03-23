@@ -67,7 +67,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         finalSelectedDataSources = FuhsenVocab.getWrappersFromMetadata(metaDataModel).mkString(",")
         Logger.info("Final Data Sources Changed by Load More Results: "+finalSelectedDataSources)
         metaData = RDFUtil.modelToTripleString(metaDataModel, Lang.TURTLE)
-        Logger.info("Metadata: "+metaData)
+        //Logger.info("Metadata: "+metaData)
       }
 
       if (keyword.isEmpty || finalSelectedDataSources.isEmpty)

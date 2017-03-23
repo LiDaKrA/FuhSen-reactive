@@ -18,11 +18,10 @@ package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
-import play.api.Logger
+import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.libs.ws._
-
 import scala.concurrent.Future
 
 /**
@@ -31,17 +30,20 @@ import scala.concurrent.Future
 
 case class Person(id: String, displayName: String, objectType: String)
 
-class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
+class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait with PaginatingApiTrait {
 
-  override def apiUrl: String = ConfigFactory.load.getString("yql.url")
+  //Google+ API implementation
+  //override def apiUrl: String = ConfigFactory.load.getString("yql.url")
   //Replaced by YQL access point
-  //override def apiUrl: String = ConfigFactory.load.getString("gplus.user.url")
+  override def apiUrl: String = ConfigFactory.load.getString("gplus.user.url")
 
 
   override def queryParams: Map[String, String] = Map (
-    "format" -> "json"
-    //Replaced by YQL
-    //"key" -> ConfigFactory.load.getString("gplus.app.key")
+    // YQL Implementation
+    //"format" -> "json"
+    //Google+ API implementation
+    "key" -> ConfigFactory.load.getString("gplus.app.key"),
+    "maxResults" -> "50"
   )
 
   /** Headers that should be added to the request. */
@@ -49,9 +51,11 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
 
   /** Returns for a given query string the representation as query parameter. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = Map (
-    "q" -> ("USE 'http://www.datatables.org/google/google.plus.people.search.xml';SELECT * FROM google.plus.people.search WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND query='"+queryString+"'")
-    //Replaced by YQL
-    //"query" -> queryString
+    // YQL Implementation
+    //"q" -> ("USE 'http://www.datatables.org/google/google.plus.people.search.xml';SELECT * FROM google.plus.people.search WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND query='"+queryString+"' LIMIT 10")
+
+    //Google+ API implementation
+    "query" -> queryString
   )
 
   /** The type of the transformation input. */
@@ -96,11 +100,11 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
   override def customResponseHandling(implicit ws: WSClient) = Some(apiResponse => {
 
     val people = {
-      try { (Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[List[Person]]
+      try { (Json.parse(apiResponse) \ "items").as[List[Person]]
         }catch {
           case e: Exception =>
             try {
-              List[Person]((Json.parse(apiResponse) \ "query" \ "results" \ "json" \ "items").as[Person]) //
+              List[Person]((Json.parse(apiResponse) \ "items").as[Person]) //
             } catch {
               case e: Exception => List[Person]()
             }
@@ -126,7 +130,7 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
       //Google plus get person request
       //Replaced by YQL
       //val _url = apiUrl + "/" + person.id
-      val _url = apiUrl + "?q=USE 'http://www.datatables.org/google/google.plus.people.xml';SELECT * FROM google.plus.people WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND userId='"+person.id+"'"
+      val _url = ConfigFactory.load.getString("yql.url") + "?q=USE 'http://www.datatables.org/google/google.plus.people.xml';SELECT * FROM google.plus.people WHERE key='"+ConfigFactory.load.getString("gplus.app.key")+"' AND userId='"+person.id+"' &format=json"
       val request = ws.url(_url)
           .withQueryString(queryParams.toSeq: _*)
       request.get()
@@ -166,4 +170,53 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
     * Returns the globally unique URI String of the source that is wrapped. This is used to track provenance.
     */
   override def sourceLocalName: String = "gplus"
+
+  /** The query parameter to specify the page/offset in the result set */
+  override def nextPageQueryParameter: String = "nextPageToken"
+
+  /**
+    * Extracts and returns the next page/offset value from the response body of the API.
+    *
+    * @param resultBody The body serialized as String as coming from the API.
+    * @param apiUrl  The last value. This can be used if the value is not available in the result body, but instead
+    *                   is calculated by the wrapper implementation.
+    */
+  override def extractNextPageQueryValue(resultBody: String, apiUrl: Option[String]): Option[String] = {
+    val jsonBody = Json.parse(resultBody)
+    val numberOfResults = countIds(resultBody)
+    Logger.info("Calculating number of results: "+numberOfResults)
+    if (numberOfResults < 50)
+      None
+    else {
+      val nextPageValue = (jsonBody \ "nextPageToken").asOpt[String]
+      nextPageValue match {
+        case Some(value) =>
+          if (apiUrl.get.contains("pageToken")){
+            val lastValue = getParameters(apiUrl.get)("pageToken")
+            Some(apiUrl.get.replace("pageToken="+lastValue, "pageToken="+value))
+          }else{
+            Some(apiUrl.get+"&pageToken="+value) //
+          }
+        case None => None
+      }
+    }
+  }
+
+  private def countIds(body: String) : Int = {
+    var count = 0
+    var index = body.indexOf("id")
+    while (index != -1) {
+      count = count + 1
+      index = body.indexOf("\"id\"", index + 2)
+    }
+    count
+  }
+
+  private def getParameters(url: String) : Map[String,String] = {
+    val url2 = url.split("\\?").last
+    url2.split("&") map { t =>
+      val idx = t.indexOf("=")
+      t.substring(0, idx) -> t.substring(idx + 1) } toMap
+  }
+
 }

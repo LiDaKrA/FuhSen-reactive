@@ -17,6 +17,8 @@ package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
+import play.Logger
+import play.api.libs.json.Json
 
 /**
   * Wrapper for the Tor2Web REST API.
@@ -27,7 +29,8 @@ class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait wit
 
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map(
-    "key" -> ConfigFactory.load.getString("tor2web.app.key")
+    "key" -> ConfigFactory.load.getString("tor2web.app.key"),
+    "start" -> "0"
   )
 
   /** Headers that should be added to the request. */
@@ -73,8 +76,36 @@ class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait wit
     *                   is calculated by the wrapper implementation.
     */
   override def extractNextPageQueryValue(resultBody: String, apiUrl: Option[String]): Option[String] = {
-    //val newOffset = lastValue map { v => v.toInt + limit} getOrElse limit
-    //Some(newOffset.toString)
-    None
+    //Logger.info(s"Google+ extractNextPageQueryValue apiUrl: $apiUrl body: $resultBody ")
+    apiUrl match {
+      case Some(value) =>
+        Logger.info("Calculating next page for url: "+value)
+        try {
+          val jsonBody = Json.parse(resultBody)
+
+          val totalPagesString = (jsonBody \ "@attributes" \ "numFound").as[String]
+          val totalPages = totalPagesString.toInt
+          val lastValueString = (jsonBody \ "@attributes" \ "start").as[String]
+          val lastValue = lastValueString.toInt
+
+          Logger.info(s"Total number of results: $totalPagesString and last value: $lastValueString")
+
+          if(lastValue > 1000)
+            None
+          else {
+            if (lastValue+100 <= totalPages)
+              Some(apiUrl.get.replace("start="+lastValue, "start="+(lastValue+100)))
+            else
+              None
+          }
+        } catch { case e: Exception =>
+          Logger.warn("Error while calculating next page for Darknet: "+e)
+          None
+        }
+      case None =>
+        Logger.info("No last call URL sent, no next page created")
+        None
+    }
   }
+
 }
