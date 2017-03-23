@@ -48,18 +48,47 @@ var ContainerHeader = React.createClass({
     }
 });
 var ProfileContainer = React.createClass({
+    getInitialState: function () {
+        return {data: null};
+    },
+    loadProfileFromServer: function(eType,eUri){
+        var url = "/engine/api/entitysummarization/" + this.props.searchUid + "/summarize?entityType=" + eType + "&uri=" + eUri;
+        $.ajax({
+            url: url,
+            dataType: 'json',
+            cache: false,
+            success: function (response) {
+                    var data_to_handle = response["@graph"];
+                    if (response["@graph"] === undefined && response["fs:source"] !== undefined) {
+                        data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(response) + "]}");
+                        data_to_handle = data_to_handle["@graph"];
+                    }
+                    else
+                        data_to_handle = undefined;
+
+                this.setState({
+                   data: data_to_handle
+                });
+            }.bind(this),
+            error: function (xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
+    },
+    componentDidMount: function (){
+        //this.loadProfileFromServer(this.props.entityType,this.props.eUri);
+    },
     render: function () {
-        var image = "https://media.licdn.com/media/p/4/000/13e/336/35bb4dc.jpg";
-        var name = "Diego Collorana";
+        // var image = "https://media.licdn.com/media/p/4/000/13e/336/35bb4dc.jpg";
+        // var name = "Diego Collorana";
         return (
-            <div>
-                <ContainerHeader />
-                {/*<div className="row search-results-container">*/}
+            <div className="container">
+                <div className="row" id="header-main-row">
                  <div id ="profile_container" className="profile">
-                            <ProfileHeader image={image} name={name}/>
-                            <ProfileBody />
+                            <ProfileHeader image={this.state.data.image} name={this.state.data["fs:tittle"]}/>
+                            <ProfileBody data = {this.state.data}/>
                     </div>
-                {/*</div>*/}
+                </div>
             </div>
         );
     }
@@ -88,10 +117,17 @@ var ProfileBody = React.createClass({
     render: function () {
         var header = "CAREER";
         var data_items = ["Researcher at Fraunhofer (since 2016)", "Researcher at EIS Group,Uni Bonn (since 2015)", "Software Engineer at X (2014-2015)"];
+        var profileSections = Object.keys(this.props.data).map(function(key,index){
+            var data_items = this.props.data[key];
+            if(!Array.isArray(this.props.data[key]))
+                data_items = [this.props.data[key]];
+            return(
+               <ProfileSection header={key} data={data_items}/>
+           )
+        });
         return (
             <div id="profile_container_middle">
-                <ProfileSection header={header} data={data_items}/>
-                <ProfileSection header={header} data={data_items}/>
+                {profileSections}
             </div>
         );
     }
