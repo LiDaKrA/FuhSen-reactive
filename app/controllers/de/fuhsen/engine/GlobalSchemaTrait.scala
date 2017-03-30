@@ -64,7 +64,7 @@ object JenaGlobalSchema extends GlobalSchemaTrait {
     model
   }
 
-  override def getDataSources() : Model = {
+  override def getEntityTypes() : Model = {
     val query = QueryFactory.create(
       s"""
          |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -86,7 +86,7 @@ object JenaGlobalSchema extends GlobalSchemaTrait {
     QueryExecutionFactory.create(query, model).execConstruct()
   }
 
-  override def getEntityTypes() : Model = {
+  override def getDataSources() : Model = {
     val query = QueryFactory.create(
       s"""
          |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
