@@ -44,8 +44,8 @@ public class Application extends Controller {
         return ok(results.render());
     }
 
-    public Result details() {
-        return ok(details.render());
+    public Result details(String uid,String eUri,String entityType) {
+        return ok(details.render(uid,eUri,entityType));
     }
 
     public Result getKeyword(){

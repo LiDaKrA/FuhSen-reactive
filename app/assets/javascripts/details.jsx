@@ -1,71 +1,28 @@
-// var context = $('body').data('context');
-var ContainerHeader = React.createClass({
-    // event handler for language switch
-    // change dictionary then update state so the page notices the change
-    setLang: function () {
-        switch (window.localStorage.getItem("lang")) {
-            case "de":
-                window.globalDict = dictGer;
-                window.localStorage.lang = "de";
-                this.setState({dictionary: "de"});
-                globalFlushFilters();
-                break;
-            case "en":
-                window.globalDict = dictEng;
-                window.localStorage.lang = "en";
-                this.setState({dictionary: "en"});
-                globalFlushFilters();
-                break;
-        }
-    },
-    render:function(){
-        return(
-            <div className="container">
-                <div className="row" id="header-main-row">
-                    <nav className="widget col-md-12" data-widget="NavigationWidget">
-                        <div className="row">
-                            <div className="col-md-4">
-                                <a href={context === "" ? "/" : context}>
-                                    <img src={context + "/assets/images/logoBig2.png"} class="smallLogo"
-                                         alt="Logo_Description"/>
-                                </a>
-                            </div>
-                            <div className="col-md-3">
-                            </div>
-                            <div className="col-md-5 toolbar search-header hidden-phone text-right">
-                                <div className="row">
-                                    <div className="col-md-12">
-                                        <LangSwitcher onlangselect={this.setLang}/>
-                                        <SearchForm id_class="form-search-header" keyword={""}/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-            </div>
-        );
-    }
-});
 var ProfileContainer = React.createClass({
     getInitialState: function () {
-        return {data: null};
+        return {data: undefined};
     },
-    loadProfileFromServer: function(eType,eUri){
-        var url = "/engine/api/entitysummarization/" + this.props.searchUid + "/summarize?entityType=" + eType + "&uri=" + eUri;
+    loadProfileFromServer: function(uid,eUri,eType){
+        var url = context + "/engine/api/entitysummarization/" + uid + "/summarize?uri=" + eUri + "&entityType=" + eType;
         $.ajax({
             url: url,
             dataType: 'json',
             cache: false,
             success: function (response) {
-                    var data_to_handle = response["@graph"];
-                    if (response["@graph"] === undefined && response["fs:source"] !== undefined) {
-                        data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(response) + "]}");
-                        data_to_handle = data_to_handle["@graph"];
-                    }
-                    else
-                        data_to_handle = undefined;
-
+                //     var data_to_handle = JSON.parse(JSON.stringify(response));
+                //     if (data_to_handle["@graph"] === undefined && data_to_handle["fs:source"] !== undefined) {
+                //         data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(response) + "]}");
+                //         data_to_handle = data_to_handle["@graph"];
+                //     }
+                //     else
+                //         data_to_handle = undefined;
+                //
+                // console.log(data_to_handle);
+                if(response["@context"] !== undefined) {
+                    delete response["@context"];
+                }
+                var data_to_handle = response;
+                console.log(data_to_handle);
                 this.setState({
                    data: data_to_handle
                 });
@@ -76,16 +33,17 @@ var ProfileContainer = React.createClass({
         });
     },
     componentDidMount: function (){
-        //this.loadProfileFromServer(this.props.entityType,this.props.eUri);
+        console.log(this.props.uid);
+        console.log(this.props.eUri);
+        console.log(this.props.entityType);
+        this.loadProfileFromServer(this.props.uid,this.props.eUri,this.props.entityType);
     },
     render: function () {
-        // var image = "https://media.licdn.com/media/p/4/000/13e/336/35bb4dc.jpg";
-        // var name = "Diego Collorana";
         return (
             <div className="container">
                 <div className="row" id="header-main-row">
-                 <div id ="profile_container" className="profile">
-                            <ProfileHeader image={this.state.data.image} name={this.state.data["fs:tittle"]}/>
+                 <div id ="profile_container">
+                            <ProfileHeader image={this.state.data !== undefined ? this.state.data["image"] : undefined} name={this.state.data !== undefined ? this.state.data["fs:title"] : undefined}/>
                             <ProfileBody data = {this.state.data}/>
                     </div>
                 </div>
@@ -99,7 +57,7 @@ var ProfileHeader = React.createClass({
         return (
             <div id="profile_container_top">
                 <div id="profile_image">
-                    <img className="thumbnail b-loaded" src={this.props.image} width="90" height="90"/>
+                    <img className="thumbnail" src={this.props.image} width="90" height="90"/>
                 </div>
                 <div id="profile_summary">
                     <div className="header">
@@ -115,16 +73,14 @@ var ProfileHeader = React.createClass({
 
 var ProfileBody = React.createClass({
     render: function () {
-        var header = "CAREER";
-        var data_items = ["Researcher at Fraunhofer (since 2016)", "Researcher at EIS Group,Uni Bonn (since 2015)", "Software Engineer at X (2014-2015)"];
-        var profileSections = Object.keys(this.props.data).map(function(key,index){
+        var profileSections = (this.props.data !== undefined ? Object.keys(this.props.data).map(function(key,index){
             var data_items = this.props.data[key];
             if(!Array.isArray(this.props.data[key]))
                 data_items = [this.props.data[key]];
             return(
                <ProfileSection header={key} data={data_items}/>
            )
-        });
+        },this) : undefined);
         return (
             <div id="profile_container_middle">
                 {profileSections}
@@ -139,11 +95,11 @@ var ProfileSection = React.createClass({
             return (<li><span>{item}</span><br/></li>);
         });
         return (
-            <div className="row-line group">
+            <div className="row-line">
                 <div className="field_label">
                     <div className="hidden-xs hidden-sm">
-                        <i className="fa fa-suitcase hidden-sm hidden-xs"/>&nbsp;
-                        <span>{this.props.header}:</span>
+                        {/*<i className="fa fa-suitcase hidden-sm hidden-xs"/>&nbsp;*/}
+                        <span><b>{this.props.header}</b></span>
                     </div>
                 </div>
                 <div className="values">
@@ -156,5 +112,5 @@ var ProfileSection = React.createClass({
     }
 });
 React.render(
-    <ProfileContainer />
+    <ProfileContainer uid = {uid} eUri = {eUri} entityType = {eType}/>
     , document.getElementById('skeleton'));

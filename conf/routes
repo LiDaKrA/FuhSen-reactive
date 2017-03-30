@@ -5,7 +5,7 @@
 # User Interface routes
 GET     /                                                   controllers.Application.index()
 GET     /results                                            controllers.Application.results()
-GET     /details                                            controllers.Application.details()
+GET     /details                                            controllers.Application.details(uid: String,eUri: String ,entityType: String)
 GET     /keyword                                            controllers.Application.getKeyword()
 GET     /screenshot                                         controllers.de.fuhsen.engine.ScreenshotController.screenshots(url: String)
 GET     /checkOnionSite                                     controllers.de.fuhsen.engine.ScreenshotController.checkOnionSite(site: String)
@@ -24,7 +24,7 @@ POST    /engine/api/federatedquery                          controllers.de.fuhse
 POST    /engine/api/datacuration                            controllers.de.fuhsen.engine.DataCurationController.execute
 POST    /engine/api/entitysummarization                     controllers.de.fuhsen.engine.EntitySummarizationController.execute
 POST    /engine/api/semanticranking                         controllers.de.fuhsen.engine.SemanticRankingController.execute
-GET     /engine/api/entitysummarization/:uid/summarize      controllers.de.fuhsen.engine.EntitySummarizationController.summarizeEntity(uid: String, entityType :String,uri:String)
+GET     /engine/api/entitysummarization/:uid/summarize      controllers.de.fuhsen.engine.EntitySummarizationController.summarizeEntity(uid: String, entityType :String,uri: String)
 
 # Global Schema API routes
 GET     /engine/api/schema/datasources                      controllers.de.fuhsen.engine.SchemaController.getSourceList

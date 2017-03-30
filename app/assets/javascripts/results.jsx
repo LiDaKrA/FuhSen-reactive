@@ -272,6 +272,7 @@ var FacetList = React.createClass({
             data:JSON.stringify(selectedFacets),
             contentType: 'application/json',
             success: function (response) {
+                console.log(response)
                 if(exact && JSON.stringify(response["@graph"]) == undefined){
                     //alert(getTranslation("no_exact_match_results"));
                 }else{
@@ -1229,7 +1230,8 @@ var ResultsContainer = React.createClass({
                             <ul id="search-results" className="search-results">
                                 <ul className="results-list list-unstyled">
                                     <ResultsList data={final_data}
-                                                 crawled={this.state.crawled}>
+                                                 crawled={this.state.crawled}
+                                                 searchUid={this.props.searchUid}>
                                     </ResultsList>
 
                                 </ul>
@@ -1272,7 +1274,7 @@ var ResultsList = React.createClass({
             if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultElement
-                        id = {idx}
+                        id = {result["@id"]}
                         img={result.image}
                         name={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1291,13 +1293,14 @@ var ResultsList = React.createClass({
                         top_haves={result["fs:top_haves"]}
                         interests={result["fs:interests"]}
                         jsonResult = {result}
+                        uid = {this.props.searchUid}
                     >
                     </PersonResultElement>
                 );
             } else if (result["@type"] === "foaf:Organization") {
                 return (
                     <OrganizationResultElement
-                        id = {idx}
+                        id = {result["@id"]}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1306,13 +1309,14 @@ var ResultsList = React.createClass({
                         country={result["fs:country"]}
                         location={result["fs:location"]}
                         webpage={result.url}
-                        jsonResult = {result}>
+                        jsonResult = {result}
+                        uid = {this.props.searchUid}>
                     </OrganizationResultElement>
                 );
             } else if (result["@type"] === "gr:ProductOrService") {
                 return (
                     <ProductResultElement
-                        id = {idx}
+                        id = {result["@id"]}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1321,7 +1325,8 @@ var ResultsList = React.createClass({
                         price={result["fs:priceLabel"]}
                         condition={result["fs:condition"]}
                         webpage={result.url}
-                        jsonResult = {result}>
+                        jsonResult = {result}
+                        uid = {this.props.searchUid}>
                     </ProductResultElement>
                 );
             } else if (result["@type"] === "foaf:Document") {
@@ -1364,7 +1369,7 @@ var ResultsList = React.createClass({
                     </DocumentResultElement>
                 );
             }
-        });
+        },this);
 
         return (
             <div className="commentList">
@@ -1507,6 +1512,7 @@ var SnapshotLink = React.createClass({
 
 var ProductResultElement = React.createClass({
     render: function () {
+        var detailsPageUri = context + "/details?entityType=product" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
         return (
             <li className="item bt">
                 <div className="summary row">
@@ -1517,9 +1523,11 @@ var ProductResultElement = React.createClass({
                     </div>
                     <div className="summary-main-wrapper col-md-8">
                         <div className="summary-main">
+                            <a href= {detailsPageUri} target="_blank">
                             <h2 className="title">
                                 {this.props.title}
                             </h2>
+                            </a>
                             <div className="subtitle">
                                 { this.props.location !== undefined ?
                                     <p>{getTranslation("location")}: {this.props.location}</p> : null }
@@ -1552,6 +1560,7 @@ var ProductResultElement = React.createClass({
 
 var PersonResultElement = React.createClass({
     render: function () {
+        var detailsPageUri = context + "/details?entityType=person" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
         return (
             <li className="item bt">
                 <div className="summary row">
@@ -1564,9 +1573,11 @@ var PersonResultElement = React.createClass({
                     </div>
                     <div className="summary-main-wrapper col-md-8">
                         <div className="summary-main">
+                            <a href={detailsPageUri} target="_blank">
                             <h2 className="title">
                                 {this.props.name}
                             </h2>
+                            </a>
                             <div className="subtitle">
                                 { this.props.alias !== undefined ?
                                     <p>{getTranslation("nick")}: {this.props.alias}</p> : null }
@@ -1615,6 +1626,7 @@ var PersonResultElement = React.createClass({
 
 var OrganizationResultElement = React.createClass({
     render: function () {
+        var detailsPageUri = context + "/details?entityType=organization" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
         return (
             <li className="item bt">
                 <div className="summary row">
@@ -1626,9 +1638,11 @@ var OrganizationResultElement = React.createClass({
                     </div>
                     <div className="summary-main-wrapper col-md-8">
                         <div className="summary-main">
+                            <a href={detailsPageUri} target="_blank">
                             <h2 className="title">
                                 {this.props.title}
                             </h2>
+                            </a>
                             <div className="subtitle">
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
