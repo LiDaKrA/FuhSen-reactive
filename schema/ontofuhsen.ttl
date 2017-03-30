@@ -81,54 +81,74 @@ fs:InformationSource 	rdf:type owl:Class ;
 
 fs:Facebook rdf:type fs:InformationSource;
 			rdfs:label 	"Facebook";
+			fs:help_url "https://en.wikipedia.org/wiki/Facebook"@en,
+			            "https://de.wikipedia.org/wiki/Facebook"@de;
 			fs:finds "person";
 			fs:key "facebook" .
 
 fs:Twitter rdf:type fs:InformationSource;
 			rdfs:label 	"Twitter";
+			fs:help_url "https://en.wikipedia.org/wiki/Twitter"@en,
+            		"https://de.wikipedia.org/wiki/Twitter"@de;
 			fs:finds "person";
 			fs:key "twitter" .
 
 fs:GooglePlus rdf:type fs:InformationSource;
 			rdfs:label 	"Google+";
+			fs:help_url "https://en.wikipedia.org/wiki/Google%2B"@en,
+                   "https://de.wikipedia.org/wiki/Google%2B"@de;
 			fs:finds "person";
 			fs:finds "organization";
 			fs:key "gplus" .
 
 fs:eBay rdf:type fs:InformationSource;
 			rdfs:label 	"eBay";
+			fs:help_url "https://en.wikipedia.org/wiki/EBay"@en,
+                   "https://de.wikipedia.org/wiki/EBay"@de;
 			fs:finds "product";
 			fs:key "ebay".
 
 fs:GoogleKnowledgeGraph rdf:type fs:InformationSource;
 						rdfs:label 	"Google Knowledge Graph";
+						fs:help_url "https://en.wikipedia.org/wiki/Knowledge_Graph"@en,
+                               "https://de.wikipedia.org/wiki/Google#Knowledge_Graph"@de;
 						fs:finds "person";
                         fs:finds "organization";
 						fs:key "gkb" .
 
 fs:LinkedLeaks	rdf:type	fs:InformationSource;
-				rdfs:label 	"Linked Leaks";
+				rdfs:label 	"ICIJ Offshore Leaks";
+                fs:help_url "https://offshoreleaks.icij.org"@en,
+                       "https://offshoreleaks.icij.org"@de;
 				fs:finds "person";
                 fs:finds "organization";
 				fs:key "linkedleaks" .
 
 fs:Xing		rdf:type	fs:InformationSource;
 			rdfs:label 	"Xing";
+			fs:help_url "https://en.wikipedia.org/wiki/XING"@en,
+                   "https://de.wikipedia.org/wiki/XING"@de;
 			fs:finds "person";
 			fs:key "xing" .
 
 fs:Occrp	rdf:type	fs:InformationSource;
 			rdfs:label 	"OCCRP";
+			fs:help_url "https://www.occrp.org/en/about-us"@en,
+                   "https://www.occrp.org/en/about-us"@de;
 			fs:finds "document";
 			fs:key "occrp" .
 
 fs:Tor2Web	rdf:type	fs:InformationSource;
 			rdfs:label 	"Onion websites";
+			fs:help_url "https://en.wikipedia.org/wiki/Darknet"@en,
+                    "https://de.wikipedia.org/wiki/Darknet"@de;
 			fs:finds "website";
 			fs:key "tor2web" .
 
 fs:ElasticSearch	rdf:type	fs:InformationSource;
 			        rdfs:label 	"Crawled Onion websites";
+			        fs:help_url "http://nutch.apache.org"@en,
+                           "http://nutch.apache.org"@de;
 			        fs:finds "website";
 			        fs:key "elasticsearch" .
 

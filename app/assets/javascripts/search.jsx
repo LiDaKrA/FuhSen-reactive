@@ -399,24 +399,43 @@ var FilterCheckList = React.createClass({
             cache: false,
             success: function (list_data) {
                 var processed_data = [];
+                console.log(list_data);
                 for(var k in list_data["@graph"]){
                     var current_label = list_data["@graph"][k]["rdfs:label"]
                     var current_key = list_data["@graph"][k]["fs:key"]
+                    var current_url = list_data["@graph"][k]["fs:help_url"]
                     var checked = false
 
                     if(list_data["@graph"].length >= previousDataList.length) {
                         checked = $.inArray(current_key, previousDataList) > -1 || previousDataList.length == 0 ? true : false
                     }
 
+                    var data_label,data_url;
                     if(Object.prototype.toString.call(current_label) === '[object Array]'){
                         for(var j in current_label){
                             if(current_label[j]["@language"] === window.localStorage.getItem("lang")){
-                                processed_data.push({ id: current_label[j]["@value"], selected: checked, key: current_key, allowed: true})
+                                //processed_data.push({ id: current_label[j]["@value"], selected: checked, key: current_key, allowed: true})
+                                data_label = current_label[j]["@value"];
                             }
                         }
                     }else{
-                        processed_data.push({ id: current_label, selected: checked, key: current_key,allowed: true})
+                        //processed_data.push({ id: current_label, selected: checked, key: current_key,allowed: true})
+                        data_label = current_label;
                     }
+
+                    if(Object.prototype.toString.call(current_url) === '[object Array]'){
+                        for(var j in current_url){
+                            if(current_url[j]["@language"] === window.localStorage.getItem("lang")){
+                                //processed_data.push({ id: current_label[j]["@value"], selected: checked, key: current_key, allowed: true})
+                                data_url = current_url[j]["@value"];
+                            }
+                        }
+                    }else{
+                        //processed_data.push({ id: current_label, selected: checked, key: current_key,allowed: true})
+                        data_url = current_url;
+                    }
+
+                    processed_data.push({ id: data_label,url: data_url, selected: checked, key: current_key,allowed: true})
                 }
                 // if(this.props.filterType === "entitytypes"){
                 //     processed_data = this.updateChecks(processed_data,this.props.AllowedTypes);
@@ -435,6 +454,7 @@ var FilterCheckList = React.createClass({
                 var found = allowedTypes.indexOf(d.key) > -1;
                 return {
                     id: d.id,
+                    url: d.url,
                     selected: found,
                     allowed: found,
                     key: d.key
@@ -466,6 +486,7 @@ var FilterCheckList = React.createClass({
         var state = this.state.data.map(function(d) {
             return {
                 id: d.id,
+                url: d.url,
                 selected: (d.id === id ? !d.selected : d.selected),
                 allowed: d.allowed,
                 key: d.key
@@ -482,6 +503,7 @@ var FilterCheckList = React.createClass({
         var state = this.state.data.map(function(d) {
             return {
                 id: d.id,
+                url: d.url,
                 selected: (d.allowed ? !this.state.selectAll : d.selected),
                 allowed: d.allowed,
                 key: d.key
@@ -504,7 +526,7 @@ var FilterCheckList = React.createClass({
                             <div>
                                 &emsp;<input type="checkbox" checked={d.selected}
                                              onChange={this.__changeSelection.bind(this, d.id)}/>
-                                {d.id}
+                                {d.url !== undefined ? <a className="no-external-link-icon" href={d.url} target="_blank">{d.id}</a> : d.id}
                                 <br />
                             </div>
                         );
@@ -514,7 +536,7 @@ var FilterCheckList = React.createClass({
                             <div>
                                 &emsp;<s><input type="checkbox" checked={d.selected} disabled="true"
                                                      onChange={this.__changeSelection.bind(this, d.id)}/>
-                                {d.id}
+                                {d.url !== undefined ? <a className="no-external-link-icon" href={d.url} target="_blank">{d.id}</a> : d.id}
                             </s>
                                 <br />
                             </div>

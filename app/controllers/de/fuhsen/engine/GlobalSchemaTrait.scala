@@ -97,11 +97,13 @@ object JenaGlobalSchema extends GlobalSchemaTrait {
          |?p rdf:type fs:InformationSource .
          |?p rdfs:label ?label .
          |?p fs:key ?key .
+         |?p fs:help_url ?url.
          |}
          |WHERE {
          |?p rdf:type fs:InformationSource .
          |?p rdfs:label ?label .
          |?p fs:key ?key .
+         |?p fs:help_url ?url.
          |}
           """.stripMargin)
     QueryExecutionFactory.create(query, model).execConstruct()
