@@ -9,20 +9,10 @@ var ProfileContainer = React.createClass({
             dataType: 'json',
             cache: false,
             success: function (response) {
-                //     var data_to_handle = JSON.parse(JSON.stringify(response));
-                //     if (data_to_handle["@graph"] === undefined && data_to_handle["fs:source"] !== undefined) {
-                //         data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(response) + "]}");
-                //         data_to_handle = data_to_handle["@graph"];
-                //     }
-                //     else
-                //         data_to_handle = undefined;
-                //
-                // console.log(data_to_handle);
                 if(response["@context"] !== undefined) {
                     delete response["@context"];
                 }
                 var data_to_handle = response;
-                console.log(data_to_handle);
                 this.setState({
                    data: data_to_handle
                 });
@@ -33,9 +23,6 @@ var ProfileContainer = React.createClass({
         });
     },
     componentDidMount: function (){
-        console.log(this.props.uid);
-        console.log(this.props.eUri);
-        console.log(this.props.entityType);
         this.loadProfileFromServer(this.props.uid,this.props.eUri,this.props.entityType);
     },
     render: function () {

@@ -979,7 +979,7 @@ var ResultsContainer = React.createClass({
         this.loadDataFromServer(this.props.entityType, this.props.exactMatching, false);
     },
     componentWillReceiveProps: function (nextProps) {
-        // see if it actually changed
+        //see if it actually changed
         if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching || nextProps.loadMoreResults === true) {
             this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
         }
@@ -1030,7 +1030,7 @@ var ResultsContainer = React.createClass({
                                 {/*</li>*/}
                                 {personenItem}
                                 {organizationenItem}
-                                {produkteItem}t
+                                {produkteItem}
                                 {darkWebItem}
                                 {documentItem}
                             </ul>
@@ -1627,6 +1627,7 @@ var PersonResultElement = React.createClass({
 var OrganizationResultElement = React.createClass({
     render: function () {
         var detailsPageUri = context + "/details?entityType=organization" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
+
         return (
             <li className="item bt">
                 <div className="summary row">
