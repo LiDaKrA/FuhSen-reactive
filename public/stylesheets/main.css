@@ -45,8 +45,16 @@
     font-size: 14px;
 }
 
-p.thick {
+.filterchecklist-head {
+    position: relative;
     font-weight: bold;
+    padding-bottom: 10px;
+}
+
+.filterchecklist-head .contextual-help {
+    position: absolute;
+    right: 0px;
+    top: 5px;
 }
 
 .separator {
@@ -93,6 +101,10 @@ div.floatingSelText-header {
 div.accessTokenDiv {
     z-index:1;
     position:static;
+}
+
+div.accessTokenDiv .socialNetworkName {
+    font-weight: bold;
 }
 
 .floatingSelChecks {
@@ -1021,15 +1033,6 @@ header .language-widget form,.header .language-widget form {
 
 .search-widget form button:hover {
     background-position-y: -50px;
-}
-
-.search-widget .contextual-help,.advanced-search .contextual-help {
-    margin-left: 4px;
-    margin-top: 5px;
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    background: url("../images/icons/tooltips.png") no-repeat 0 0;
 }
 
 #form-search .contextual-help:hover,#form-search .contextual-help:active,#form-search .contextual-help:focus,.advanced-search .contextual-help:hover,.advanced-search .contextual-help:active,.advanced-search .contextual-help:focus {

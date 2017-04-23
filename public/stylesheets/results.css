@@ -1473,7 +1473,7 @@ color: #44639A;
 /* The actual popup */
 .contextual-help .popuptext {
   visibility: hidden;
-  width: 400px;
+  width: 500px;
   background-color: #999;
   color: #fff;
   text-align: justify;
@@ -1482,8 +1482,8 @@ color: #44639A;
   position: absolute;
   z-index: 1;
   bottom: 125%;
-  left: -660%;
-  margin-left: -80px;
+  left: -750%;
+  margin-left: -115px;
 }
 
 /* Popup arrow */

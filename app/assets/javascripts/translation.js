@@ -47,7 +47,7 @@ var dictEng = {
     "toolminmax":"MIN-MAX: Enables a range filter by defining a lower limit and an upper limit.",
     "newtoken":"Retrieve a new access token",
     "novalidtkfound_pre":"No valid ",
-    "novalidtkfound_post": " token found, if this data source is needed please:",
+    "novalidtkfound_post": " token found, please:",
     "hours":"hours",
     "days":"days",
     "minutes":"minutes",
@@ -124,7 +124,9 @@ var dictEng = {
     "no_exact_match_results":"No exact match results found, shown all results.",
     "show_more_results":"SHOW MORE RESULTS",
     "empty_keyword": "Search Keyword cannot be empty !!. Please write a keyword.",
-    "see_snapshot": "See Snapshot"
+    "see_snapshot": "See Snapshot",
+    "data_sources_help" : "Data sources: 1) Crawled Onion websites: Containing Darknet websites crawled with FuhSen application, entities such as persons or products are extracted and annotated. 2) Facebook: Containing person profiles. 3) Google Knowledge Graph: Containing information about People (such as politicians) and well-known Organizations. 4) Google+: Containing person and organization profiles. 5) ICIJ Offshore Leaks: Containing the Panama Papers leak. 6) OCCRP. Containing Organized Crimes and Corruption reports collected from all around the world. 7) Onion websites: Containing websites from the Darknet. 8) Twitter: Containing person profiles 9) Xing: Containing person professional profiles. 10) eBay: Containing product offers.",
+    "entity_types_help" : "The current version of FuhSen is able to search for: People profiles, Product offers, Organization profiles, Documents containing data leaks, organized crime and corruption reports, and Darknet websites."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -184,7 +186,7 @@ var dictGer = {
     "toolminmax":"MIN-MAX: Ermöglich die Eingabe einer Unter- oder Obergrenze für diese Eigenschaft.",
     "newtoken":"Ein neues Access Token bekommen",
     "novalidtkfound_pre":"Kein gültiges ",
-    "novalidtkfound_post": "-Token gefunden. Wenn Sie diese Datenquelle nutzen wollen, bitte:",
+    "novalidtkfound_post": "-Token gefunden, bitte:",
     "minutes":"Minuten",
     "hours":"Stunden",
     "days":"Tage",
@@ -259,7 +261,9 @@ var dictGer = {
     "no_exact_match_results":"Keine exakten Ergebnisse, alle Ergebnisse werden angezeigt.",
     "show_more_results":"MEHR ERGEBNISSE ZEIGEN",
     "empty_keyword": "Bitte geben Sie einen Suchbegriff ein.",
-    "see_snapshot": "Screenshot anzeigen"
+    "see_snapshot": "Screenshot anzeigen",
+    "data_sources_help" : "Datenquellen: 1) Crawled Onion Webseiten: Mit Darknet Webseiten, die mit FuhSen Anwendung gecrawlt werden, werden Entitäten wie Personen oder Produkte extrahiert und kommentiert. 2) Facebook: Enthaltene Personenprofile. 3) Google Knowledge Graph: Enthält Informationen über Menschen (wie Politiker) und bekannte Organisationen. 4) Google+: Personen- und Organisationsprofile enthalten. 5) ICIJ Offshore Lecks: Enthalten der Panama Papers Leck. 6) OCCRP Mit organisierten Verbrechen und Korruptionsberichten aus aller Welt gesammelt. 7) Zwiebel-Websites: Mit Webseiten aus dem Darknet. 8) Twitter: Enthaltene Personenprofile 9) Xing: Personendienstprofile enthalten. 10) eBay: Lieferumfang enthalten.",
+    "entity_types_help" : "Die aktuelle Version von FuhSen sucht nach: Personenprofilen, Produktangeboten, Organisationsprofilen, Dokumenten mit Datenlecks, organisiertem Verbrechen und Korruptionsberichten und Darknet Webseiten."
 };
 
 window.dictGer = dictGer;

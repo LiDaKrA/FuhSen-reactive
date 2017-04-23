@@ -33,7 +33,7 @@ var ContainerSearch = React.createClass({
                 <div className="row">
                     <link rel="stylesheet" media="screen" href={context+"/assets/stylesheets/startPage.css"}>
                         <div className="col-md-12 search-widget">
-                            <div class="row">
+                            <div>
                                 <img src={context+"/assets/images/imgpsh_fullsize_NoText.png"} className="bigLogo" alt="Logo_Description"/>
                                 <h1 style={{color: "#456499"} }>{getTranslation("fuhsen")}</h1>
                             </div>
@@ -59,7 +59,7 @@ var ContainerSearch = React.createClass({
                 </a>
 
                 <div id="contact-mini">
-                    {getTranslation("need_help")}<a href="mailto:lidakra-support@@ontos.com">{getTranslation("contact")}<img class="thumbnail" src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/></a>
+                    {getTranslation("need_help")}<a href="mailto:lidakra-support@@ontos.com">{getTranslation("contact")}<img src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/></a>
                 </div>
 
 
@@ -311,7 +311,7 @@ var SearchForm = React.createClass({
                             </div>
                         </div>
                     </form>
-                    <div class="row">
+                    <div>
                         <div className="col-md-3"/>
                         <div className={floatingDivStyle}>
                             <div className="row" id="filterList">
@@ -357,14 +357,14 @@ var SearchForm = React.createClass({
                         {/*<KeywordsFile sources={selected_sources} types={selected_types}/>*/}
                     {/*</div>*/}
                 </div>
-                <div class="row">
+                <div>
                     <div className={floatingDivStyle}>
                         <div className="row" id="filterList">
                             <div className="col-md-6 separator">
-                                <FilterCheckList filterType="datasources" lang = {this.props.lang} AllowedTypes = {[]} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="datasources" disabled="false" helpText="data_sources_help" lang = {this.props.lang} AllowedTypes = {[]} onSourceChangedFunction={this.sourcesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                             <div className="col-md-6">
-                                <FilterCheckList filterType="entitytypes" lang = {this.props.lang} AllowedTypes = {this.state.allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
+                                <FilterCheckList filterType="entitytypes" disabled="true" helpText="entity_types_help" lang = {this.props.lang} AllowedTypes = {this.state.allowed_types} onSourceChangedFunction={this.typesChanged} show={this.state.showSourcesTypesDiv}/>
                             </div>
                         </div>
                     </div>
@@ -524,9 +524,16 @@ var FilterCheckList = React.createClass({
                     if(d.allowed) {
                         return (
                             <div>
-                                &emsp;<input type="checkbox" checked={d.selected}
-                                             onChange={this.__changeSelection.bind(this, d.id)}/>
-                                {d.url !== undefined ? <a className="no-external-link-icon" href={d.url} target="_blank">{d.id}</a> : d.id}
+                                &emsp;
+                                {this.props.disabled === "true" ?
+                                    <input type="checkbox" disabled
+                                           checked={d.selected}
+                                           onChange={this.__changeSelection.bind(this, d.id)}/>
+                                    :
+                                    <input type="checkbox"
+                                           checked={d.selected}
+                                           onChange={this.__changeSelection.bind(this, d.id)}/>}
+                                    {d.id}
                                 <br />
                             </div>
                         );
@@ -534,10 +541,8 @@ var FilterCheckList = React.createClass({
                     else{
                         return (
                             <div>
-                                &emsp;<s><input type="checkbox" checked={d.selected} disabled="true"
-                                                     onChange={this.__changeSelection.bind(this, d.id)}/>
-                                {d.url !== undefined ? <a className="no-external-link-icon" href={d.url} target="_blank">{d.id}</a> : d.id}
-                            </s>
+                                &emsp;<s><input type="checkbox" checked={d.selected} disabled                                                      onChange={this.__changeSelection.bind(this, d.id)}/>
+                                {d.id}</s>
                                 <br />
                             </div>
                         );
@@ -545,9 +550,14 @@ var FilterCheckList = React.createClass({
                 }.bind(this));
                 return (
                     <div>
-                         <p className="thick">
-                             <input type="checkbox" checked={this.state.selectAll} onChange={this.__changeSelectAll}/>
-                             {filter_title+":"}</p>
+                         <div className="filterchecklist-head">
+                             {this.props.disabled === "true" ?
+                                 <input type="checkbox" disabled checked={this.state.selectAll} onChange={this.__changeSelectAll}/>
+                                 :
+                                 <input type="checkbox" checked={this.state.selectAll} onChange={this.__changeSelectAll}/>}
+                             {filter_title+":"}
+                             <ContextualHelp type="contextual-help help" message={getTranslation(this.props.helpText)}/>
+                         </div>
                         {checks}
                     </div>
                 );
@@ -594,7 +604,7 @@ var AccessTokenForm = React.createClass({
             if(this.state.token_life_length === "-1") {
                 return (
                     <div className="accessTokenDiv" align="center">
-                        {getTranslation("novalidtkfound_pre")+social_net_upper_case+getTranslation("novalidtkfound_post")}
+                        {getTranslation("novalidtkfound_pre")}<span className="socialNetworkName">{social_net_upper_case}</span>{getTranslation("novalidtkfound_post")}
                         <br/>
                         <br/>
                         <form action={context+"/"+this.props.social_network+"/getToken"} method="get">
@@ -635,9 +645,32 @@ var SupportContact = React.createClass({
     render: function () {
         return (
             <div id="contact-footer">
-                <img class="thumbnail" src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/>
+                <img src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/>
                 <h6>{getTranslation("need_help")}</h6>
-                <h6><a class="no-external-link-icon" href="mailto:lidakra-support@ontos.com">{getTranslation("contact")}</a></h6>
+                <h6><a href="mailto:lidakra-support@ontos.com">{getTranslation("contact")}</a></h6>
+            </div>
+        );
+    }
+});
+
+var ContextualHelp = React.createClass({
+    onChange: function() {
+        if(this.state.showSourcesTypesDiv) {
+            this.setState({ showSourcesTypesDiv: false});
+        } else {
+            this.setState({ showSourcesTypesDiv: true});
+        }
+    },
+    getInitialState: function() {
+        return { showSourcesTypesDiv: false };
+    },
+    render: function () {
+        var floatingDivStyle = this.state.showSourcesTypesDiv ? "popuptext popupshow" : "popuptext"
+        return (
+            <div className={this.props.type} onClick={this.onChange}>
+                <span className={floatingDivStyle}>
+                    {this.props.message}
+                </span>
             </div>
         );
     }
