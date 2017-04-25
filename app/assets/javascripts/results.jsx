@@ -15,6 +15,12 @@ function extractQuery(key) {
 }
 var queryDirty = extractQuery("query");
 var query = queryDirty.replace(new RegExp('\\+', 'g'), ' ');
+var exact_matching = false;
+
+if(query.match("^\"") && query.match("\"$")){
+    exact_matching = true;
+    query=query.substring(1, query.length-1)
+}
 
 function compareRank(a, b) {
     if (a["fs:rank"] < b["fs:rank"])
@@ -157,7 +163,8 @@ var Container = React.createClass({
         this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
     },
     loadCommentsFromServer: function () {
-        //alert("Loading results Container ");
+        //alert("Keyword: "+this.props.keyword);
+
         var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + this.state.exactMatching;
         $.ajax({
             url: searchUrl,
@@ -187,7 +194,7 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:false, loadMoreResults:false};
+        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:exact_matching, loadMoreResults:false};
     },
     onExactMatchingChange: function () {
         this.setState({exactMatching:!this.state.exactMatching})
