@@ -1561,6 +1561,7 @@ var ProductResultElement = React.createClass({
 var PersonResultElement = React.createClass({
     render: function () {
         var detailsPageUri = context + "/details?entityType=person" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
+        var screenShotElement = (this.props.source !== "Facebook" ? <SnapshotLink webpage={this.props.webpage}></SnapshotLink> : null);
         return (
             <li className="item bt">
                 <div className="summary row">
@@ -1594,9 +1595,10 @@ var PersonResultElement = React.createClass({
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
                                 { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
-                                                                           target="_blank">{this.props.webpage}</a>
-                                        <SnapshotLink webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                    <p><b>{getTranslation("link")}: </b>
+                                        <a href={this.props.webpage} target="_blank">{this.props.webpage}</a>
+                                        {screenShotElement}</p>
+                                    : null }
                                 { this.props.active_email !== undefined ?
                                     <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
                                 { this.props.wants !== undefined ?
