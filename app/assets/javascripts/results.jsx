@@ -197,7 +197,7 @@ var Container = React.createClass({
         return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:exact_matching, loadMoreResults:false};
     },
     onExactMatchingChange: function () {
-        this.setState({exactMatching:!this.state.exactMatching})
+        this.setState({exactMatching:!this.state.exactMatching, loadMoreResults:false})
     },
     onLoadMoreResults: function () {
         this.setState({loadMoreResults: true})
