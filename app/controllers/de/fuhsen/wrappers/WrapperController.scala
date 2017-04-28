@@ -15,6 +15,7 @@
  */
 package controllers.de.fuhsen.wrappers
 
+import java.net.ConnectException
 import java.util.Calendar
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -22,7 +23,7 @@ import javax.inject.Inject
 import com.typesafe.config.ConfigFactory
 import controllers.Application
 import controllers.de.fuhsen.FuhsenVocab
-import controllers.de.fuhsen.common.{ModelBodyParser, ApiError, ApiResponse, ApiSuccess}
+import controllers.de.fuhsen.common.{ApiError, ApiResponse, ApiSuccess, ModelBodyParser}
 import controllers.de.fuhsen.wrappers.dataintegration.{EntityLinking, SilkConfig, SilkTransformableTrait}
 import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, RestApiOAuthTrait}
 import org.apache.jena.graph.Triple
@@ -135,6 +136,11 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
 
     if(!wrapper.requestType.equals("JAVA"))
       request.get.map(convertToApiResponse("Wrapper or the wrapped service", Some(wrapper), Some(request.url))) //Add here the original API URI
+        .recover {
+        case e: ConnectException =>
+          Logger.error("Connection Exception during wrapper execution: "+e.getMessage)
+          ApiError(INTERNAL_SERVER_ERROR, e.getMessage)
+      }
     else {
       wrapper match {
         case oAuthWrapper: RestApiOAuthTrait =>
