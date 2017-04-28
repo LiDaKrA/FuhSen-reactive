@@ -188,15 +188,11 @@ object FuhsenVocab {
                   |  ?s a prov:Agent .
                   |  ?s rdfs:label ?label .
                   |  ?s fs:nextPage ?nextPage .
+                  |  FILTER (?nextPage != "")
                   |}
                 """.stripMargin)
     val resultSet = QueryExecutionFactory.create(query, model).execSelect()
-    resultSet.map { r =>
-      if (!r.getLiteral("nextPage").getString.isEmpty)
-        r.getLiteral("label").getString
-      else
-        ""
-    }.toList
+    resultSet.map { r => r.getLiteral("label").getString }.toList
   }
 
 }

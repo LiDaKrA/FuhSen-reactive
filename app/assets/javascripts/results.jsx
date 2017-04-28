@@ -1460,7 +1460,7 @@ var WebResultElement = React.createClass({
     onClickLink : function(url,e){
         e.preventDefault();
         if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
-            url = url.replace(".onion",".onion.cab");
+            url = url.replace(".onion",".onion.to");
         window.open(url,'_blank');
     },
     render: function () {
@@ -1685,7 +1685,7 @@ var ElasticSearchResultElement = React.createClass({
     onClickLink : function(url,e){
         e.preventDefault();
         if(navigator.appCodeName == "Mozilla") //"Mozilla" is the application code name for both Chrome, Firefox, IE, Safari, and Opera.
-            url = url.replace(".onion",".onion.cab");
+            url = url.replace(".onion",".onion.to");
         window.open(url,'_blank');
     },
     render: function () {
@@ -1707,7 +1707,7 @@ var ElasticSearchResultElement = React.createClass({
                                 { this.props.onion_url !== undefined ?
                                     <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
                                                                            onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a><SnapshotLink
-                                        webpage={this.props.onion_url.replace(".onion",".onion.cab")}></SnapshotLink></p> : null }
+                                        webpage={this.props.onion_url.replace(".onion",".onion.to")}></SnapshotLink></p> : null }
                                 { this.props.content !== undefined ?
                                     <p><b>Content: </b>{<RichText label="Content" text={this.props.content} maxLength={300}/>}</p> : null }
                                 { this.props.entity_url !== undefined ?
