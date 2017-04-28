@@ -136,12 +136,12 @@ var Container = React.createClass({
             if (this.state.facetsDict[facetName].indexOf(facetValue) === -1) {
                 this.state.facetsDict[facetName].push(facetValue)
                 this.state.orgFacetsDict[propertyName].push(facetValue)
-                this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
+                this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict, loadMoreResults: false})
             }
         } else {
             this.state.facetsDict[facetName] = [facetValue];
             this.state.orgFacetsDict[propertyName] = [facetValue];
-            this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
+            this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict, loadMoreResults: false})
         }
     },
     onFacetRemoval: function (facetName, propertyName,facetValue) {
@@ -160,7 +160,7 @@ var Container = React.createClass({
             delete this.state.orgFacetsDict[propertyName]
         }
 
-        this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict})
+        this.setState({facetsDict: this.state.facetsDict,orgFacetsDict: this.state.orgFacetsDict, loadMoreResults: false})
     },
     loadCommentsFromServer: function () {
         //alert("Keyword: "+this.props.keyword);
