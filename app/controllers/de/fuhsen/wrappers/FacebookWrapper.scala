@@ -65,9 +65,6 @@ class FacebookWrapper extends RestApiWrapperTrait with RestApiOAuth2Trait with S
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
 
-  /** The query parameter to specify the page/offset in the result set */
-  override def nextPageQueryParameter: String = "after"
-
   /**
     * Extracts and returns the next page/offset value from the response body of the API.
     *

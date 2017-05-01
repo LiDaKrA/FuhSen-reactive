@@ -69,9 +69,6 @@ class EBayWrapper extends RestApiWrapperTrait with SilkTransformableTrait with P
     */
   override def sourceLocalName: String = "ebay"
 
-  /** The query parameter to specify the page/offset in the result set */
-  override def nextPageQueryParameter: String = "paginationInput.pageNumber"
-
   /**
     * Extracts and returns the next page/offset value from the response body of the API.
     *

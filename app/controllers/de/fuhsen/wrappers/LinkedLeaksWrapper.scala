@@ -31,9 +31,39 @@ class LinkedLeaksWrapper extends RestApiWrapperTrait with SilkTransformableTrait
 
   /** Returns for a given query string the representation as query parameter for the specific API. */
   override def searchQueryAsParam(queryString: String): Map[String, String] = {
-    var sparql_query_template_init = "PREFIX inst: <http://www.ontotext.com/connectors/lucene/instance#>\nPREFIX lucene: <http://www.ontotext.com/connectors/lucene#>\nPREFIX leak: <http://data.ontotext.com/resource/leak/>\nPREFIX gn: <http://www.geonames.org/ontology#>\nPREFIX dbr: <http://dbpedia.org/resource/>\nPREFIX onto: <http://www.ontotext.com/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nselect ?node_id ?node ?type ?name ?countries ?address ?company_type ?company ?jurisdiction_description ?note ?original_name ?service_provider ?status ?valid_until\nfrom onto:disable-sameAs\n{\n    ?search a inst:all-nodes2;\n              lucene:query '''name:"
-    var sparql_query_template_end = "''' ;\n              lucene:entities ?node .\n    ?node a ?type .\n    ?node leak:name ?name .\n    OPTIONAL { ?node leak:address ?address } .\n    OPTIONAL { ?node leak:node_id ?node_id } .\n    OPTIONAL { ?node leak:company_type ?company_type } .\n    OPTIONAL { ?node leak:countries ?countries } .\n    OPTIONAL { ?node leak:company ?company } .\n    OPTIONAL { ?node leak:jurisdiction_description ?jurisdiction_description } .\n    OPTIONAL { ?node leak:note ?note } .\n    OPTIONAL { ?node leak:original_name ?original_name } .    \n    OPTIONAL { ?node leak:service_provider ?service_provider } .\n    OPTIONAL { ?node leak:status ?status } .\n    OPTIONAL { ?node leak:valid_until ?valid_until } .\n    FILTER(?type IN (leak:Intermediary, leak:Entity, leak:Officer )) .\n}"
-    var final_query = sparql_query_template_init + "\"" + queryString + "\""+ sparql_query_template_end
+
+    var final_query = s"""
+                          |PREFIX inst: <http://www.ontotext.com/connectors/lucene/instance#>
+                          |PREFIX lucene: <http://www.ontotext.com/connectors/lucene#>
+                          |PREFIX leak: <http://data.ontotext.com/resource/leak/>
+                          |PREFIX gn: <http://www.geonames.org/ontology#>
+                          |PREFIX dbr: <http://dbpedia.org/resource/>
+                          |PREFIX onto: <http://www.ontotext.com/>
+                          |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                          |
+                          |select ?node_id ?node ?type ?name ?countries ?address ?company_type ?company ?jurisdiction_description ?note ?original_name ?service_provider ?status ?valid_until
+                          |
+                          |from onto:disable-sameAs
+                          |{
+                          |    ?search a inst:all-nodes2;
+                          |    lucene:query '''name:"$queryString"''' ;
+                          |    lucene:entities ?node .
+                          |    ?node a ?type .
+                          |    ?node leak:name ?name .
+                          |    OPTIONAL { ?node leak:address ?address } .
+                          |    OPTIONAL { ?node leak:node_id ?node_id } .
+                          |    OPTIONAL { ?node leak:company_type ?company_type } .
+                          |    OPTIONAL { ?node leak:countries ?countries } .
+                          |    OPTIONAL { ?node leak:company ?company } .
+                          |    OPTIONAL { ?node leak:jurisdiction_description ?jurisdiction_description } .
+                          |    OPTIONAL { ?node leak:note ?note } .
+                          |    OPTIONAL { ?node leak:original_name ?original_name } .
+                          |    OPTIONAL { ?node leak:service_provider ?service_provider } .
+                          |    OPTIONAL { ?node leak:status ?status } .
+                          |    OPTIONAL { ?node leak:valid_until ?valid_until } .
+                          |    FILTER(?type IN (leak:Intermediary, leak:Entity, leak:Officer )) .
+                          |}
+      """.stripMargin
 
     Map("query" -> java.net.URLEncoder.encode(final_query, "UTF-8"))
   }

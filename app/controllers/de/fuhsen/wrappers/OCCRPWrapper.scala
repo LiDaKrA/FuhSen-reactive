@@ -17,11 +17,13 @@ package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
+import play.Logger
+import play.api.libs.json.Json
 
 /**
   * Wrapper for the Linked Leaks REST API.
   */
-class OCCRPWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
+class OCCRPWrapper extends RestApiWrapperTrait with SilkTransformableTrait with PaginatingApiTrait {
 
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map("limit" -> "100")
@@ -59,5 +61,23 @@ class OCCRPWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
 
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
+
+  /**
+    * Extracts and returns the next page/offset value from the response body of the API.
+    *
+    * @param resultBody The body serialized as String as coming from the API.
+    * @param apiUrl  The last value. This can be used if the value is not available in the result body, but instead
+    *                   is calculated by the wrapper implementation.
+    */
+  override def extractNextPageQueryValue(resultBody: String, apiUrl: Option[String]): Option[String] = {
+    try {
+      val jsonBody = Json.parse(resultBody)
+      (jsonBody \ "next").toOption map (_.as[String])
+    } catch {
+      case e: Exception =>
+        Logger.error("Exception during next OCCRP page result calculation: "+e.getMessage)
+        None
+    }
+  }
 
 }

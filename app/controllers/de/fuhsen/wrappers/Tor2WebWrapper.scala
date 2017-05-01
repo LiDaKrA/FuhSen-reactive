@@ -66,8 +66,6 @@ class Tor2WebWrapper extends RestApiWrapperTrait with SilkTransformableTrait wit
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
 
-  override def nextPageQueryParameter: String = "start"
-
   /**
     * Extracts and returns the next page/offset value from the response body of the API.
     *

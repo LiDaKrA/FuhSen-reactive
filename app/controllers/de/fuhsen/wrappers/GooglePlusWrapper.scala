@@ -171,9 +171,6 @@ class GooglePlusWrapper extends RestApiWrapperTrait with SilkTransformableTrait 
     */
   override def sourceLocalName: String = "gplus"
 
-  /** The query parameter to specify the page/offset in the result set */
-  override def nextPageQueryParameter: String = "nextPageToken"
-
   /**
     * Extracts and returns the next page/offset value from the response body of the API.
     *
