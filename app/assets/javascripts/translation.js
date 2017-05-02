@@ -41,7 +41,7 @@ var dictEng = {
     'danish':"Danish",
     "female":"Female",
     "male":"Male",
-    "toolactive":"ACTIVATE: Shows results that contain this Property (ignoring its value).",
+    "toolactive":"ACTIVATE: Shows results that contain this property (ignoring its value).",
     "tooltype":"BY VALUE: Filters all results that own the entered value.",
     "toolmostfreq":"LISTING: Shows the most frequent values of this property. You may filter by selecting them.",
     "toolminmax":"MIN-MAX: Enables a range filter by defining a lower limit and an upper limit.",
@@ -68,7 +68,7 @@ var dictEng = {
     "studyAt":"Studies",
     "page":"Page",
     "sortedby":"Sorted by frequency",
-    "clickhere":"Click here to visit this webpage.",
+    "clickhere":"Click here to visit this Web site.",
     "checkingtoken": "Checking token ...",
     "country": "Country",
     "price": "Price",
@@ -121,7 +121,7 @@ var dictEng = {
     "search_ok": " finished successfully. ",
     "search_error":" had problems during query and results are not shown. ",
     "exact_match": "Display exact matches only",
-    "no_exact_match_results":"No exact match results found, shown all results.",
+    "no_exact_match_results":"No exact match results found. All results will be shown.",
     "show_more_results":"SHOW MORE RESULTS",
     "empty_keyword": "Search Keyword cannot be empty !!. Please write a keyword.",
     "see_snapshot": "See Snapshot",
@@ -262,7 +262,7 @@ var dictGer = {
     "show_more_results":"MEHR ERGEBNISSE ZEIGEN",
     "empty_keyword": "Bitte geben Sie einen Suchbegriff ein.",
     "see_snapshot": "Screenshot anzeigen",
-    "data_sources_help" : "Datenquellen: 1) Crawled Onion Webseiten: Mit Darknet Webseiten, die mit FuhSen Anwendung gecrawlt werden, werden Entitäten wie Personen oder Produkte extrahiert und kommentiert. 2) Facebook: Enthaltene Personenprofile. 3) Google Knowledge Graph: Enthält Informationen über Menschen (wie Politiker) und bekannte Organisationen. 4) Google+: Personen- und Organisationsprofile enthalten. 5) ICIJ Offshore Lecks: Enthalten der Panama Papers Leck. 6) OCCRP Mit organisierten Verbrechen und Korruptionsberichten aus aller Welt gesammelt. 7) Zwiebel-Websites: Mit Webseiten aus dem Darknet. 8) Twitter: Enthaltene Personenprofile 9) Xing: Personendienstprofile enthalten. 10) eBay: Lieferumfang enthalten.",
+    "data_sources_help" : "Datenquellen: 1) Crawled Darknet Webseiten: Beinhaltet Darknet Webseiten, die mit der FuhSen-Anwendung gecrawlt werden. Es werden Entitäten, wie z.B. Personen oder Produkte extrahiert und kommentiert. 2) Facebook: Beinhaltet darin enthaltene Personenprofile. 3) Google Knowledge Graph: Enthält Informationen über Menschen (wie Politiker) und bekannte Organisationen. 4) Google+: Beinhaltet Personen- und Organisationsprofile. 5) ICIJ Offshore Lecks: Beinhalten die Panama Papers Leckage. 6) OCCRP Beinhalten organisierte Verbrechen und Korruptionsberichte aus aller der Welt. ) Darknet Webseiten: Beinhalten Webseiten aus dem Darknet. 8) Twitter: Beinhaltet Personenprofile. 9) Xing: Beinhaltet Personendienstprofile. 10) eBay: Beinhaltet Produkt- und Lieferumfang.",
     "entity_types_help" : "Die aktuelle Version von FuhSen sucht nach: Personenprofilen, Produktangeboten, Organisationsprofilen, Dokumenten mit Datenlecks, organisiertem Verbrechen und Korruptionsberichten und Darknet Webseiten."
 };
 
