@@ -75,7 +75,7 @@ class OCCRPWrapper extends RestApiWrapperTrait with SilkTransformableTrait with 
       (jsonBody \ "next").toOption map (_.as[String])
     } catch {
       case e: Exception =>
-        Logger.error("Exception during next OCCRP page result calculation: "+e.getMessage)
+        Logger.warn("Exception during next OCCRP page result calculation: "+e.getMessage)
         None
     }
   }

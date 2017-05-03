@@ -187,7 +187,7 @@ var Container = React.createClass({
                 //Todo remove this hardcoded value
                 window.location.href = "/fuhsen";
             }.bind(this)
-            ,timeout: 120000 // sets timeout to 120 seconds
+            ,timeout: 150000 // sets timeout to 120 seconds
         });
     },
     componentDidMount: function () {

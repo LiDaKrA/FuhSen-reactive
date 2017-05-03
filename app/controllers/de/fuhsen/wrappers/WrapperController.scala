@@ -87,6 +87,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                        query: String,
                        searchMetaData: Option[Model]): WSRequest = {
     val apiRequestWithApiParams: WSRequest = getWrapperApiUrl(wrapper, query, searchMetaData)
+    apiRequestWithApiParams.withRequestTimeout(200) //(ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout"))
     //val apiRequestWithApiParams = addQueryParameters(wrapper, query, searchMetaData)
     val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
     apiRequestWithOAuthIfNeeded
@@ -166,7 +167,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
           // There has been an error previously, don't go on.
           Future(error)
         case ApiSuccess(body, nextPage, lastValue) =>
-          //Logger.info("PRE-SILK: "+body)
+          Logger.info("PRE-SILK: "+body)
           handleSilkTransformation(wrapper, body, nextPage)
       }
   }
@@ -199,7 +200,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
             case ApiSuccess(responseBody, nextPage, lastValue) =>
-              //Logger.debug("POST-SILK:" + responseBody)
+              Logger.debug("POST-SILK:" + responseBody)
               val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
               requestMerger.addWrapperResult(model, wrapper.sourceUri)
             case e: ApiError =>
