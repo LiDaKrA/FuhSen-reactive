@@ -315,7 +315,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |    }
              |  }
              ${if (exact) {s"""|?s rdfs:label ?exact_name .
-                               |FILTER (?exact_name = '$keyword')
+                               |FILTER (lcase(?exact_name) = lcase('$keyword'))
                                |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "product" =>
@@ -349,7 +349,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:priceLabel ?price } .
              |OPTIONAL { ?p fs:condition ?condition } .
              ${if (exact) {s"""|?p rdfs:label ?exact_name .
-                               |FILTER (?exact_name = '$keyword') .
+                               |FILTER (lcase(?exact_name) = lcase('$keyword')) .
                                |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "organization" =>
@@ -377,7 +377,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?s ?p ?o .
              |FILTER(isLiteral(?o)) }
              ${if (exact) {s"""|?s rdfs:label ?exact_name .
-                               |FILTER (?exact_name = '$keyword')
+                               |FILTER (lcase(?exact_name) = lcase('$keyword'))
                                |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
       case "website" =>
@@ -432,7 +432,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |     FILTER(isLiteral(?o)) } .
              |OPTIONAL { ?s fs:url ?url } .
              ${if (exact) {s"""|?s rdfs:label ?exact_name .
-                               |FILTER (?exact_name = '$keyword') .
+                               |FILTER (lcase(?exact_name) = lcase('$keyword')) .
                                |}"""}else{s"""|}"""}}""".stripMargin)
         QueryExecutionFactory.create(query, model).execConstruct()
     }

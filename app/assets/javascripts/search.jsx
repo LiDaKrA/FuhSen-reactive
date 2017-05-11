@@ -59,7 +59,7 @@ var ContainerSearch = React.createClass({
                 </a>
 
                 <div id="contact-mini">
-                    {getTranslation("need_help")}<a href="mailto:lidakra-support@@ontos.com">{getTranslation("contact")}<img src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/></a>
+                    {getTranslation("need_help")}<a href="mailto:lidakra-support@ontos.com">{getTranslation("contact")}<img src={context + "/assets/images/icons/help-desk-icon.png"} id="support-icon"/></a>
                 </div>
 
 
