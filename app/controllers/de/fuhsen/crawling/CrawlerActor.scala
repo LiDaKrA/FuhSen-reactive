@@ -9,6 +9,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 
+import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -18,6 +19,7 @@ import scala.util.{Failure, Success}
   */
 class CrawlerActor(ws: WSClient) extends UntypedActor {
   private val log = Logging.getLogger(getContext().system, this)
+  private val remainingRoundsByCrawlId = mutable.HashMap.empty[String, Int]
 
   override def onReceive(msg: Any): Unit = {
     msg match {
@@ -27,6 +29,9 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
         handleCreateNutchJob(crawlId, typ, timestamp, args, crawlDepth)
       case cnj: CheckNutchJob =>
         handleCheckJob(cnj)
+      case statusRequest: CrawlStatusRequest =>
+        val crawlStatus = CrawlStatus(remainingRoundsByCrawlId.getOrElse(statusRequest.crawlId, 0))
+        sender() ! CrawlStatusResponse(statusRequest.crawlId, Some(crawlStatus))
     }
   }
 
@@ -82,10 +87,12 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
               self ! CreateNutchJob(crawlId = crawlId, `type` = nextJobType, newTimestamp orElse timestamp, args = args, crawlDepth)
             case None =>
               if(crawlDepth > 0) {
-                log.info(s"Starting next crawl round for crawl ID $crawlId. ${crawlDepth - 1} rounds remaining.")
+                val remainingRounds = crawlDepth - 1
+                log.info(s"Starting next crawl round for crawl ID $crawlId. $remainingRounds rounds remaining.")
                 val (args, newTimestamp) = getJobArgs(cnj, GenerateType)
-                self ! CreateNutchJob(crawlId = crawlId, `type` = GenerateType, newTimestamp orElse timestamp, args = args, crawlDepth - 1)
+                self ! CreateNutchJob(crawlId = crawlId, `type` = GenerateType, newTimestamp orElse timestamp, args = args, remainingRounds)
               } else {
+                remainingRoundsByCrawlId.remove(crawlId)
                 // Crawl job finished
                 // TODO: Report to user
               }
@@ -114,6 +121,9 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
 
   private def handleStartCrawl(crawlId: String, seedListPath: String, crawlDepth: Int): Unit = {
     log.info("Start crawl " + crawlId + " with crawl depth " + crawlDepth)
+    if(crawlDepth > 0) {
+      remainingRoundsByCrawlId.put(crawlId, crawlDepth)
+    }
     self ! CreateNutchJob(crawlId = crawlId, `type` = InjectType, timestamp = None, args = InjectArgs(seedListPath), crawlDepth)
   }
 
@@ -124,6 +134,15 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
       case Success(response) =>
         val jobId = response.body
         log.debug(s"Created $typ Nutch job: $jobId")
+        typ match {
+          case GenerateType =>
+            if(crawlDepth > 0) {
+              remainingRoundsByCrawlId.put(crawlId, crawlDepth)
+            } else {
+              remainingRoundsByCrawlId.remove(crawlId)
+            }
+          case _ =>
+        }
         self ! CheckNutchJob(crawlId, typ, jobId, timestamp, crawlDepth)
       case Failure(e) =>
         log.warning("Error in getting a response: " + e.getMessage)
@@ -165,6 +184,12 @@ object CrawlerActor {
   case class CreateNutchJob(crawlId: String, `type`: NutchJobType, timestamp: Option[Long], args: NutchJobArgs, crawlDepth: Int)
 
   case class CheckNutchJob(crawlId: String, `type`: NutchJobType, jobId: String, timestamp: Option[Long], crawlDepth: Int)
+
+  case class CrawlStatusRequest(crawlId: String)
+
+  case class CrawlStatusResponse(crawlId: String, status: Option[CrawlStatus])
+
+  case class CrawlStatus(remainingRounds: Int)
 
 }
 

@@ -55,13 +55,17 @@ description: |
     /status:
       get:
         description: Get overall status of a crawl. This endpoint should be used to check if a crawl has finished, yet.
-                     If the crawlStatus property of the response reads FINISHED, the crawl has finished and the content
-                     is indexed.
+                     If the crawlStatus property of the response reads "FINISHED" and the remainingRounds property has a value of 0,
+                     the crawl has finished and all the crawled content is indexed.
         responses:
           200:
             body:
               application/json:
                 example: |
-                  {"crawlId": "crawl-1467627443209-1",
-                   "currentJob": "INDEX",
-                   "crawlStatus": "FINISHED"}
+                  { "crawlId": "crawl-1467627443209-1",
+                    "currentJob": "INDEX",
+                    "crawlStatus": "FINISHED",
+                    "crawlDetails": {
+                      "remainingRounds": 0
+                    },
+                  }

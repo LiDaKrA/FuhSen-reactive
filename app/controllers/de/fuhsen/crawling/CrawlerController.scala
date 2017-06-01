@@ -4,8 +4,10 @@ import java.util.concurrent.atomic.AtomicLong
 import javax.inject.{Inject, Singleton}
 
 import akka.actor.ActorSystem
+import akka.pattern.Patterns
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import controllers.de.fuhsen.crawling.CrawlerActor.StartCrawl
+import controllers.de.fuhsen.crawling.CrawlerActor.{CrawlStatusRequest, CrawlStatusResponse, StartCrawl}
 import controllers.de.fuhsen.crawling.JsonFormatters._
 import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -14,6 +16,7 @@ import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.mvc.{Action, Controller, Result}
 
 import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 
 /**
   * Handles REST request for the crawl service.
@@ -53,7 +56,7 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
     * @param crawlId The crawl ID as received from the create call.
     */
   def crawlJobProgressByCrawlId(crawlId: String) = Action.async {
-    handleNutchJobProgress(crawlId) { jobsReducedInformation =>
+    handleNutchJobProgress(crawlId, additionalFutures = None, defaultAdditionalValue = None) { case (jobsReducedInformation, _) =>
       Ok(JsArray(jobsReducedInformation.map(Json.toJson(_))))
     }
   }
@@ -63,8 +66,11 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
     *
     * @param crawlId The crawl ID as received from the create call.
     */
-  def crawlStatusByCrawlId(crawlId: String) = Action.async { // TODO: This should work with crawls with depth > 0
-    handleNutchJobProgress(crawlId) { jobsReducedInformation =>
+  def crawlStatusByCrawlId(crawlId: String) = Action.async {
+    val timeout = new Timeout(Duration.create(5, "seconds"))
+    val crawlStatusFuture = Patterns.ask(crawlActor, CrawlStatusRequest(crawlId), timeout).map(_.asInstanceOf[CrawlStatusResponse])
+    handleNutchJobProgress(crawlId, Some(crawlStatusFuture),
+      defaultAdditionalValue = CrawlStatusResponse(crawlId, None)) { (jobsReducedInformation, crawlStatusResponse) =>
       jobsReducedInformation.find(j => j.`type` == "INDEX" || j.status != "FINISHED") match {
         case Some(current) =>
           val currentStatus = (current.`type`, current.status) match {
@@ -75,25 +81,38 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
             case (_, state) =>
               state
           }
-          val crawlStatus = CrawlProgress(crawlId, current.`type`.toString, currentStatus)
-          Ok(Json.toJson(crawlStatus))
+          val crawlProgress = CrawlProgress(crawlId, current.`type`.toString, currentStatus, crawlStatusResponse.status)
+          Ok(Json.toJson(crawlProgress))
         case _ =>
           NotFound
       }
-
     }
   }
 
-  private def handleNutchJobProgress(crawlId: String)(handle: Seq[CrawlJobProgress] => Result): Future[Result] = {
-    nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
+  private def handleNutchJobProgress[T](crawlId: String,
+                                        additionalFutures: Option[Future[T]],
+                                        defaultAdditionalValue: T)(handle: (Seq[CrawlJobProgress], T) => Result): Future[Result] = {
+    val nutchProgressResponse: Future[Either[Either[Seq[CrawlJobProgress], Result], Result]] = nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
       response.json match {
         case jobs: JsArray =>
           val jobsReducedInformation = reduceNutchJobsToProgressData(crawlId, jobs)
-          handle(jobsReducedInformation)
+          Left(jobsReducedInformation)
         case other =>
-          InternalServerError("Expected JSON array from Nutch service. But got " + other.getClass.getName)
+          Right(InternalServerError("Expected JSON array from Nutch service. But got " + other.getClass.getName))
       }
-    } map pickResult
+    }
+    val additional = additionalFutures.getOrElse(Future(defaultAdditionalValue))
+    for (progress <- nutchProgressResponse;
+         additionalValue <- additional) yield {
+      progress match {
+        case Left(Left(prog)) =>
+          handle(prog, additionalValue)
+        case Right(errorResult) =>
+          errorResult
+        case Left(Right(errorResult)) =>
+          errorResult
+      }
+    }
   }
 
   private def reduceNutchJobsToProgressData(crawlId: String, jobs: JsArray): Seq[CrawlJobProgress] = {
