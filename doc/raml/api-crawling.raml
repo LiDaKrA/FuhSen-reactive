@@ -14,14 +14,16 @@ description: |
               !include api-crawling-files/example-jobs.json
   /create:
     post:
-      description: Create a crawl job based on seed URLs.
+      description: Create a crawl job based on seed URLs. The crawlDepth parameter is optional and specifies the number of times
+                   the crawler should traverse links from the crawled pages recursively. 0 means only crawl the seed URLs.
       body:
         application/json:
           example: |
             { "seedURLs": [
-              "http://blablablablablal.onion",
-              "http://someexampleonion.onion"
-              ]
+                "http://blablablablablal.onion",
+                "http://someexampleonion.onion"
+              ],
+              "crawlDepth": 2
             }
       responses:
         201:

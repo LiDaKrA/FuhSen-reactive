@@ -8,8 +8,8 @@ import controllers.de.fuhsen.crawling.JsonFormatters._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 /**
@@ -21,10 +21,10 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
 
   override def onReceive(msg: Any): Unit = {
     msg match {
-      case StartCrawl(crawlId, seedListPath) =>
-        handleStartCrawl(crawlId, seedListPath)
-      case createNutchJob@CreateNutchJob(crawlId, typ, timestamp, args) =>
-        handleCreateNutchJob(crawlId, typ, timestamp, args)
+      case StartCrawl(crawlId, seedListPath, crawlDepth) =>
+        handleStartCrawl(crawlId, seedListPath, crawlDepth)
+      case CreateNutchJob(crawlId, typ, timestamp, args, crawlDepth) =>
+        handleCreateNutchJob(crawlId, typ, timestamp, args, crawlDepth)
       case cnj: CheckNutchJob =>
         handleCheckJob(cnj)
     }
@@ -66,7 +66,6 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
 
   /**
     * Manage the Nutch job. Start next phase if previous one finished. Poll the current phase asynchronously.
-    * @param cnj
     */
   private def handleCheckJob(cnj: CheckNutchJob): Unit = {
     import cnj._
@@ -80,17 +79,22 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
             case Some(nextJobType) =>
               // Start next job
               val (args, newTimestamp) = getJobArgs(cnj, nextJobType)
-              self ! CreateNutchJob(crawlId = crawlId, `type` = nextJobType, newTimestamp orElse timestamp, args = args)
+              self ! CreateNutchJob(crawlId = crawlId, `type` = nextJobType, newTimestamp orElse timestamp, args = args, crawlDepth)
             case None =>
-            // Crawl job finished
-            // TODO: Report to user
+              if(crawlDepth > 0) {
+                val (args, newTimestamp) = getJobArgs(cnj, GenerateType)
+                self ! CreateNutchJob(crawlId = crawlId, `type` = GenerateType, newTimestamp orElse timestamp, args = args, crawlDepth - 1)
+              } else {
+                // Crawl job finished
+                // TODO: Report to user
+              }
           }
         case "FAILED" =>
           log.error(s"Crawl $crawlId failed in phase ${`type`.toString}. Message: " + response.body)
-          // Don't start next phase, stop crawl.
-        case "STOPPING"|"KILLING"|"KILLED" =>
+        // Don't start next phase, stop crawl.
+        case "STOPPING" | "KILLING" | "KILLED" =>
           log.warning(s"Crawl job $crawlId has been stopped or killed in phase ${`type`.toString}.")
-        case "RUNNING"|"IDLE"|"ANY" =>
+        case "RUNNING" | "IDLE" | "ANY" =>
           log.debug(s"Job $jobId is in state $state")
           getContext().system.scheduler.scheduleOnce(
             500.milliseconds, self, cnj)
@@ -99,7 +103,7 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
   }
 
   /** Map from current phase to next phase */
-  val nextJob = Map[NutchJobType, NutchJobType](
+  val nextJob: Map[NutchJobType, NutchJobType] = Map(
     InjectType -> GenerateType,
     GenerateType -> FetchType,
     FetchType -> ParseType,
@@ -107,23 +111,21 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
     UpdateDbType -> IndexType
   )
 
-  private def handleStartCrawl(crawlId: String, seedListPath: String): Unit = {
-    log.info("Start crawl " + crawlId)
-    self ! CreateNutchJob(crawlId = crawlId, `type` = InjectType, timestamp = None, args = InjectArgs(seedListPath))
+  private def handleStartCrawl(crawlId: String, seedListPath: String, crawlDepth: Int): Unit = {
+    log.info("Start crawl " + crawlId + " with crawl depth " + crawlDepth)
+    self ! CreateNutchJob(crawlId = crawlId, `type` = InjectType, timestamp = None, args = InjectArgs(seedListPath), crawlDepth)
   }
 
-  private def handleCreateNutchJob(crawlId: String, typ: NutchJobType, timestamp: Option[Long], args: NutchJobArgs): Unit = {
+  private def handleCreateNutchJob(crawlId: String, typ: NutchJobType, timestamp: Option[Long], args: NutchJobArgs, crawlDepth: Int): Unit = {
     val argsJson = jobArgsToJson(typ, args)
     ws.url(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job/create").
-        post(Json.toJson(NutchJob(argsJson, confId = "default", crawlId = crawlId, `type` = typ.toString))).onComplete { responseTry =>
-      responseTry match {
-        case Success(response) =>
-          val jobId = response.body
-          log.info(s"Created $typ Nutch job: $jobId")
-          self ! CheckNutchJob(crawlId, typ, jobId, timestamp)
-        case Failure(e) =>
-          log.warning("Error in getting a response: " + e.getMessage)
-      }
+        post(Json.toJson(NutchJob(argsJson, confId = "default", crawlId = crawlId, `type` = typ.toString))).onComplete {
+      case Success(response) =>
+        val jobId = response.body
+        log.info(s"Created $typ Nutch job: $jobId")
+        self ! CheckNutchJob(crawlId, typ, jobId, timestamp, crawlDepth)
+      case Failure(e) =>
+        log.warning("Error in getting a response: " + e.getMessage)
     }
   }
 
@@ -150,13 +152,19 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
 object CrawlerActor {
   def props(ws: WSClient) = Props(new CrawlerActor(ws))
 
-  case class StartCrawl(crawlId: String, seedListPath: String)
+  /**
+    * @param crawlId      The ID of the crawl
+    * @param seedListPath The path of the uploaded seed list in Nutch
+    * @param crawlDepth   The depth of the crawl. This is 0 if only the URLs in the seed list should be crawled.
+    */
+  case class StartCrawl(crawlId: String, seedListPath: String, crawlDepth: Int)
 
   case class NutchJob(args: JsValue, confId: String, crawlId: String, `type`: String)
 
-  case class CreateNutchJob(crawlId: String, `type`: NutchJobType, timestamp: Option[Long], args: NutchJobArgs)
+  case class CreateNutchJob(crawlId: String, `type`: NutchJobType, timestamp: Option[Long], args: NutchJobArgs, crawlDepth: Int)
 
-  case class CheckNutchJob(crawlId: String, `type`: NutchJobType, jobId: String, timestamp: Option[Long])
+  case class CheckNutchJob(crawlId: String, `type`: NutchJobType, jobId: String, timestamp: Option[Long], crawlDepth: Int)
+
 }
 
 sealed trait NutchJobArgs
@@ -174,7 +182,7 @@ case class UpdateDbArgs(crawlId: String, batch: String) extends NutchJobArgs
 case class IndexArgs(crawlId: String, batch: String) extends NutchJobArgs
 
 sealed abstract class NutchJobType(`type`: String) {
-  override def toString = `type`
+  override def toString: String = `type`
 }
 
 case object InjectType extends NutchJobType(`type` = "INJECT")
