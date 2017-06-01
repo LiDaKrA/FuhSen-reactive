@@ -74,7 +74,7 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
       val state = (response.json \ "state").as[String]
       state match {
         case "FINISHED" =>
-          log.info(s"Job $jobId has finished!")
+          log.debug(s"Job $jobId has finished!")
           nextJob.get(cnj.`type`) match {
             case Some(nextJobType) =>
               // Start next job
@@ -82,6 +82,7 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
               self ! CreateNutchJob(crawlId = crawlId, `type` = nextJobType, newTimestamp orElse timestamp, args = args, crawlDepth)
             case None =>
               if(crawlDepth > 0) {
+                log.info(s"Starting next crawl round for crawl ID $crawlId. ${crawlDepth - 1} rounds remaining.")
                 val (args, newTimestamp) = getJobArgs(cnj, GenerateType)
                 self ! CreateNutchJob(crawlId = crawlId, `type` = GenerateType, newTimestamp orElse timestamp, args = args, crawlDepth - 1)
               } else {
@@ -122,7 +123,7 @@ class CrawlerActor(ws: WSClient) extends UntypedActor {
         post(Json.toJson(NutchJob(argsJson, confId = "default", crawlId = crawlId, `type` = typ.toString))).onComplete {
       case Success(response) =>
         val jobId = response.body
-        log.info(s"Created $typ Nutch job: $jobId")
+        log.debug(s"Created $typ Nutch job: $jobId")
         self ! CheckNutchJob(crawlId, typ, jobId, timestamp, crawlDepth)
       case Failure(e) =>
         log.warning("Error in getting a response: " + e.getMessage)
