@@ -1,6 +1,6 @@
 package controllers.de.fuhsen.crawling
 
-import controllers.de.fuhsen.crawling.CrawlerActor.NutchJob
+import controllers.de.fuhsen.crawling.CrawlerActor.{CrawlStatus, NutchJob}
 import play.api.libs.json.Json
 
 /**
@@ -17,5 +17,6 @@ object JsonFormatters {
   implicit val updateDbArgsFormatter = Json.format[UpdateDbArgs]
   implicit val indexArgsFormatter = Json.format[IndexArgs]
   implicit val nutchJobFormatter = Json.format[NutchJob]
+  implicit val crawlStatusFormatter = Json.format[CrawlStatus]
   implicit val crawlProgressFormatter = Json.format[CrawlProgress]
 }

@@ -4,28 +4,31 @@ import java.util.concurrent.atomic.AtomicLong
 import javax.inject.{Inject, Singleton}
 
 import akka.actor.ActorSystem
+import akka.pattern.Patterns
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import controllers.de.fuhsen.crawling.CrawlerActor.StartCrawl
+import controllers.de.fuhsen.crawling.CrawlerActor.{CrawlStatusRequest, CrawlStatusResponse, StartCrawl}
+import controllers.de.fuhsen.crawling.JsonFormatters._
 import play.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.mvc.{Action, Controller, Result}
-import JsonFormatters._
 
 import scala.concurrent.Future
+import scala.concurrent.duration.Duration
 
 /**
   * Handles REST request for the crawl service.
   */
 @Singleton
 class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Controller {
-  val crawlActor = system.actorOf(CrawlerActor.props(ws), "crawler-actor")
+  private val crawlActor = system.actorOf(CrawlerActor.props(ws), "crawler-actor")
 
   /**
     * Returns all jobs of all crawls.
     */
-  def crawlJobs = Action.async { request =>
+  def crawlJobs = Action.async {
     nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
       Ok(response.json)
     } map pickResult
@@ -34,9 +37,9 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
   /**
     * Returns all jobs of a specific crawl.
     *
-    * @param crawlId
+    * @param crawlId The crawl ID as received from the create call.
     */
-  def crawlJobsByCrawlId(crawlId: String) = Action.async { request =>
+  def crawlJobsByCrawlId(crawlId: String) = Action.async {
     nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
       response.json match {
         case jobs: JsArray =>
@@ -50,10 +53,10 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
   /**
     * Returns only the crawl job progress of a specific crawl.
     *
-    * @param crawlId
+    * @param crawlId The crawl ID as received from the create call.
     */
-  def crawlJobProgressByCrawlId(crawlId: String) = Action.async { request =>
-    handleNutchJobProgress(crawlId) { jobsReducedInformation =>
+  def crawlJobProgressByCrawlId(crawlId: String) = Action.async {
+    handleNutchJobProgress(crawlId, additionalFutures = None, defaultAdditionalValue = None) { case (jobsReducedInformation, _) =>
       Ok(JsArray(jobsReducedInformation.map(Json.toJson(_))))
     }
   }
@@ -61,39 +64,55 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
   /**
     * Returns the status of the crawl.
     *
-    * @param crawlId
+    * @param crawlId The crawl ID as received from the create call.
     */
-    def crawlStatusByCrawlId(crawlId: String) = Action.async { request =>
-      handleNutchJobProgress(crawlId) { jobsReducedInformation =>
-        jobsReducedInformation.filter(j => j.`type` == "INDEX" || j.status != "FINISHED").headOption match {
-          case Some(current) =>
-            val currentStatus = (current.`type`, current.status) match {
-              case ("INDEX", "FINISHED") =>
-                "FINISHED"
-              case (_, "FAILED") =>
-                "FAILED"
-              case (_, state) =>
-                state
-            }
-            val crawlStatus = CrawlProgress(crawlId, current.`type`.toString, currentStatus)
-            Ok(Json.toJson(crawlStatus))
-          case _ =>
-            NotFound
-        }
-
+  def crawlStatusByCrawlId(crawlId: String) = Action.async {
+    val timeout = new Timeout(Duration.create(5, "seconds"))
+    val crawlStatusFuture = Patterns.ask(crawlActor, CrawlStatusRequest(crawlId), timeout).map(_.asInstanceOf[CrawlStatusResponse])
+    handleNutchJobProgress(crawlId, Some(crawlStatusFuture),
+      defaultAdditionalValue = CrawlStatusResponse(crawlId, None)) { (jobsReducedInformation, crawlStatusResponse) =>
+      jobsReducedInformation.find(j => j.`type` == "INDEX" || j.status != "FINISHED") match {
+        case Some(current) =>
+          val currentStatus = (current.`type`, current.status) match {
+            case ("INDEX", "FINISHED") =>
+              "FINISHED"
+            case (_, "FAILED") =>
+              "FAILED"
+            case (_, state) =>
+              state
+          }
+          val crawlProgress = CrawlProgress(crawlId, current.`type`.toString, currentStatus, crawlStatusResponse.status)
+          Ok(Json.toJson(crawlProgress))
+        case _ =>
+          NotFound
       }
     }
+  }
 
-  private def handleNutchJobProgress(crawlId: String)(handle: Seq[CrawlJobProgress] => Result): Future[Result] = {
-    nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
+  private def handleNutchJobProgress[T](crawlId: String,
+                                        additionalFutures: Option[Future[T]],
+                                        defaultAdditionalValue: T)(handle: (Seq[CrawlJobProgress], T) => Result): Future[Result] = {
+    val nutchProgressResponse: Future[Either[Either[Seq[CrawlJobProgress], Result], Result]] = nutchGetRequest(ConfigFactory.load().getString("crawler.nutch.rest.api.url") + "/job") { response =>
       response.json match {
         case jobs: JsArray =>
           val jobsReducedInformation = reduceNutchJobsToProgressData(crawlId, jobs)
-          handle(jobsReducedInformation)
+          Left(jobsReducedInformation)
         case other =>
-          InternalServerError("Expected JSON array from Nutch service. But got " + other.getClass.getName)
+          Right(InternalServerError("Expected JSON array from Nutch service. But got " + other.getClass.getName))
       }
-    } map pickResult
+    }
+    val additional = additionalFutures.getOrElse(Future(defaultAdditionalValue))
+    for (progress <- nutchProgressResponse;
+         additionalValue <- additional) yield {
+      progress match {
+        case Left(Left(prog)) =>
+          handle(prog, additionalValue)
+        case Right(errorResult) =>
+          errorResult
+        case Left(Right(errorResult)) =>
+          errorResult
+      }
+    }
   }
 
   private def reduceNutchJobsToProgressData(crawlId: String, jobs: JsArray): Seq[CrawlJobProgress] = {
@@ -201,14 +220,15 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
     * @return The crawl id of the crawl job.
     */
   def createCrawlJob() = Action.async { request =>
-    Logger.info("Creating crawl jobs...")
+    Logger.debug("Creating crawl jobs...")
     request.body.asJson match {
       case Some(json) =>
-        (json \ "seedURLs") match {
+        val crawlDepth = (json \ "crawlDepth").asOpt[Int].getOrElse(0)
+        json \ "seedURLs" match {
           case JsDefined(urlsJs: JsArray) =>
-            val crawlId = CrawlCounter.getNextCrawlId()
+            val crawlId = CrawlCounter.nextCrawlId()
             val urls = urlsJs.value map (jsString => jsString.as[String])
-            createSeedListAndHandleResponse(crawlId, urls)
+            createSeedListAndHandleResponse(crawlId, urls, crawlDepth)
           case other =>
             Future(BadRequest("Wrong JSON format! Property seedURLs must be an array. But it has been " + other.getClass.getName))
         }
@@ -217,17 +237,15 @@ class CrawlerController @Inject()(ws: WSClient, system: ActorSystem) extends Con
     }
   }
 
-  private def createSeedListAndHandleResponse(crawlId: String, urls: Seq[String]): Future[Result] = {
-    createSeedList(crawlId, urls) map { result =>
-      result match {
-        case Left(seedListPath) =>
-          crawlActor ! StartCrawl(crawlId, seedListPath)
-          Logger.info(s"Created crawl $crawlId")
-          val path = "/crawling/jobs/" + crawlId
-          Created(path).withHeaders(LOCATION -> path)
-        case Right(failureResult) =>
-          failureResult
-      }
+  private def createSeedListAndHandleResponse(crawlId: String, urls: Seq[String], crawlDepth: Int): Future[Result] = {
+    createSeedList(crawlId, urls) map {
+      case Left(seedListPath) =>
+        crawlActor ! StartCrawl(crawlId, seedListPath, crawlDepth)
+        Logger.info(s"Created crawl $crawlId")
+        val path = "/crawling/jobs/" + crawlId
+        Created(path).withHeaders(LOCATION -> path)
+      case Right(failureResult) =>
+        failureResult
     }
   }
 }
@@ -240,7 +258,7 @@ object CrawlCounter {
 
   val crawlIdCounter = new AtomicLong(1)
 
-  def getNextCrawlId(): String = {
+  def nextCrawlId(): String = {
     val count = crawlIdCounter.getAndIncrement()
     val time = System.currentTimeMillis()
     val crawlId = s"crawl-$time-$count"
