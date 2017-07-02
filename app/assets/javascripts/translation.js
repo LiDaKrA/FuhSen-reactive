@@ -105,8 +105,8 @@ var dictEng = {
     "tor_invalid_websites": "The web site you are trying to crawl seems to be not online anymore. Crawling Job not started.",
     "invalid_website": "The website is offline",
     "no_valid_token_found": "ERROR: NO VALID TOKEN FOUND.",
-    "timeout": "TIMEOUT: THE SEARCH TOOK TOO LONG!",
-    "internal_server_error": "INTERNAL SERVER ERROR!",
+    "timeout": "The search is taking to long! Do you want to wait?",
+    "internal_server_error": "An unexpected error occurred and has been logged. An admin will take a look, please try again!",
     "datasources": "Data sources",
     "entitytypes": "Entity types",
     "types" : "Types",
@@ -126,7 +126,9 @@ var dictEng = {
     "empty_keyword": "Search Keyword cannot be empty !!. Please write a keyword.",
     "see_snapshot": "See Snapshot",
     "data_sources_help" : "Data sources: 1) Crawled Onion websites: Containing Darknet websites crawled with FuhSen application, entities such as persons or products are extracted and annotated. 2) Facebook: Containing person profiles. 3) Google Knowledge Graph: Containing information about People (such as politicians) and well-known Organizations. 4) Google+: Containing person and organization profiles. 5) ICIJ Offshore Leaks: Containing the Panama Papers leak. 6) OCCRP. Containing Organized Crimes and Corruption reports collected from all around the world. 7) Onion websites: Containing websites from the Darknet. 8) Twitter: Containing person profiles 9) Xing: Containing person professional profiles. 10) eBay: Containing product offers.",
-    "entity_types_help" : "The current version of FuhSen is able to search for: People profiles, Product offers, Organization profiles, Documents containing data leaks, organized crime and corruption reports, and Darknet websites."
+    "entity_types_help" : "The current version of FuhSen is able to search for: People profiles, Product offers, Organization profiles, Documents containing data leaks, organized crime and corruption reports, and Darknet websites.",
+    "searching_too_long" : "Is the search taking too long?",
+    "cancel_search_btn" : "Cancel Search"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -242,8 +244,8 @@ var dictGer = {
     "tor_invalid_websites": "Die Website ist nicht mehr online. Crawling Job nicht gestartet.",
     "invalid_website": "Die Website ist offline",
     "no_valid_token_found": "FEHLER: KEIN GÜLTIGES TOKEN GEFUNDEN.",
-    "timeout": "TIMEOUT: DIE SUCHE HAT ZU LANG GEDAUERT!",
-    "internal_server_error": "INTERNER SERVERFEHLER!",
+    "timeout": "Die Suche dauert lange! Wollen Sie warten?",
+    "internal_server_error": "Ein unerwarteter Fehler ist aufgetreten und wurde protokolliert. Ein Admin wird mal sehen, bitte versuchen Sie es erneut!",
     "datasources": "Datenquellen",
     "entitytypes": "Entitätstypen",
     "types" : "Typen",
@@ -263,7 +265,9 @@ var dictGer = {
     "empty_keyword": "Bitte geben Sie einen Suchbegriff ein.",
     "see_snapshot": "Screenshot anzeigen",
     "data_sources_help" : "Datenquellen: 1) Crawled Darknet Webseiten: Beinhaltet Darknet Webseiten, die mit der FuhSen-Anwendung gecrawlt werden. Es werden Entitäten, wie z.B. Personen oder Produkte extrahiert und kommentiert. 2) Facebook: Beinhaltet darin enthaltene Personenprofile. 3) Google Knowledge Graph: Enthält Informationen über Menschen (wie Politiker) und bekannte Organisationen. 4) Google+: Beinhaltet Personen- und Organisationsprofile. 5) ICIJ Offshore Lecks: Beinhalten die Panama Papers Leckage. 6) OCCRP Beinhalten organisierte Verbrechen und Korruptionsberichte aus aller der Welt. ) Darknet Webseiten: Beinhalten Webseiten aus dem Darknet. 8) Twitter: Beinhaltet Personenprofile. 9) Xing: Beinhaltet Personendienstprofile. 10) eBay: Beinhaltet Produkt- und Lieferumfang.",
-    "entity_types_help" : "Die aktuelle Version von FuhSen sucht nach: Personenprofilen, Produktangeboten, Organisationsprofilen, Dokumenten mit Datenlecks, organisiertem Verbrechen und Korruptionsberichten und Darknet Webseiten."
+    "entity_types_help" : "Die aktuelle Version von FuhSen sucht nach: Personenprofilen, Produktangeboten, Organisationsprofilen, Dokumenten mit Datenlecks, organisiertem Verbrechen und Korruptionsberichten und Darknet Webseiten.",
+    "searching_too_long" : "Ist die Suche zu lange?",
+    "cancel_search_btn" : "Suche abbrechen"
 };
 
 window.dictGer = dictGer;

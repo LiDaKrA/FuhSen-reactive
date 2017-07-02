@@ -61,7 +61,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
           val microtaskServer = ConfigFactory.load.getString("engine.microtask.url")
           val futureResponse: Future[WSResponse] = for {
             //responseOne <- ws.url(microtaskServer+"/engine/api/queryprocessing").post(data)
-            responseOne <- ws.url(microtaskServer+"/engine/api/federatedquery"+parameter).post(data)
+            responseOne <- ws.url(microtaskServer+"/engine/api/federatedquery"+parameter).withRequestTimeout(ConfigFactory.load.getLong("fuhsen.engine.request.timeout") + 40000).post(data)
             responseTwo <- ws.url(microtaskServer+"/engine/api/datacuration").post(responseOne.body)
             responseThree <- ws.url(microtaskServer+"/engine/api/entitysummarization").post(responseTwo.body)
             responseFour <- ws.url(microtaskServer+"/engine/api/semanticranking").post(responseThree.body)

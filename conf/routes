@@ -17,6 +17,7 @@ DELETE  /engine/api/searches/:uid                           controllers.de.fuhse
 POST    /engine/api/searches/:uid/facets                    controllers.de.fuhsen.engine.FacetsController.getGeneratedFacets(uid: String, entityType: String, lang: String, exact: Boolean)
 GET     /engine/api/searches/:uid/results_stat              controllers.de.fuhsen.engine.SearchEngineController.calculateSearchStat(uid: String)
 GET     /engine/api/searches/:uid/metadata                  controllers.de.fuhsen.engine.SearchEngineController.getSearchMetadata(uid: String)
+GET     /engine/api/searches/test                           controllers.de.fuhsen.engine.TestEngineController.testEngine(query: String)
 
 #Mini-task services enriching the results graph
 #POST    /engine/api/queryprocessing                         controllers.de.fuhsen.engine.QueryProcessingController.execute
@@ -50,3 +51,6 @@ GET     /crawling/jobs/:crawlId                             controllers.de.fuhse
 GET     /crawling/jobs/:crawlId/progress                    controllers.de.fuhsen.crawling.CrawlerController.crawlJobProgressByCrawlId(crawlId: String)
 GET     /crawling/jobs/:crawlId/status                      controllers.de.fuhsen.crawling.CrawlerController.crawlStatusByCrawlId(crawlId: String)
 POST    /crawling/jobs/create                               controllers.de.fuhsen.crawling.CrawlerController.createCrawlJob
+
+# pipl
+GET     /pipl/search                                        controllers.de.fuhsen.engine.ScreenshotController.piplEmulator(query: String)

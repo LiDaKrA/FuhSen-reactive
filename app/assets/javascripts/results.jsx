@@ -120,13 +120,7 @@ var Trigger = React.createClass({
             return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid}/>);
         }
 
-        return <div className="row">
-            <div className="col-md-12 text-center">
-                <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
-                     alt="Loading results"/>
-                <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
-            </div>
-        </div>;
+        return <LoadingResults/>;
     }
 });
 
@@ -164,12 +158,15 @@ var Container = React.createClass({
     },
     loadCommentsFromServer: function () {
         //alert("Keyword: "+this.props.keyword);
-
         var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + this.state.entityType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + this.state.exactMatching;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
             cache: false,
+            //beforeSend: function() {
+            //    clearInterval();
+            //    $("#cancel_loading_btn").fadeIn("slow").delay(5000).fadeOut();
+            //},
             success: function () {
                 this.setState({initData: true});
             }.bind(this),
@@ -178,16 +175,21 @@ var Container = React.createClass({
 
                 if(err.toString().includes("Not Acceptable")){
                     alert(getTranslation("no_valid_token_found"))
+                    window.location.href = "/fuhsen";
                 }else if(err.toString().includes("timeout")){
-                    alert(getTranslation("timeout"));
+                    //alert(getTranslation("timeout"));
+                    var r = confirm(getTranslation("timeout"));
+                    if (r == true)
+                        window.location.reload();
+                    else
+                        window.location.href = "/fuhsen";
                 }else{
                     alert(getTranslation("internal_server_error"));
+                    //Todo remove this hardcoded value
+                    window.location.href = "/fuhsen";
                 }
-
-                //Todo remove this hardcoded value
-                window.location.href = "/fuhsen";
             }.bind(this)
-            ,timeout: 150000 // sets timeout to 120 seconds
+            ,timeout: 100000 // sets timeout to 100 seconds
         });
     },
     componentDidMount: function () {
@@ -248,13 +250,7 @@ var Container = React.createClass({
                                   setEntityType = {this.setEntityType}/>
             </div>);
         }
-        return <div className="row">
-            <div className="col-md-12 text-center">
-                <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
-                     alt="Loading results"/>
-                <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
-            </div>
-        </div>;
+        return <LoadingResults/>;
     }
 });
 
@@ -1044,14 +1040,7 @@ var ResultsContainer = React.createClass({
                         </div>
                     </div>
                 </div>
-
-                <div className="row">
-                    <div className="col-md-12 text-center">
-                        <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
-                             alt="Loading results"/>
-                        <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
-                    </div>
-                </div>
+                <LoadingResults/>
             </div>;
         }
 
@@ -1281,7 +1270,8 @@ var ResultsList = React.createClass({
             if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultElement
-                        id = {result["@id"]}
+                        uri = {result["@id"]}
+                        id = {result["fs:id"]}
                         img={result.image}
                         name={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1307,7 +1297,8 @@ var ResultsList = React.createClass({
             } else if (result["@type"] === "foaf:Organization") {
                 return (
                     <OrganizationResultElement
-                        id = {result["@id"]}
+                        uri = {result["@id"]}
+                        id = {result["fs:id"]}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1323,7 +1314,8 @@ var ResultsList = React.createClass({
             } else if (result["@type"] === "gr:ProductOrService") {
                 return (
                     <ProductResultElement
-                        id = {result["@id"]}
+                        uri = {result["@id"]}
+                        id = {result["fs:id"]}
                         img={result.image}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
@@ -1519,7 +1511,7 @@ var SnapshotLink = React.createClass({
 
 var ProductResultElement = React.createClass({
     render: function () {
-        var detailsPageUri = context + "/details?entityType=product" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
+        var detailsPageUri = context + "/details?entityType=product" + "&eUri=" + this.props.uri + "&uid=" + this.props.uid;
         return (
             <li className="item bt">
                 <div className="summary row">
@@ -1567,7 +1559,7 @@ var ProductResultElement = React.createClass({
 
 var PersonResultElement = React.createClass({
     render: function () {
-        var detailsPageUri = context + "/details?entityType=person" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
+        var detailsPageUri = context + "/details?entityType=person" + "&eUri=" + this.props.uri + "&uid=" + this.props.uid;
         var screenShotElement = (this.props.source !== "Facebook" ? <SnapshotLink webpage={this.props.webpage}></SnapshotLink> : null);
         return (
             <li className="item bt">
@@ -1635,7 +1627,7 @@ var PersonResultElement = React.createClass({
 
 var OrganizationResultElement = React.createClass({
     render: function () {
-        var detailsPageUri = context + "/details?entityType=organization" + "&eUri=" + this.props.id + "&uid=" + this.props.uid;
+        var detailsPageUri = context + "/details?entityType=organization" + "&eUri=" + this.props.uri + "&uid=" + this.props.uid;
 
         return (
             <li className="item bt">
@@ -1829,6 +1821,25 @@ var SearchMetadataInfo = React.createClass({
     render: function () {
         return (
             <ContextualHelp type="contextual-help info" message={this.state.message}/>
+        );
+    }
+});
+
+var LoadingResults = React.createClass({
+    render: function () {
+        return (
+            <div className="row">
+                <div className="col-md-12 text-center">
+                    <div id="cancel_loading_btn" className="cancel-loading">
+                        {getTranslation("searching_too_long")}<button>{getTranslation("cancel_search_btn")}</button>
+                    </div>
+                    <div>
+                    <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
+                         alt="Loading results"/>
+                    <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
+                    </div>
+                </div>
+            </div>
         );
     }
 });

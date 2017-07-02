@@ -76,6 +76,7 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
         //Calling the RDF-Wrappers to get the information //engine.microtask.url
         ws.url(ConfigFactory.load.getString("engine.microtask.url") +
           s"$SEARCH_ENDPOINT?query=${keyword.get}&wrapperIds=$finalSelectedDataSources").
+          withRequestTimeout(ConfigFactory.load.getLong("fuhsen.engine.request.timeout")).
           post(metaData).map {
           response =>
             val newModel = deleteNextPageTuples(model)

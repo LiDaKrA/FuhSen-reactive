@@ -1558,3 +1558,8 @@ color: #44639A;
   color: #fff;
   top: 5px;
 }
+
+.cancel-loading {
+  display:none;
+  /*background: lightgrey;*/
+}

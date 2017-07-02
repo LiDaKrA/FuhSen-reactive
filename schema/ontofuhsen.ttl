@@ -152,6 +152,13 @@ fs:ElasticSearch	rdf:type	fs:InformationSource;
 			        fs:finds "website";
 			        fs:key "elasticsearch" .
 
+#fs:Pipl         	rdf:type	fs:InformationSource;
+#			        rdfs:label 	"pipl";
+#			        fs:help_url "http://pipl.org"@en,
+#                           "http://pipl.org"@de;
+#			        fs:finds "person";
+#			        fs:key "pipl" .
+
 #-------------------------------------------------------------
 # Entity Properties definition
 #-------------------------------------------------------------

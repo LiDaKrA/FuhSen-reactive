@@ -87,7 +87,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                        query: String,
                        searchMetaData: Option[Model]): WSRequest = {
     val apiRequestWithApiParams: WSRequest = getWrapperApiUrl(wrapper, query, searchMetaData)
-    apiRequestWithApiParams.withRequestTimeout(200) //(ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout"))
+    apiRequestWithApiParams.withRequestTimeout(ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout"))
+    Logger.info(s"${wrapper.sourceLocalName} timeout set to ${ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout")}")
     //val apiRequestWithApiParams = addQueryParameters(wrapper, query, searchMetaData)
     val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
     apiRequestWithOAuthIfNeeded
@@ -141,6 +142,9 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         case e: ConnectException =>
           Logger.error("Connection Exception during wrapper execution: "+e.getMessage)
           ApiError(INTERNAL_SERVER_ERROR, e.getMessage)
+        case e: Exception =>
+          Logger.error(s"Generic Exception during wrapper execution ${e.getMessage}")
+          ApiError(INTERNAL_SERVER_ERROR, e.getMessage)
       }
     else {
       wrapper match {
@@ -167,7 +171,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
           // There has been an error previously, don't go on.
           Future(error)
         case ApiSuccess(body, nextPage, lastValue) =>
-          Logger.info("PRE-SILK: "+body)
+          //Logger.info("PRE-SILK: "+body)
           handleSilkTransformation(wrapper, body, nextPage)
       }
   }
@@ -200,7 +204,7 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
         for ((wrapperResult, wrapper) <- results.zip(wrappers.flatten)) {
           wrapperResult match {
             case ApiSuccess(responseBody, nextPage, lastValue) =>
-              Logger.debug("POST-SILK:" + responseBody)
+              //Logger.debug("POST-SILK:" + responseBody)
               val model = rdfStringToModel(responseBody, Lang.JSONLD.getName) //Review
               requestMerger.addWrapperResult(model, wrapper.sourceUri)
             case e: ApiError =>
@@ -493,7 +497,9 @@ object WrapperController {
     //Xing
     new XingWrapper(),
     //Elastic Search
-    new ElasticSearchWrapper()
+    new ElasticSearchWrapper(),
+    //pipl
+    new PiplWrapper()
   )
   val wrapperMap: Map[String, RestApiWrapperTrait] = wrappers.map { wrapper =>
     (wrapper.sourceLocalName, wrapper)

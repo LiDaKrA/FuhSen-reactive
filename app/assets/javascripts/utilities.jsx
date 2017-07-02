@@ -19,6 +19,7 @@ var RichText = React.createClass({
         );
     }
 });
+
 var Graph = React.createClass({
     convertData : function (entity) {
         if(entity["@type"] === "foaf:Person")
@@ -29,6 +30,7 @@ var Graph = React.createClass({
             return this.convertProductData(entity);
     },
     convertPersonData : function(entity){
+        alert("convertPersonData");
         var graph = {"nodes" : [],"links": []};
 
         //Generate Graph
