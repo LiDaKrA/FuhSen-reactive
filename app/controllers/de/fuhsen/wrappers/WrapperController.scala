@@ -87,9 +87,8 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                        query: String,
                        searchMetaData: Option[Model]): WSRequest = {
     val apiRequestWithApiParams: WSRequest = getWrapperApiUrl(wrapper, query, searchMetaData)
-    apiRequestWithApiParams.withRequestTimeout(ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout"))
-    Logger.info(s"${wrapper.sourceLocalName} timeout set to ${ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout")}")
-    //val apiRequestWithApiParams = addQueryParameters(wrapper, query, searchMetaData)
+    //apiRequestWithApiParams.withRequestTimeout(ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout"))
+    //Logger.info(s"${wrapper.sourceLocalName} timeout set to ${ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout")}")
     val apiRequestWithOAuthIfNeeded = handleOAuth(wrapper, apiRequestWithApiParams)
     apiRequestWithOAuthIfNeeded
   }
@@ -137,13 +136,14 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
                                         request: WSRequest) : Future[ApiResponse] = {
 
     if(!wrapper.requestType.equals("JAVA"))
-      request.get.map(convertToApiResponse("Wrapper or the wrapped service", Some(wrapper), Some(request.url))) //Add here the original API URI
+      request.withRequestTimeout(ConfigFactory.load.getLong("fuhsen.wrapper.request.timeout"))
+          .get.map(convertToApiResponse("Wrapper or the wrapped service", Some(wrapper), Some(request.url))) //Add here the original API URI
         .recover {
         case e: ConnectException =>
-          Logger.error("Connection Exception during wrapper execution: "+e.getMessage)
+          Logger.warn("Connection Exception during wrapper execution: "+e.getMessage)
           ApiError(INTERNAL_SERVER_ERROR, e.getMessage)
         case e: Exception =>
-          Logger.error(s"Generic Exception during wrapper execution ${e.getMessage}")
+          Logger.warn(s"Generic Exception during wrapper execution ${e.getMessage}")
           ApiError(INTERNAL_SERVER_ERROR, e.getMessage)
       }
     else {
