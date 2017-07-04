@@ -11,8 +11,47 @@
         <maxHistory>30</maxHistory>
       </rollingPolicy>
      <encoder>
-       <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
+       <pattern>%date [%level] %message%n%xException</pattern>
      </encoder>
+  </appender>
+
+  <appender name="FILE_GRAPH" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home}/logs/graphs.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- Daily rollover with compression -->
+      <fileNamePattern>application-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <!-- keep 30 days worth of history -->
+      <maxHistory>10</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%date [%level] %message%n%xException</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE_ORG" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home}/logs/organizations.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- Daily rollover with compression -->
+      <fileNamePattern>application-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <!-- keep 30 days worth of history -->
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%date [%level] %message%n%xException</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE_LOC" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home}/logs/locations.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- Daily rollover with compression -->
+      <fileNamePattern>application-log-%d{yyyy-MM-dd}.gz</fileNamePattern>
+      <!-- keep 30 days worth of history -->
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%date [%level] %message%n%xException</pattern>
+    </encoder>
   </appender>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -23,6 +62,18 @@
 
   <appender name="ASYNCFILE" class="ch.qos.logback.classic.AsyncAppender">
     <appender-ref ref="FILE" />
+  </appender>
+
+  <appender name="ASYNCFILE_GRAPH" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FILE_GRAPH" />
+  </appender>
+
+  <appender name="ASYNCFILE_ORG" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FILE_ORG" />
+  </appender>
+
+  <appender name="ASYNCFILE_LOC" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FILE_LOC" />
   </appender>
 
   <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
@@ -39,6 +90,18 @@
   <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
   <!-- Set logging for all Akka library classes to INFO -->
   <logger name="akka" level="INFO" />
+
+  <logger name="utils.loggers.GraphLogger" level="DEBUG">
+    <appender-ref ref="ASYNCFILE_GRAPH" />
+  </logger>
+
+  <logger name="utils.loggers.OrganizationLogger" level="DEBUG">
+    <appender-ref ref="ASYNCFILE_ORG" />
+  </logger>
+
+  <logger name="utils.loggers.LocationLogger" level="DEBUG">
+    <appender-ref ref="ASYNCFILE_LOC" />
+  </logger>
 
   <root level="INFO">
     <appender-ref ref="ASYNCFILE" />
