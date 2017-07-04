@@ -17,19 +17,23 @@
 package controllers.de.fuhsen.engine
 
 import java.util.{Calendar, UUID}
+
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.FuhsenVocab
 import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.riot.Lang
 import utils.dataintegration.RDFUtil
+
 import scala.concurrent.Future
 import javax.inject.Inject
+
 import org.apache.jena.rdf.model.{Model, ModelFactory}
 import play.Logger
 import play.api.mvc.{Action, Controller}
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
+import utils.loggers.{GraphLogger, LocationLogger, OrganizationLogger}
 
 class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
@@ -76,10 +80,15 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
           futureResponse.map {
             r =>
               if(!r.body.equals("NO VALID TOKEN")){
+
+                GraphLogger.log(r.body) //Logging data
                 val finalModel = RDFUtil.rdfStringToModel(r.body, Lang.TURTLE)
+
+                OrganizationLogger.log(finalModel)//Logging data
+                LocationLogger.log(finalModel) //Logging data
+
                 GraphResultsCache.saveModel(uid, finalModel)
                 Logger.info("Search results stored in cache: "+uid)
-
                 //Return sub model by type
                 Ok(RDFUtil.modelToTripleString(getSubModel(entityType, finalModel, exact), Lang.JSONLD))
               }else{
