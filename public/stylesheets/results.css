@@ -1563,3 +1563,9 @@ color: #44639A;
   display:none;
   /*background: lightgrey;*/
 }
+
+.results-table{
+  max-height: 75vh;
+  max-width:  75vw;
+  overflow: auto;
+}
