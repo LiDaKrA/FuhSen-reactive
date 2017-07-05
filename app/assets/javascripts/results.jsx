@@ -1438,6 +1438,7 @@ var WebResultElement = React.createClass({
                 this.setState({jobStatus: "crawlJob"+ status});
             }.bind(this),
             error: function (xhr, status, err) {
+                clearInterval(this.state.timerJobStatus);
                 console.error(this.props.url, status, err.toString());
             }.bind(this)
         });
