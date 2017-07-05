@@ -124,7 +124,7 @@ var ResultsTable = React.createClass({
         },this);
 
         return (
-            <div className="table-responsive">
+            <div className="table-responsive results-table">
                 <table className="table table-bordered table-hover">
                     <thead>
                     <TableHeader type={this.props.type}/>
