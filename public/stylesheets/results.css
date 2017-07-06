@@ -1569,3 +1569,7 @@ color: #44639A;
   max-width:  75vw;
   overflow: auto;
 }
+
+ul.unstyled {
+  list-style: none;
+}
