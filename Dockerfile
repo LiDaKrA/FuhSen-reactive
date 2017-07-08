@@ -35,6 +35,7 @@
 FROM ubuntu
 MAINTAINER Luigi Selmi <luigiselmi@gmail.com>
 
+#RUN apt-get update && apt-get -y install locales
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
