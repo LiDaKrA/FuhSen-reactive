@@ -2022,7 +2022,7 @@ var LinkResultsButton = React.createClass({
     },
     render: function(){
         return (
-            <button className={this.state.style} title="Compare Object" onClick={this.handleClick}/>
+            <button className={this.state.style} title="Merge Object" onClick={this.handleClick}/>
         )
     }
 });
