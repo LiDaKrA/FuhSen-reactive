@@ -1267,6 +1267,7 @@ color: #44639A;
   width: 120px;
   max-height: 120px;
   max-width: 120px;
+  margin-left: 5%;
 }
 
 .compare-object .compare-default-pic {
@@ -1339,7 +1340,7 @@ color: #44639A;
   max-width: 120px;
   margin-left: auto;
   margin-right: auto;
-  background-color: #D3D6D9;
+  background-color: #FFFFFF;
 }
 
 .compare-objects .compare-object {

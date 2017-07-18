@@ -196,7 +196,7 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:exact_matching, loadMoreResults:false};
+        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:exact_matching, loadMoreResults:false, mergeData: {1: null, 2: null}};
     },
     onExactMatchingChange: function () {
         this.setState({exactMatching:!this.state.exactMatching, loadMoreResults:false})
@@ -223,31 +223,71 @@ var Container = React.createClass({
     setEntityType: function (type) {
         this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false});
     },
+    onMergeChange: function(data, cancel){
+        let link = this.state.mergeData;
+        let state = true;
+        if(data){
+            if(!link[1] && !link[2]){
+                link[1]= data;
+            }
+            else if(link[1] && !link[2]){
+                link[2]= data;
+            }
+            else{
+                alert("Only two results can be merged at once");
+                state = false;
+            }
+        }
+        if(cancel){
+            link[cancel] = null;
+            state = false;
+        }
+        this.setState({
+            mergeData: link
+        });
+        return state;
+    },
+    onMerge: function(){
+      let data = this.state.mergeData;
+      console.log("We are now going to merge the following data:");
+      console.log(data[1]);
+      console.log(data[2]);
+    },
     render: function () {
         if (this.state.initData) {
-            return (<div class="row search-results-container">
-                <FacetList searchUid={this.props.searchUid}
-                           keyword={this.props.keyword}
-                           entityType={this.state.entityType}
-                           onFacetSelection={this.onFacetSelection}
-                           onFacetRemoval={this.onFacetRemoval}
-                           currentTab={this.state.entityType}
-                           orgFacetsDict = {this.state.orgFacetsDict}
-                           onExactMatchingChange = {this.onExactMatchingChange}
-                           exactMatching={this.state.exactMatching}
-                           loadMoreResults={this.state.loadMoreResults}/>
-                <ResultsContainer searchUid={this.props.searchUid}
-                                  keyword={this.props.keyword}
-                                  entityType={this.state.entityType}
-                                  view={this.state.view}
-                                  facets={this.state.facets}
-                                  onTypeChange={this.onTypeChange}
-                                  facetsDict={this.state.facetsDict}
-                                  exactMatching={this.state.exactMatching}
-                                  onExactMatchingChange = {this.onExactMatchingChange}
-                                  onLoadMoreResults={this.onLoadMoreResults}
-                                  loadMoreResults={this.state.loadMoreResults}
-                                  setEntityType = {this.setEntityType}/>
+            return (<div className="row search-results-container">
+                <div className="col-md-3">
+                    <div className="row">
+                        <FacetList searchUid={this.props.searchUid}
+                                   keyword={this.props.keyword}
+                                   entityType={this.state.entityType}
+                                   onFacetSelection={this.onFacetSelection}
+                                   onFacetRemoval={this.onFacetRemoval}
+                                   currentTab={this.state.entityType}
+                                   orgFacetsDict = {this.state.orgFacetsDict}
+                                   onExactMatchingChange = {this.onExactMatchingChange}
+                                   exactMatching={this.state.exactMatching}
+                                   loadMoreResults={this.state.loadMoreResults}/>
+                    </div>
+                    <div className="row">
+                        <LinkResults data={this.state.mergeData} onLinkCancel={this.onMergeChange} merge={this.onMerge}/>
+                    </div>
+                </div>
+                <div>
+                    <ResultsContainer searchUid={this.props.searchUid}
+                                      keyword={this.props.keyword}
+                                      entityType={this.state.entityType}
+                                      view={this.state.view}
+                                      facets={this.state.facets}
+                                      onTypeChange={this.onTypeChange}
+                                      facetsDict={this.state.facetsDict}
+                                      exactMatching={this.state.exactMatching}
+                                      onExactMatchingChange = {this.onExactMatchingChange}
+                                      onLoadMoreResults={this.onLoadMoreResults}
+                                      loadMoreResults={this.state.loadMoreResults}
+                                      setEntityType = {this.setEntityType}
+                                      onAddLink = {this.onMergeChange}/>
+                </div>
             </div>);
         }
         return <LoadingResults/>;
@@ -432,7 +472,7 @@ var FacetList = React.createClass({
             const tooltipStyle = { display: this.state.hover ? 'block' : 'none'}
 
             return (
-                <div id="facetsDiv" className="col-md-3 facets-container hidden-phone">
+                <div id="facetsDiv" className="facets-container hidden-phone">
                     <div className="facets-head">
                         <h3>{getTranslation("resultfilters")}
                             <span className="export-facets-btn">(<a href="#" title={getTranslation("export_facets")} onClick={this.facets2CSV} className="no-external-link-icon">{getTranslation("export")}</a>)</span>
@@ -454,7 +494,7 @@ var FacetList = React.createClass({
             )
         }
         return (
-            <div className="col-md-3 facets-container hidden-phone">
+            <div className="facets-container hidden-phone">
                 <div className="facets-head">
                     <h3>{getTranslation("resultfilters")}</h3>
                 </div>
@@ -1227,7 +1267,8 @@ var ResultsContainer = React.createClass({
                                 <ul className="results-list list-unstyled">
                                     <ResultsList data={final_data}
                                                  crawled={this.state.crawled}
-                                                 searchUid={this.props.searchUid}>
+                                                 searchUid={this.props.searchUid}
+                                                 onAddLink={this.props.onAddLink}>
                                     </ResultsList>
 
                                 </ul>
@@ -1239,7 +1280,7 @@ var ResultsContainer = React.createClass({
                                           crawled={this.state.crawled}
                                           type={this.props.entityType}
                                           checksListener={this.checksListener}
-                            >
+                                          onAddLink={this.props.onAddLink}>
                             </ResultsTable>
                         </div>
                     }
@@ -1364,7 +1405,8 @@ var ResultsList = React.createClass({
                         language={result["fs:language"]}
                         filename={result["fs:file_name"]}
                         extension={result["fs:extension"]}
-                        source={result["fs:source"]}>
+                        source={result["fs:source"]}
+                        onAddLink={this.props.onAddLink}>
                     </DocumentResultElement>
                 );
             }
@@ -1545,6 +1587,9 @@ var ProductResultElement = React.createClass({
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
+                        <div className="thumbnail">
+                            <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
@@ -1613,6 +1658,9 @@ var PersonResultElement = React.createClass({
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
+                        <div className="thumbnail">
+                            <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
@@ -1661,6 +1709,9 @@ var OrganizationResultElement = React.createClass({
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
+                        <div className="thumbnail">
+                            <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
@@ -1715,6 +1766,9 @@ var ElasticSearchResultElement = React.createClass({
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
+                        <div className="thumbnail">
+                            <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/Elasticsearch.png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
@@ -1759,6 +1813,12 @@ var DocumentResultElement = React.createClass({
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
+                        <div className="thumbnail">
+                            <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
+                        <div className="thumbnail">
+                            <FavouritesButton/>
+                        </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
@@ -1769,6 +1829,27 @@ var DocumentResultElement = React.createClass({
             </li>
         );
     }
+});
+
+var FavouritesButton = React.createClass({
+   getInitialState: function () {
+       return({style: "favorite link-button"})
+   },
+   handleClick: function (e){
+        let style = this.state.style;
+        if(style.includes("favorited")){
+            style = "favorite link-button"
+        }
+        else{
+            style += " favorited"
+        }
+        this.setState({style: style})
+   },
+   render: function (){
+       return(
+           <button className={this.state.style} title="Favourite Object" onClick={this.handleClick}/>
+       )
+   }
 });
 
 var SearchMetadataInfo = React.createClass({
@@ -1842,6 +1923,108 @@ var LoadingResults = React.createClass({
                 </div>
             </div>
         );
+    }
+});
+
+var LinkResults = React.createClass({
+    getInitialState: function(){
+      return {link: null}
+    },
+    getStyle: function(data){
+        let style = {
+            span1 : "compare-default-pic",
+            span2 : "compare-default",
+            img :   "compare-img off",
+            src: "",
+            title: "",
+            titleStyle: "compare-title truncate off",
+            cancel :"comparison-cancel-button off"
+        };
+        if(data){
+            style.span1 += " off";
+            style.span2 += " off";
+            style.img = "compare-img";
+            style.src = (data.extension !== undefined ?
+                        context + "/assets/images/icons/" + data.extension + ".png" :
+                        context + "/assets/images/datasources/Unknown_Thing.jpg");
+            style.title = data.label;
+            style.titleStyle = "compare-title truncate";
+            style.cancel = "comparison-cancel-button";
+        }
+        return style;
+    },
+    cancelLink: function(event){
+      let index = event.target.dataset.index;
+      this.props.onLinkCancel(false, index);
+
+    },
+    render: function () {
+        let data = this.props.data;
+        let style1 = this.getStyle(data[1]);
+        let style2 = this.getStyle(data[2]);
+        let buttonStyle = data[1] && data[2] ? "button" : "button disabled";
+        return(
+            <div className="compare-objects bt br bb bl">
+                <div className="compare-header">
+                    <b>Merge Objects</b>
+                    <span className="contextual-help hidden-phone hidden-tablet" data-content="To merge objects, please select two objects by clicking on the appropriate icon in the results list.">
+  </span>
+
+                    <div className="tooltip hasArrow" style={{display: 'none'}}>To merge objects, please select two objects by clicking on the appropriate icon in the results list.<div className="arrow"></div></div>
+                </div>
+                <div className="compare-main">
+                    <div id="compare-object1" className="compare-object bt br bb bl">
+                        <div className="compare-table">
+                            <span className={style1.span1}></span>
+                            <span className={style1.span2}>First object</span>
+                            <a className="compare-link">
+                                <span className="compare-text off"></span>
+                                <img className={style1.img} title={style1.title} alt={style1.title} src={style1.src}/>
+                            </a>
+                            <span className={style1.titleStyle}>{style1.title}</span>
+                            <span data-index="1" className={style1.cancel} onClick={this.cancelLink}></span>
+                        </div>
+                    </div>
+                    <div id="compare-object2" className="compare-object bt br bb bl">
+                        <div className="compare-table">
+                            <span className={style2.span1}></span>
+                            <span className={style2.span2}>First object</span>
+                            <a className="compare-link">
+                                <span className="compare-text off"></span>
+                                <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
+                            </a>
+                            <span className={style2.titleStyle}>{style2.title}</span>
+                            <span data-index="2" className={style2.cancel} onClick={this.cancelLink}></span>
+                        </div>
+                    </div>
+                </div>
+                <div className="compare-footer bt bb bl br">
+                    <a id="compare-button">
+                        <div className={buttonStyle} onClick={this.props.merge}>
+                            Merge Objects
+                        </div>
+                    </a>
+                </div>
+            </div>
+        );
+    }
+});
+
+var LinkResultsButton = React.createClass({
+    getInitialState: function(){
+      return({style: "compare-button link-button"})
+    },
+    handleClick: function (e) {
+        let state  = this.props.onAddLink(this.props.data);
+        let style = this.state.style;
+        style = style.includes("compared") ? "compare-button link-button" : style + " compared";
+        this.setState({style: style});
+        e.preventDefault();
+    },
+    render: function(){
+        return (
+            <button className={this.state.style} title="Merge Object" onClick={this.handleClick}/>
+        )
     }
 });
 
