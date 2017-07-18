@@ -53,4 +53,6 @@ GET     /crawling/jobs/:crawlId/status                      controllers.de.fuhse
 POST    /crawling/jobs/create                               controllers.de.fuhsen.crawling.CrawlerController.createCrawlJob
 
 # pipl
-GET     /pipl/search                                        controllers.de.fuhsen.engine.ScreenshotController.piplEmulator(query: String)
+GET     /pipl/search                                        controllers.de.fuhsen.engine.TestServicesControllers.piplEmulator(query: String)
+GET     /elastic/search                                     controllers.de.fuhsen.engine.TestServicesControllers.elasticSearchEmulator(q: String, size:String, pretty:String)
+GET     /darknet/search                                     controllers.de.fuhsen.engine.TestServicesControllers.darknetEmulator(q: String, key:String, start:String)

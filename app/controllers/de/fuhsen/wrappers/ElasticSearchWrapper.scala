@@ -17,14 +17,19 @@ package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
+import play.Logger
+import play.api.libs.json.{JsArray, Json}
 
 /**
   * Wrapper for the Linked Leaks REST API.
   */
-class ElasticSearchWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
+class ElasticSearchWrapper extends RestApiWrapperTrait with SilkTransformableTrait with PaginatingApiTrait {
+
+  // The number of results in one response
+  final val limit = 50
 
   /** Query parameters that should be added to the request. */
-  override def queryParams: Map[String, String] = Map("size" -> "100", "pretty" -> "false")
+  override def queryParams: Map[String, String] = Map("size" -> s"$limit", "from" -> "0", "pretty" -> "false")
 
   /** Headers that should be added to the request. */
   override def headersParams: Map[String, String] = Map()
@@ -65,5 +70,35 @@ class ElasticSearchWrapper extends RestApiWrapperTrait with SilkTransformableTra
 
   /** The project id of the Silk project */
   override def projectId: String = ConfigFactory.load.getString("silk.socialApiProject.id")
+
+  /**
+    * Extracts and returns the next page/offset value from the response body of the API.
+    *
+    * @param resultBody The body serialized as String as coming from the API.
+    * @param apiUrl  The last value. This can be used if the value is not available in the result body, but instead
+    *                   is calculated by the wrapper implementation.
+    */
+  override def extractNextPageQueryValue(resultBody: String, apiUrl: Option[String]): Option[String] = {
+    try {
+      val jsonBody = Json.parse(resultBody)
+      val resultSize = (jsonBody \ "hits" \ "hits").as[JsArray].value.size
+      val lastValue = getParameters(apiUrl.get)("from").toInt
+      if (resultSize == limit)
+        Some(apiUrl.get.replace("from="+lastValue, "from="+(lastValue+limit)))
+      else
+        None
+    } catch {
+      case e: Exception =>
+        Logger.warn("Exception during next ElasticSearch page result calculation: "+e.getMessage)
+        None
+    }
+  }
+
+  private def getParameters(url: String) : Map[String,String] = {
+    val url2 = url.split("\\?").last
+    url2.split("&") map { t =>
+      val idx = t.indexOf("=")
+      t.substring(0, idx) -> t.substring(idx + 1) } toMap
+  }
 
 }
