@@ -233,6 +233,9 @@ var Container = React.createClass({
             else if(link[1] && !link[2]){
                 link[2]= data;
             }
+            else if(link[2] && !link[1]){
+                link[1]= data;
+            }
             else{
                 alert("Only two results can be merged at once");
                 state = false;
@@ -1332,7 +1335,7 @@ var ResultsList = React.createClass({
                         interests={result["fs:interests"]}
                         jsonResult = {result}
                         uid = {this.props.searchUid}
-                    >
+                        onAddLink={this.props.onAddLink}>
                     </PersonResultElement>
                 );
             } else if (result["@type"] === "foaf:Organization") {
@@ -1349,7 +1352,8 @@ var ResultsList = React.createClass({
                         location={result["fs:location"]}
                         webpage={result.url}
                         jsonResult = {result}
-                        uid = {this.props.searchUid}>
+                        uid = {this.props.searchUid}
+                        onAddLink={this.props.onAddLink}>
                     </OrganizationResultElement>
                 );
             } else if (result["@type"] === "gr:ProductOrService") {
@@ -1366,7 +1370,8 @@ var ResultsList = React.createClass({
                         condition={result["fs:condition"]}
                         webpage={result.url}
                         jsonResult = {result}
-                        uid = {this.props.searchUid}>
+                        uid = {this.props.searchUid}
+                        onAddLink={this.props.onAddLink}>
                     </ProductResultElement>
                 );
             } else if (result["@type"] === "foaf:Document") {
@@ -1380,7 +1385,8 @@ var ResultsList = React.createClass({
                             entity_url={result["fs:entity_url"]}
                             entity_dbpedia={result["fs:entity_dbpedia"]}
                             entity_type={result["fs:entity_type"]}
-                            entity_name={result["fs:entity_name"]}>
+                            entity_name={result["fs:entity_name"]}
+                            onAddLink={this.props.onAddLink}>
                         </ElasticSearchResultElement>
                     );
                 } else {
@@ -1391,7 +1397,8 @@ var ResultsList = React.createClass({
                             comment={result["fs:comment"]}
                             source={result["fs:source"]}
                             onion_label={result["rdfs:label"]}
-                            crawled={already_crawled}>
+                            crawled={already_crawled}
+                            onAddLink={this.props.onAddLink}>
                         </WebResultElement>
                     );
                 }
@@ -1520,17 +1527,25 @@ var WebResultElement = React.createClass({
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <div>
+                    <div class="thumbnail-wrapper col-md-1">
+                        <div className="thumbnail">
+                            <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
+                        <div className="thumbnail">
+                            <FavouritesButton/>
+                        </div>
+                        <div className="thumbnail">
                             <div>
-                                <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                     alt={"Information from " + this.props.source} height="45" width="45"
-                                     title={this.props.source}/>
-                            </div>
-                            <div>
-                                {this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
-                                <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label> : <button
-                                onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
+                                <div>
+                                    <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
+                                         alt={"Information from " + this.props.source} height="45" width="45"
+                                         title={this.props.source}/>
+                                </div>
+                                <div>
+                                    {this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
+                                        <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label> : <button
+                                            onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1589,6 +1604,9 @@ var ProductResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
+                        <div className="thumbnail">
+                            <FavouritesButton/>
                         </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
@@ -1661,7 +1679,10 @@ var PersonResultElement = React.createClass({
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                         </div>
-                        <div class="thumbnail">
+                        <div className="thumbnail">
+                            <FavouritesButton/>
+                        </div>
+                        <div className="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title={this.props.source}/>
@@ -1711,6 +1732,9 @@ var OrganizationResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
+                        <div className="thumbnail">
+                            <FavouritesButton/>
                         </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
@@ -1768,6 +1792,9 @@ var ElasticSearchResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
+                        </div>
+                        <div className="thumbnail">
+                            <FavouritesButton/>
                         </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/Elasticsearch.png"}
@@ -1947,7 +1974,7 @@ var LinkResults = React.createClass({
             style.src = (data.extension !== undefined ?
                         context + "/assets/images/icons/" + data.extension + ".png" :
                         context + "/assets/images/datasources/Unknown_Thing.jpg");
-            style.title = data.label;
+            style.title = data.label || data.name;
             style.titleStyle = "compare-title truncate";
             style.cancel = "comparison-cancel-button";
         }
@@ -1988,7 +2015,7 @@ var LinkResults = React.createClass({
                     <div id="compare-object2" className="compare-object bt br bb bl">
                         <div className="compare-table">
                             <span className={style2.span1}></span>
-                            <span className={style2.span2}>First object</span>
+                            <span className={style2.span2}>Second object</span>
                             <a className="compare-link">
                                 <span className="compare-text off"></span>
                                 <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
