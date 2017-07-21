@@ -252,9 +252,24 @@ var Container = React.createClass({
     },
     onMerge: function(){
       let data = this.state.mergeData;
-      console.log("We are now going to merge the following data:");
-      console.log(data[1]);
-      console.log(data[2]);
+      let mergeUrl = context + '/' + this.props.searchUid + '/merge';
+        $.ajax({
+            url: mergeUrl,
+            data: {
+                'uri1': data[1].uri,
+                'uri2': data[2].uri
+            },
+            cache: false,
+            type: 'GET',
+            success: function(response) {
+                console.log("success");
+                window.location.reload()
+            },
+            error: function(xhr) {
+                console.log("error");
+                console.log(xhr);
+            }
+        });
     },
     render: function () {
         if (this.state.initData) {
