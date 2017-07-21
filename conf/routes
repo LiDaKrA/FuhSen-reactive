@@ -56,3 +56,8 @@ POST    /crawling/jobs/create                               controllers.de.fuhse
 GET     /pipl/search                                        controllers.de.fuhsen.engine.TestServicesControllers.piplEmulator(query: String)
 GET     /elastic/search                                     controllers.de.fuhsen.engine.TestServicesControllers.elasticSearchEmulator(q: String, size:String, pretty:String)
 GET     /darknet/search                                     controllers.de.fuhsen.engine.TestServicesControllers.darknetEmulator(q: String, key:String, start:String)
+
+# RDF Graph Services
+GET    /:graphUid/merge                                    controllers.de.fuhsen.engine.RdfGraphController.mergeEntities(graphUid: String, uri1: String, uri2: String)
+GET    /:graphUid/favorites                                controllers.de.fuhsen.engine.RdfGraphController.getFavorites(graphUid: String)
+POST   /:graphUid/favorites                                controllers.de.fuhsen.engine.RdfGraphController.addToFavorites(graphUid: String, uri: String)
