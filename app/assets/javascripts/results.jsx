@@ -1601,7 +1601,7 @@ var SnapshotLink = React.createClass({
     },
     render: function () {
         return (
-            <a href="#" onClick={this.showPDF}> --- ({getTranslation("see_snapshot")})</a>
+            <a className="snapshot" href="#" title="See Snapshot" onClick={this.showPDF}></a>
         );
     }
 });
@@ -1696,11 +1696,12 @@ var PersonResultElement = React.createClass({
                                     <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b>
-                                        <a href={this.props.webpage} target="_blank">{this.props.webpage}</a>
-                                        {screenShotElement}</p>
-                                    : null }
+                                {/*{ this.props.webpage !== undefined ?*/}
+                                    {/*<p><b>{getTranslation("link")}: </b>*/}
+                                        {/*<a href={this.props.webpage} target="_blank">{this.props.webpage}</a>*/}
+                                        {/*/!*{screenShotElement}*!/*/}
+                                        {/*</p>*/}
+                                    {/*: null }*/}
                                 { this.props.active_email !== undefined ?
                                     <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
                                 { this.props.wants !== undefined ?
@@ -1717,9 +1718,9 @@ var PersonResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
-                        </div>
-                        <div className="thumbnail">
                             <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
+                            { this.props.webpage !== undefined ? <p>{screenShotElement}</p> : null }
+                            <a href={this.props.webpage} title="Open Link" className="ext-link" target="_blank"></a>
                         </div>
                         <div className="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}

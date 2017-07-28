@@ -1631,3 +1631,25 @@ ul.unstyled {
 .compare-button:hover, .compared{
   background: url(../images/icons/ddbIkonographie.png) no-repeat -30px -122px;
 }
+
+.snapshot {
+  background-image: url(../images/icons/photo-camera.png);
+  background-size: 100%;
+  display: block;
+  width: 18px;
+  height: 17px;
+  float: right;
+  position: absolute;
+  right: 0px;
+  top: 75px;
+}
+
+.ext-link {
+  display: block;
+  width: 18px;
+  height: 17px;
+  float: right;
+  position: absolute;
+  right: 0px;
+  top: 105px;
+}
