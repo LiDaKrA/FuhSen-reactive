@@ -252,9 +252,39 @@ var Container = React.createClass({
     },
     onMerge: function(){
       let data = this.state.mergeData;
-      console.log("We are now going to merge the following data:");
-      console.log(data[1]);
-      console.log(data[2]);
+      let mergeUrl = context + '/' + this.props.searchUid + '/merge';
+        $.ajax({
+            url: mergeUrl,
+            data: {
+                'uri1': data[1].uri,
+                'uri2': data[2].uri
+            },
+            cache: false,
+            type: 'GET',
+            success: function(response) {
+                console.log("success");
+                window.location.reload()
+            },
+            error: function(xhr) {
+                console.log("error");
+                console.log(xhr);
+            }
+        });
+    },
+    onFavourite: function(data){
+        let url = context + '/' + this.props.searchUid + '/favorites';
+        $.ajax({
+            url: url+"?uri=" + data,
+            cache: false,
+            type: 'POST',
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(xhr) {
+                console.log("error");
+                console.log(xhr);
+            }
+        });
     },
     render: function () {
         if (this.state.initData) {
@@ -289,7 +319,8 @@ var Container = React.createClass({
                                       onLoadMoreResults={this.onLoadMoreResults}
                                       loadMoreResults={this.state.loadMoreResults}
                                       setEntityType = {this.setEntityType}
-                                      onAddLink = {this.onMergeChange}/>
+                                      onAddLink = {this.onMergeChange}
+                                      onFavourite = {this.onFavourite}/>
                 </div>
             </div>);
         }
@@ -1271,7 +1302,8 @@ var ResultsContainer = React.createClass({
                                     <ResultsList data={final_data}
                                                  crawled={this.state.crawled}
                                                  searchUid={this.props.searchUid}
-                                                 onAddLink={this.props.onAddLink}>
+                                                 onAddLink={this.props.onAddLink}
+                                                 onFavourite={this.props.onFavourite}>
                                     </ResultsList>
 
                                 </ul>
@@ -1283,7 +1315,8 @@ var ResultsContainer = React.createClass({
                                           crawled={this.state.crawled}
                                           type={this.props.entityType}
                                           checksListener={this.checksListener}
-                                          onAddLink={this.props.onAddLink}>
+                                          onAddLink={this.props.onAddLink}
+                                          onFavourite={this.props.onFavourite}>
                             </ResultsTable>
                         </div>
                     }
@@ -1335,7 +1368,8 @@ var ResultsList = React.createClass({
                         interests={result["fs:interests"]}
                         jsonResult = {result}
                         uid = {this.props.searchUid}
-                        onAddLink={this.props.onAddLink}>
+                        onAddLink={this.props.onAddLink}
+                        onFavourite={this.props.onFavourite}>
                     </PersonResultElement>
                 );
             } else if (result["@type"] === "foaf:Organization") {
@@ -1353,7 +1387,8 @@ var ResultsList = React.createClass({
                         webpage={result.url}
                         jsonResult = {result}
                         uid = {this.props.searchUid}
-                        onAddLink={this.props.onAddLink}>
+                        onAddLink={this.props.onAddLink}
+                        onFavourite={this.props.onFavourite}>
                     </OrganizationResultElement>
                 );
             } else if (result["@type"] === "gr:ProductOrService") {
@@ -1371,7 +1406,8 @@ var ResultsList = React.createClass({
                         webpage={result.url}
                         jsonResult = {result}
                         uid = {this.props.searchUid}
-                        onAddLink={this.props.onAddLink}>
+                        onAddLink={this.props.onAddLink}
+                        onFavourite={this.props.onFavourite}>
                     </ProductResultElement>
                 );
             } else if (result["@type"] === "foaf:Document") {
@@ -1386,7 +1422,8 @@ var ResultsList = React.createClass({
                             entity_dbpedia={result["fs:entity_dbpedia"]}
                             entity_type={result["fs:entity_type"]}
                             entity_name={result["fs:entity_name"]}
-                            onAddLink={this.props.onAddLink}>
+                            onAddLink={this.props.onAddLink}
+                            onFavourite={this.props.onFavourite}>
                         </ElasticSearchResultElement>
                     );
                 } else {
@@ -1398,7 +1435,8 @@ var ResultsList = React.createClass({
                             source={result["fs:source"]}
                             onion_label={result["rdfs:label"]}
                             crawled={already_crawled}
-                            onAddLink={this.props.onAddLink}>
+                            onAddLink={this.props.onAddLink}
+                            onFavourite={this.props.onFavourite}>
                         </WebResultElement>
                     );
                 }
@@ -1413,7 +1451,8 @@ var ResultsList = React.createClass({
                         filename={result["fs:file_name"]}
                         extension={result["fs:extension"]}
                         source={result["fs:source"]}
-                        onAddLink={this.props.onAddLink}>
+                        onAddLink={this.props.onAddLink}
+                        onFavourite={this.props.onFavourite}>
                     </DocumentResultElement>
                 );
             }
@@ -1532,7 +1571,7 @@ var WebResultElement = React.createClass({
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                         </div>
                         <div className="thumbnail">
-                            <FavouritesButton/>
+                            <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                         </div>
                         <div className="thumbnail">
                             <div>
@@ -1606,7 +1645,7 @@ var ProductResultElement = React.createClass({
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                         </div>
                         <div className="thumbnail">
-                            <FavouritesButton/>
+                            <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                         </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
@@ -1680,7 +1719,7 @@ var PersonResultElement = React.createClass({
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                         </div>
                         <div className="thumbnail">
-                            <FavouritesButton/>
+                            <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                         </div>
                         <div className="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
@@ -1734,7 +1773,7 @@ var OrganizationResultElement = React.createClass({
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                         </div>
                         <div className="thumbnail">
-                            <FavouritesButton/>
+                            <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                         </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
@@ -1794,7 +1833,7 @@ var ElasticSearchResultElement = React.createClass({
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                         </div>
                         <div className="thumbnail">
-                            <FavouritesButton/>
+                            <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                         </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/Elasticsearch.png"}
@@ -1844,7 +1883,7 @@ var DocumentResultElement = React.createClass({
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                         </div>
                         <div className="thumbnail">
-                            <FavouritesButton/>
+                            <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                         </div>
                         <div class="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
@@ -1870,11 +1909,12 @@ var FavouritesButton = React.createClass({
         else{
             style += " favorited"
         }
-        this.setState({style: style})
+        this.setState({style: style});
+        this.props.onFavourite(this.props.data);
    },
    render: function (){
        return(
-           <button className={this.state.style} title="Favourite Object" onClick={this.handleClick}/>
+           <button className={this.state.style} title="Favourite" onClick={this.handleClick}/>
        )
    }
 });
@@ -1957,6 +1997,17 @@ var LinkResults = React.createClass({
     getInitialState: function(){
       return {link: null}
     },
+    getThumbnail(data){
+      if(data.img)
+          return data.img;
+      if(data.extension){
+          return context + "/assets/images/icons/" + data.extension + ".png"
+      }
+      if(data.name){
+          return context + "/assets/images/datasources/Unknown.png";
+      }
+      return context + "/assets/images/datasources/Unknown_Thing.jpg";
+    },
     getStyle: function(data){
         let style = {
             span1 : "compare-default-pic",
@@ -1971,10 +2022,8 @@ var LinkResults = React.createClass({
             style.span1 += " off";
             style.span2 += " off";
             style.img = "compare-img";
-            style.src = (data.extension !== undefined ?
-                        context + "/assets/images/icons/" + data.extension + ".png" :
-                        context + "/assets/images/datasources/Unknown_Thing.jpg");
-            style.title = data.label || data.name;
+            style.src = this.getThumbnail(data);
+            style.title = data.name || data.title || data.label || data.onion_url;
             style.titleStyle = "compare-title truncate";
             style.cancel = "comparison-cancel-button";
         }
@@ -1993,17 +2042,17 @@ var LinkResults = React.createClass({
         return(
             <div className="compare-objects bt br bb bl">
                 <div className="compare-header">
-                    <b>Merge Objects</b>
-                    <span className="contextual-help hidden-phone hidden-tablet" data-content="To merge objects, please select two objects by clicking on the appropriate icon in the results list.">
+                    <b>Merge Results</b>
+                    <span className="contextual-help hidden-phone hidden-tablet" data-content="To merge results, please select two results by clicking on the appropriate icon in the results list.">
   </span>
 
-                    <div className="tooltip hasArrow" style={{display: 'none'}}>To merge objects, please select two objects by clicking on the appropriate icon in the results list.<div className="arrow"></div></div>
+                    <div className="tooltip hasArrow" style={{display: 'none'}}>To merge results, please select two results by clicking on the appropriate icon in the results list.<div className="arrow"></div></div>
                 </div>
                 <div className="compare-main">
                     <div id="compare-object1" className="compare-object bt br bb bl">
                         <div className="compare-table">
                             <span className={style1.span1}></span>
-                            <span className={style1.span2}>First object</span>
+                            <span className={style1.span2}>First result</span>
                             <a className="compare-link">
                                 <span className="compare-text off"></span>
                                 <img className={style1.img} title={style1.title} alt={style1.title} src={style1.src}/>
@@ -2015,7 +2064,7 @@ var LinkResults = React.createClass({
                     <div id="compare-object2" className="compare-object bt br bb bl">
                         <div className="compare-table">
                             <span className={style2.span1}></span>
-                            <span className={style2.span2}>Second object</span>
+                            <span className={style2.span2}>Second result</span>
                             <a className="compare-link">
                                 <span className="compare-text off"></span>
                                 <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
@@ -2028,7 +2077,7 @@ var LinkResults = React.createClass({
                 <div className="compare-footer bt bb bl br">
                     <a id="compare-button">
                         <div className={buttonStyle} onClick={this.props.merge}>
-                            Merge Objects
+                            Merge Results
                         </div>
                     </a>
                 </div>
@@ -2050,7 +2099,7 @@ var LinkResultsButton = React.createClass({
     },
     render: function(){
         return (
-            <button className={this.state.style} title="Merge Object" onClick={this.handleClick}/>
+            <button className={this.state.style} title="Merge Result" onClick={this.handleClick}/>
         )
     }
 });
