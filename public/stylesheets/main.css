@@ -344,6 +344,7 @@ select {
     -moz-transition: none;
     -o-transition: none;
     transition: none;
+    background-color: transparent !important;
 }
 
 a.thumbnail:hover {
