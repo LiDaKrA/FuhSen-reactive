@@ -80,7 +80,7 @@ var ContainerResults = React.createClass({
                     </div>
                 </div>
 
-                <div className="row search-results-container">
+                <div className="row search-results-container no-border">
                     <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000}/>
                 </div>
 
@@ -1575,15 +1575,10 @@ var WebResultElement = React.createClass({
                         </div>
                         <div className="thumbnail">
                             <div>
-                                <div>
-                                    <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                         alt={"Information from " + this.props.source} height="45" width="45"
-                                         title={this.props.source}/>
-                                </div>
-                                <div>
+                                <div className="crawl_thumbnail">
                                     {this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
                                         <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label> : <button
-                                            onClick={this.onCreateCrawlJobClick}>&nbsp;{getTranslation("createCrawlJob")}&nbsp;</button> : getTranslation("invalid_website") }
+                                            className="crawl_icon" onClick={this.onCreateCrawlJobClick} title={getTranslation("createCrawlJob")}></button> : <span> {getTranslation("invalid_website")} </span> }
                                 </div>
                             </div>
                         </div>
@@ -1635,19 +1630,15 @@ var ProductResultElement = React.createClass({
                                     <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
                                 { this.props.webpage !== undefined ?
                                     <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
-                                                                           target="_blank">{this.props.webpage}</a><SnapshotLink
-                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                                                           target="_blank">{this.props.webpage}</a></p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
-                        </div>
-                        <div className="thumbnail">
                             <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
-                        </div>
-                        <div class="thumbnail">
+                            <SnapshotLink webpage={this.props.webpage}></SnapshotLink>
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title={this.props.source}/>
@@ -1696,12 +1687,10 @@ var PersonResultElement = React.createClass({
                                     <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                {/*{ this.props.webpage !== undefined ?*/}
-                                    {/*<p><b>{getTranslation("link")}: </b>*/}
-                                        {/*<a href={this.props.webpage} target="_blank">{this.props.webpage}</a>*/}
-                                        {/*/!*{screenShotElement}*!/*/}
-                                        {/*</p>*/}
-                                    {/*: null }*/}
+                                { this.props.webpage !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b>
+                                        <a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>
+                                    : null }
                                 { this.props.active_email !== undefined ?
                                     <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
                                 { this.props.wants !== undefined ?
@@ -1720,7 +1709,6 @@ var PersonResultElement = React.createClass({
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
                             <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                             { this.props.webpage !== undefined ? <p>{screenShotElement}</p> : null }
-                            <a href={this.props.webpage} title="Open Link" className="ext-link" target="_blank"></a>
                         </div>
                         <div className="thumbnail">
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
@@ -1764,19 +1752,15 @@ var OrganizationResultElement = React.createClass({
                                     <p>{getTranslation("location")}: {this.props.location}</p> : null }
                                 { this.props.webpage !== undefined ?
                                     <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
-                                                                           target="_blank">{this.props.webpage}</a><SnapshotLink
-                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                                                           target="_blank">{this.props.webpage}</a></p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
-                        </div>
-                        <div className="thumbnail">
                             <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
-                        </div>
-                        <div class="thumbnail">
+                            <SnapshotLink webpage={this.props.webpage}></SnapshotLink>
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title={this.props.source}/>
@@ -1814,8 +1798,7 @@ var ElasticSearchResultElement = React.createClass({
                             <div className="subtitle">
                                 { this.props.onion_url !== undefined ?
                                     <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
-                                                                           onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a><SnapshotLink
-                                        webpage={this.props.onion_url.replace(".onion",".onion.to")}></SnapshotLink></p> : null }
+                                                                           onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a></p> : null }
                                 { this.props.content !== undefined ?
                                     <p><b>Content: </b>{<RichText label="Content" text={this.props.content} maxLength={300}/>}</p> : null }
                                 { this.props.entity_url !== undefined ?
@@ -1832,11 +1815,8 @@ var ElasticSearchResultElement = React.createClass({
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
-                        </div>
-                        <div className="thumbnail">
                             <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
-                        </div>
-                        <div class="thumbnail">
+                            <SnapshotLink webpage={this.props.onion_url.replace(".onion",".onion.to")}></SnapshotLink>
                             <img src={context + "/assets/images/datasources/Elasticsearch.png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title="Elasticsearch"/>
@@ -1874,19 +1854,15 @@ var DocumentResultElement = React.createClass({
                                     <p>{getTranslation("filename")}: {this.props.filename}</p> : null }
                                 { this.props.webpage !== undefined ?
                                     <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
-                                                                           target="_blank">{this.props.webpage}</a><SnapshotLink
-                                        webpage={this.props.webpage}></SnapshotLink></p> : null }
+                                                                           target="_blank">{this.props.webpage}</a></p> : null }
                             </div>
                         </div>
                     </div>
                     <div class="thumbnail-wrapper col-md-1">
                         <div className="thumbnail">
                             <LinkResultsButton data={this.props} onAddLink={this.props.onAddLink}/>
-                        </div>
-                        <div className="thumbnail">
                             <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
-                        </div>
-                        <div class="thumbnail">
+                            <SnapshotLink webpage={this.props.webpage}></SnapshotLink>
                             <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
                                  alt={"Information from " + this.props.source} height="45" width="45"
                                  title={this.props.source}/>

@@ -50,8 +50,9 @@
 }
 .crawl_icon {
   background-image: url("../images/icons/crawl-icon.png");
-  width: 25px;
-  height: 25px;
+  width: 18px;
+  height: 18px;
+  background-position: center !important;
 }
 
 .headers-li {
@@ -1652,4 +1653,15 @@ ul.unstyled {
   position: absolute;
   right: 0px;
   top: 105px;
+}
+
+.no-border{
+  border: none !important;
+}
+
+.crawl_thumbnail{
+  float: right;
+  top: 75px;
+  position: absolute;
+  right: 0;
 }
