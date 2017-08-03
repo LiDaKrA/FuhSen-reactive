@@ -52,6 +52,12 @@ var ContainerResults = React.createClass({
                 break;
         }
     },
+    getInitialState: function(){
+        return({searchUid: null})
+    },
+    setSearchUid: function(id){
+        this.setState({searchUid:id});
+    },
     render: function () {
         return (
             <div>
@@ -69,6 +75,7 @@ var ContainerResults = React.createClass({
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <div className="row">
+                                        <FavouritesHeader searchUid={this.state.searchUid}/>
                                         <div className="col-md-12">
                                             <LangSwitcher onlangselect={this.setLang}/>
                                             <SearchForm id_class="form-search-header" keyword={query}/>
@@ -81,7 +88,7 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container no-border">
-                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000}/>
+                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000} setSearchUid={this.setSearchUid}/>
                 </div>
 
                 <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
@@ -102,6 +109,7 @@ var Trigger = React.createClass({
             cache: false,
             success: function (kw) {
                 this.setState({keyword: kw["keyword"], searchUid: kw["uid"]});
+                this.props.setSearchUid(kw["uid"]);
             }.bind(this),
             error: function (xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
@@ -2080,5 +2088,33 @@ var LinkResultsButton = React.createClass({
         )
     }
 });
+
+var FavouritesHeader= React.createClass({
+    getInitialState: function(){
+        let count = 0;
+        let url = context + '/' + this.props.searchUid + '/favorites';
+        $.ajax({
+            url: url,
+            cache: false,
+            type: 'GET',
+            success: function(response) {
+            },
+            error: function(xhr) {
+            }
+        });
+        return({count: count})
+    },
+    handleClick: function (e) {
+        e.preventDefault();
+    },
+    render: function(){
+        return (
+            <a href="#" value="favourites" onClick={this.handleClick}>Favourites({this.state.count})</a>
+        )
+    }
+});
+
+
+
 
 React.render(<ContainerResults url={context + "/keyword"} pollInterval={200000}/>, document.getElementById('skeleton'));
