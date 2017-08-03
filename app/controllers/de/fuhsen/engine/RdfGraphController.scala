@@ -36,10 +36,18 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  def getFavorites(graphUid: String) = Action {
+  def getFavorites(graphUid: String) = Action.async {
     Logger.info("Get Favorites")
     Logger.info(s"GraphUid: $graphUid")
-    Ok
+    ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
+      .withQueryString("query"->ConfigFactory.load.getString("store.favorites.sparql"))
+      .withHeaders("Accept"->"application/n-triples")
+      .get()
+      .map {
+        response =>
+          val model = RDFUtil.rdfStringToModel(response.body, Lang.NTRIPLES)
+          Ok(RDFUtil.modelToTripleString(model, Lang.JSONLD))
+      }
   }
 
   private def getUriModel(uri: String, model: Model) : Model = {
@@ -61,7 +69,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
   private def push2Dydra(model: Model, graph: String): Future[String] = {
     Logger.info(s"Pushing ${model.size} triples to favorits to graph: $graph ")
     val n3_model = RDFUtil.modelToTripleString(model, Lang.N3)
-    ws.url(ConfigFactory.load.getString("store.endpoint.url"))
+    ws.url(ConfigFactory.load.getString("store.endpoint.service.url"))
         .withQueryString("graph"-> graph).withHeaders("Content-Type"->"text/rdf+n3").post(n3_model).map(
         response => "DYDRA.RESPONSE: "+response.body)
   }
