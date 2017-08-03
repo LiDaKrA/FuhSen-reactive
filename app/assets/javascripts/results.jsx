@@ -75,9 +75,11 @@ var ContainerResults = React.createClass({
                                 </div>
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <div className="row">
-                                        <FavouritesHeader searchUid={this.state.searchUid}/>
                                         <div className="col-md-12">
-                                            <LangSwitcher onlangselect={this.setLang}/>
+                                            <div className="row header-links">
+                                                <FavouritesHeader searchUid={this.state.searchUid}/>
+                                                <LangSwitcher onlangselect={this.setLang}/>
+                                            </div>
                                             <SearchForm id_class="form-search-header" keyword={query}/>
                                         </div>
                                     </div>
@@ -2091,25 +2093,32 @@ var LinkResultsButton = React.createClass({
 
 var FavouritesHeader= React.createClass({
     getInitialState: function(){
-        let count = 0;
+        return({count:0});
+    },
+    handleClick: function (e) {
+        e.preventDefault();
+    },
+    componentWillMount: function(){
         let url = context + '/' + this.props.searchUid + '/favorites';
+        let count = 0;
+        var ref = this;
         $.ajax({
             url: url,
             cache: false,
             type: 'GET',
             success: function(response) {
+                obj = JSON.parse(response);
+                count = obj["@graph"].length;
+                ref.setState({count:count});
             },
             error: function(xhr) {
             }
         });
-        return({count: count})
-    },
-    handleClick: function (e) {
-        e.preventDefault();
+        this.setState({count:count});
     },
     render: function(){
         return (
-            <a href="#" value="favourites" onClick={this.handleClick}>Favourites({this.state.count})</a>
+            <a href="#" className="header-links-child" value="favourites" onClick={this.handleClick}>Favourites({this.state.count})</a>
         )
     }
 });

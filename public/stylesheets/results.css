@@ -1665,3 +1665,11 @@ ul.unstyled {
   position: absolute;
   right: 0;
 }
+
+.header-links{
+  display:inline-flex;
+}
+
+.header-links-child{
+  margin-right: 15px;
+}
