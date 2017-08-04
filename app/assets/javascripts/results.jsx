@@ -53,7 +53,15 @@ var ContainerResults = React.createClass({
         }
     },
     getInitialState: function(){
-        return({searchUid: null})
+        return({searchUid: null, favourites: null})
+    },
+    setFavourites: function(data){
+        if(this.state.favourites){
+            this.setState({favourites:null});
+        }
+        else{
+            this.setState({favourites:data});
+        }
     },
     setSearchUid: function(id){
         this.setState({searchUid:id});
@@ -76,8 +84,8 @@ var ContainerResults = React.createClass({
                                 <div className="col-md-5 toolbar search-header hidden-phone text-right">
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <div className="row header-links">
-                                                <FavouritesHeader searchUid={this.state.searchUid}/>
+                                            <div className="header-links">
+                                                <FavouritesHeader searchUid={this.state.searchUid} setFavourites={this.setFavourites}/>
                                                 <LangSwitcher onlangselect={this.setLang}/>
                                             </div>
                                             <SearchForm id_class="form-search-header" keyword={query}/>
@@ -90,7 +98,7 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container no-border">
-                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000} setSearchUid={this.setSearchUid}/>
+                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000} setSearchUid={this.setSearchUid} favourites={this.state.favourites}/>
                 </div>
 
                 <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
@@ -127,7 +135,7 @@ var Trigger = React.createClass({
     },
     render: function () {
         if (this.state.keyword) {
-            return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid}/>);
+            return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid} favourites={this.props.favourites}/>);
         }
 
         return <LoadingResults/>;
@@ -330,7 +338,8 @@ var Container = React.createClass({
                                       loadMoreResults={this.state.loadMoreResults}
                                       setEntityType = {this.setEntityType}
                                       onAddLink = {this.onMergeChange}
-                                      onFavourite = {this.onFavourite}/>
+                                      onFavourite = {this.onFavourite}
+                                      favourites={this.props.favourites}/>
                 </div>
             </div>);
         }
@@ -1068,6 +1077,35 @@ var ResultsContainer = React.createClass({
     componentWillReceiveProps: function (nextProps) {
         //see if it actually changed
         if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching || nextProps.loadMoreResults === true) {
+            this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
+        }
+        if(nextProps.favourites){
+            var new_data = JSON.parse(nextProps.favourites);
+            //TODO: remove this hack asap
+            new_data.forEach( function (item)
+            {
+                for (var key in item) {
+                    if (item.hasOwnProperty(key)) {
+                        if(key.toString().includes('#')){
+                            var parts = key.toString().split('#');
+                            var new_key = '';
+                            if(parts[0].includes('fuhsen')){
+                                new_key = 'fs:' + parts[1];
+                            }
+                            if(parts[0].includes('rdf')){
+                                new_key = 'rdfs:' + parts[1];
+                            }
+                            Object.defineProperty(item, new_key, Object.getOwnPropertyDescriptor(item, key));
+                            delete item[key];
+                        }
+                    }
+                }
+                item["@type"] = "foaf:Person";
+            });
+            console.log(new_data);
+            this.setState({resultsData: new_data, originalData: new_data});
+        }
+        else{
             this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
         }
     },
@@ -2093,10 +2131,7 @@ var LinkResultsButton = React.createClass({
 
 var FavouritesHeader= React.createClass({
     getInitialState: function(){
-        return({count:0});
-    },
-    handleClick: function (e) {
-        e.preventDefault();
+        return({count:0, result: null});
     },
     componentWillMount: function(){
         let url = context + '/' + this.props.searchUid + '/favorites';
@@ -2109,16 +2144,19 @@ var FavouritesHeader= React.createClass({
             success: function(response) {
                 obj = JSON.parse(response);
                 count = obj["@graph"].length;
-                ref.setState({count:count});
+                ref.setState({count:count, result: JSON.stringify(obj["@graph"])});
             },
             error: function(xhr) {
             }
         });
         this.setState({count:count});
     },
+    handleClick: function(){
+      this.props.setFavourites(this.state.result);
+    },
     render: function(){
         return (
-            <a href="#" className="header-links-child" value="favourites" onClick={this.handleClick}>Favourites({this.state.count})</a>
+            <a href="#" className="header-links-child" onClick={this.handleClick} value="favourites">Favourites({this.state.count})</a>
         )
     }
 });
