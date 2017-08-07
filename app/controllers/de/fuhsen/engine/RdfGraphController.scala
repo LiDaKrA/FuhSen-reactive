@@ -50,6 +50,10 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
       }
   }
 
+  def countFavorites(graphUid: String) = Action.async {
+    Future(Ok("4"))
+  }
+
   private def getUriModel(uri: String, model: Model) : Model = {
     val query = QueryFactory.create(
       s"""

@@ -53,15 +53,7 @@ var ContainerResults = React.createClass({
         }
     },
     getInitialState: function(){
-        return({searchUid: null, favourites: null})
-    },
-    setFavourites: function(data){
-        if(this.state.favourites){
-            this.setState({favourites:null});
-        }
-        else{
-            this.setState({favourites:data});
-        }
+        return({searchUid: null})
     },
     setSearchUid: function(id){
         this.setState({searchUid:id});
@@ -85,7 +77,7 @@ var ContainerResults = React.createClass({
                                     <div className="row">
                                         <div className="col-md-12">
                                             <div className="header-links">
-                                                <FavouritesHeader searchUid={this.state.searchUid} setFavourites={this.setFavourites}/>
+                                                <FavouritesHeader searchUid={this.state.searchUid}/>
                                                 <LangSwitcher onlangselect={this.setLang}/>
                                             </div>
                                             <SearchForm id_class="form-search-header" keyword={query}/>
@@ -98,7 +90,7 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container no-border">
-                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000} setSearchUid={this.setSearchUid} favourites={this.state.favourites}/>
+                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000} setSearchUid={this.setSearchUid} />
                 </div>
 
                 <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
@@ -135,9 +127,8 @@ var Trigger = React.createClass({
     },
     render: function () {
         if (this.state.keyword) {
-            return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid} favourites={this.props.favourites}/>);
+            return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid}/>);
         }
-
         return <LoadingResults/>;
     }
 });
@@ -289,21 +280,6 @@ var Container = React.createClass({
             }
         });
     },
-    onFavourite: function(data){
-        let url = context + '/' + this.props.searchUid + '/favorites';
-        $.ajax({
-            url: url+"?uri=" + data,
-            cache: false,
-            type: 'POST',
-            success: function(response) {
-                console.log(response);
-            },
-            error: function(xhr) {
-                console.log("error");
-                console.log(xhr);
-            }
-        });
-    },
     render: function () {
         if (this.state.initData) {
             return (<div className="row search-results-container">
@@ -337,9 +313,7 @@ var Container = React.createClass({
                                       onLoadMoreResults={this.onLoadMoreResults}
                                       loadMoreResults={this.state.loadMoreResults}
                                       setEntityType = {this.setEntityType}
-                                      onAddLink = {this.onMergeChange}
-                                      onFavourite = {this.onFavourite}
-                                      favourites={this.props.favourites}/>
+                                      onAddLink = {this.onMergeChange}/>
                 </div>
             </div>);
         }
@@ -1077,35 +1051,6 @@ var ResultsContainer = React.createClass({
     componentWillReceiveProps: function (nextProps) {
         //see if it actually changed
         if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching || nextProps.loadMoreResults === true) {
-            this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
-        }
-        if(nextProps.favourites){
-            var new_data = JSON.parse(nextProps.favourites);
-            //TODO: remove this hack asap
-            new_data.forEach( function (item)
-            {
-                for (var key in item) {
-                    if (item.hasOwnProperty(key)) {
-                        if(key.toString().includes('#')){
-                            var parts = key.toString().split('#');
-                            var new_key = '';
-                            if(parts[0].includes('fuhsen')){
-                                new_key = 'fs:' + parts[1];
-                            }
-                            if(parts[0].includes('rdf')){
-                                new_key = 'rdfs:' + parts[1];
-                            }
-                            Object.defineProperty(item, new_key, Object.getOwnPropertyDescriptor(item, key));
-                            delete item[key];
-                        }
-                    }
-                }
-                item["@type"] = "foaf:Person";
-            });
-            console.log(new_data);
-            this.setState({resultsData: new_data, originalData: new_data});
-        }
-        else{
             this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
         }
     },
@@ -2134,7 +2079,7 @@ var FavouritesHeader= React.createClass({
         return({count:0, result: null});
     },
     componentWillMount: function(){
-        let url = context + '/' + this.props.searchUid + '/favorites';
+        let url = context + '/' + this.props.searchUid + '/favorites/count';
         let count = 0;
         var ref = this;
         $.ajax({
@@ -2142,21 +2087,19 @@ var FavouritesHeader= React.createClass({
             cache: false,
             type: 'GET',
             success: function(response) {
-                obj = JSON.parse(response);
-                count = obj["@graph"].length;
-                ref.setState({count:count, result: JSON.stringify(obj["@graph"])});
+                //obj = JSON.parse(response);
+                count = parseInt(response); //obj["@graph"].length;
+                ref.setState({count:count, result: null});
             },
             error: function(xhr) {
             }
         });
         this.setState({count:count});
     },
-    handleClick: function(){
-      this.props.setFavourites(this.state.result);
-    },
     render: function(){
+        var favoritesPageUri = context + "/favorites?" + "uid=" + this.props.searchUid;
         return (
-            <a href="#" className="header-links-child" onClick={this.handleClick} value="favourites">Favourites({this.state.count})</a>
+            <a href={favoritesPageUri} target="_blank" className="header-links-child" value="favourites">Favourites({this.state.count})</a>
         )
     }
 });

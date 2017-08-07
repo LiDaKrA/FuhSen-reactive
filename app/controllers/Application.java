@@ -48,6 +48,10 @@ public class Application extends Controller {
         return ok(details.render(uid,eUri,entityType));
     }
 
+    public Result favorites(String uid) {
+        return ok(favorites.render(uid));
+    }
+
     public Result getKeyword(){
         String json_res = "{ \"keyword\" : \""+this.keyword+"\" }";
         return ok(json_res);

@@ -1,0 +1,11 @@
+@(uid: String)
+@main("Favorites Page", false, scripts) {
+<div id="skeleton" class="row">
+</div>
+}
+
+@scripts = {
+<script type='text/javascript' src='@routes.Assets.versioned("javascripts/translation.js")'></script>
+<script type='text/javascript' src='@routes.Assets.versioned("javascripts/search.js")'></script>
+<script type='text/javascript' src='@routes.Assets.versioned("javascripts/favorites.js")'></script>
+}
