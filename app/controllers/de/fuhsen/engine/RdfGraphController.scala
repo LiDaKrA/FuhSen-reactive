@@ -42,7 +42,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
     ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
       .withQueryString("query"->ConfigFactory.load.getString("store.favorites.sparql"))
       .withHeaders("Accept"->"application/n-triples")
-      .get()
+      .get
       .map {
         response =>
           val model = RDFUtil.rdfStringToModel(response.body, Lang.NTRIPLES)
@@ -51,7 +51,18 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
   }
 
   def countFavorites(graphUid: String) = Action.async {
-    Future(Ok("4"))
+    Logger.info("Count Favorites")
+    Logger.info(s"GraphUid: $graphUid")
+    ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
+      .withQueryString("query"->ConfigFactory.load.getString("store.favorites.count.sparql"))
+      .withHeaders("Accept"->"application/json")
+      .get
+      .map {
+        response =>
+          val _json = response.json
+          val count = (((_json \ "results" \ "bindings")(0)) \ "COUNT1" \ "value").as[String]
+          Ok(count)
+      }
   }
 
   private def getUriModel(uri: String, model: Model) : Model = {
