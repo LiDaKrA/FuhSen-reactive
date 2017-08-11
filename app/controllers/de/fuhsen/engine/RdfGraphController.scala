@@ -12,7 +12,7 @@ import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import utils.dataintegration.RDFUtil
+import utils.dataintegration.{MergeOperator, RDFUtil}
 
 /**
   * Created by dcollarana on 7/21/2017.
@@ -22,7 +22,13 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
   def mergeEntities(graphUid: String, uri1: String, uri2: String) = Action {
     Logger.info("Merge Entities")
     Logger.info(s"GraphUid: $graphUid Uri 1: $uri1 Uri 2: $uri2")
-    Ok
+    GraphResultsCache.getModel(graphUid) match {
+      case Some(model) =>
+        MergeOperator.merge(uri1, uri2, model, MergeOperator.unionPolicy)
+        Ok
+      case None =>
+        InternalServerError("Provided uid has not result model associated.")
+    }
   }
 
   def addToFavorites(graphUid: String, uri: String) = Action.async {

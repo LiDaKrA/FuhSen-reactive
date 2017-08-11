@@ -93,6 +93,9 @@ class FederatedQueryController @Inject()(ws: WSClient) extends Controller {
       }
   }
 
+  /*
+  Deleting tuple from the Model (RDF Graph)
+   */
   private def deleteNextPageTuples(model: Model) : Model = {
     val query = UpdateFactory.create(s"""
                    |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
