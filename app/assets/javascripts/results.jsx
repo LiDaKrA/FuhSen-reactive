@@ -280,6 +280,21 @@ var Container = React.createClass({
             }
         });
     },
+    onFavourite: function(data){
+        let url = context + '/' + this.props.searchUid + '/favorites';
+        $.ajax({
+            url: url+"?uri=" + data,
+            cache: false,
+            type: 'POST',
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(xhr) {
+                console.log("error");
+                console.log(xhr);
+            }
+        });
+    },
     render: function () {
         if (this.state.initData) {
             return (<div className="row search-results-container">
@@ -313,7 +328,8 @@ var Container = React.createClass({
                                       onLoadMoreResults={this.onLoadMoreResults}
                                       loadMoreResults={this.state.loadMoreResults}
                                       setEntityType = {this.setEntityType}
-                                      onAddLink = {this.onMergeChange}/>
+                                      onAddLink = {this.onMergeChange}
+                                      onFavourite = {this.onFavourite}/>
                 </div>
             </div>);
         }
