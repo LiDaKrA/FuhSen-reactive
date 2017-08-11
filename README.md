@@ -117,7 +117,7 @@ keytool -delete -alias occrp -keystore cacerts
 
 #### License
 
-* Copyright (C) 2015-2016 EIS Uni-Bonn
+* Copyright (C) 2015-2018 EIS University of Bonn & Fraunhofer IAIS
 * Licensed under the Apache 2.0 License
 
 
