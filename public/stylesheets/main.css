@@ -2131,3 +2131,12 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     color: blue;
     background-color: transparent;
 }
+
+.fav-item{
+    list-style: none;
+}
+
+.favContainer{
+    margin-left: 25%;
+    width:50%;
+}
