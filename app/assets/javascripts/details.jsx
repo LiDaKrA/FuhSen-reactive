@@ -1,3 +1,11 @@
+function getValue(property) {
+    if(Array.isArray(property)){
+        return property[0];
+    }
+    else
+        return property;
+}
+
 var ProfileContainer = React.createClass({
     getInitialState: function () {
         return {data: undefined};
@@ -41,15 +49,17 @@ var ProfileContainer = React.createClass({
 
 var ProfileHeader = React.createClass({
     render: function () {
+        var singleName = getValue(this.props.name);
+        var singleImg = getValue(this.props.image);
         return (
             <div id="profile_container_top">
                 <div id="profile_image">
-                    <img className="thumbnail" src={this.props.image} width="90" height="90"/>
+                    <img className="thumbnail" src={singleImg} width="90" height="90"/>
                 </div>
                 <div id="profile_summary">
                     <div className="header">
                         <span className="highlight">
-                            {this.props.name}
+                            {singleName}
                         </span>
                     </div>
                 </div>

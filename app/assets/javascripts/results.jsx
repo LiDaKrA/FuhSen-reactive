@@ -30,6 +30,14 @@ function compareRank(a, b) {
     return 0;
 }
 
+function getValue(property) {
+    if(Array.isArray(property)){
+        return property[0];
+    }
+    else
+        return property;
+}
+
 var sourcesDirty = extractQuery("sources");
 var typesDirty = extractQuery("types");
 
@@ -205,13 +213,13 @@ var Container = React.createClass({
         this.loadCommentsFromServer();
     },
     getInitialState: function () {
-        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:exact_matching, loadMoreResults:false, mergeData: {1: null, 2: null}};
+        return {view: "list", entityType: "person", facets: "", initData: false, facetsDict: {}, orgFacetsDict: {}, exactMatching:exact_matching, loadMoreResults:false, mergeData: {1: null, 2: null}, loadMergedData: false};
     },
     onExactMatchingChange: function () {
-        this.setState({exactMatching:!this.state.exactMatching, loadMoreResults:false})
+        this.setState({exactMatching:!this.state.exactMatching, loadMoreResults:false, loadMergedData: false})
     },
     onLoadMoreResults: function () {
-        this.setState({loadMoreResults: true})
+        this.setState({loadMoreResults: true, loadMergedData: false})
     },
     onTypeChange: function (event) {
         var optionSelected = event.currentTarget.dataset.id;
@@ -227,10 +235,10 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false});
+        this.setState({entityType: type, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
     },
     setEntityType: function (type) {
-        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false});
+        this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
     },
     onMergeChange: function(data, cancel){
         let link = this.state.mergeData;
@@ -270,14 +278,16 @@ var Container = React.createClass({
             },
             cache: false,
             type: 'GET',
-            success: function(response) {
+            success: function() {
                 console.log("success");
-                window.location.reload()
-            },
+                //window.location.reload()
+                alert("The data was merged");
+                this.setState({entityType: this.state.entityType, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: true, mergeData: {1: null, 2: null}});
+            }.bind(this),
             error: function(xhr) {
                 console.log("error");
                 console.log(xhr);
-            }
+            }.bind(this)
         });
     },
     onFavourite: function(data){
@@ -329,14 +339,14 @@ var Container = React.createClass({
                                       loadMoreResults={this.state.loadMoreResults}
                                       setEntityType = {this.setEntityType}
                                       onAddLink = {this.onMergeChange}
-                                      onFavourite = {this.onFavourite}/>
+                                      onFavourite = {this.onFavourite}
+                                      loadMergedData={this.state.loadMergedData}/>
                 </div>
             </div>);
         }
         return <LoadingResults/>;
     }
 });
-
 
 //************** Begin Facets Components *******************
 
@@ -1066,7 +1076,7 @@ var ResultsContainer = React.createClass({
     },
     componentWillReceiveProps: function (nextProps) {
         //see if it actually changed
-        if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching || nextProps.loadMoreResults === true) {
+        if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching || nextProps.loadMoreResults === true || nextProps.loadMergedData === true) {
             this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
         }
     },
@@ -1664,23 +1674,18 @@ var PersonResultElement = React.createClass({
     render: function () {
         var detailsPageUri = context + "/details?entityType=person" + "&eUri=" + this.props.uri + "&uid=" + this.props.uid;
         var screenShotElement = (this.props.source !== "Facebook" ? <SnapshotLink webpage={this.props.webpage}></SnapshotLink> : null);
+
         return (
             <li className="item bt">
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/> :
-                                <img src={context + "/assets/images/datasources/Unknown.png"} height="60px"
-                                     width="75px"/> }
+                            <ThumbnailElement img={this.props.img} />
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
                         <div className="summary-main">
-                            <a href={detailsPageUri} target="_blank">
-                            <h2 className="title">
-                                {this.props.name}
-                            </h2>
-                            </a>
+                            <LabelElement name={this.props.name} pageUrl={detailsPageUri} />
                             <div className="subtitle">
                                 { this.props.alias !== undefined ?
                                     <p>{getTranslation("nick")}: {this.props.alias}</p> : null }
@@ -1696,10 +1701,7 @@ var PersonResultElement = React.createClass({
                                     <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b>
-                                        <a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>
-                                    : null }
+                                <LinkElement webpage={this.props.webpage} />
                                 { this.props.active_email !== undefined ?
                                     <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
                                 { this.props.wants !== undefined ?
@@ -1719,11 +1721,7 @@ var PersonResultElement = React.createClass({
                             <FavouritesButton data={this.props.uri} onFavourite={this.props.onFavourite}/>
                             { this.props.webpage !== undefined ? <p>{screenShotElement}</p> : null }
                         </div>
-                        <div className="thumbnail">
-                            <img src={context + "/assets/images/datasources/" + this.props.source + ".png"}
-                                 alt={"Information from " + this.props.source} height="45" width="45"
-                                 title={this.props.source}/>
-                        </div>
+                        <SourceElement source={this.props.source} />
                         {/*<Graph id={"graph"+this.props.id} entity={this.props.jsonResult}/>*/}
                     </div>
                 </div>
@@ -2120,7 +2118,51 @@ var FavouritesHeader= React.createClass({
     }
 });
 
+/*
+* Result Summary Elements that handle arrays in their values (e.g., After applying merge operation)
+*/
 
+var ThumbnailElement = React.createClass({
+    render: function() {
+        if (this.props.img !== undefined) {
+            var imgVal = getValue(this.props.img);
+            return <img src={imgVal} height="60px" width="75px"/>;
+        }
+        else
+            return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>;
+    }
+});
 
+var LinkElement = React.createClass({
+    render: function() {
+        if (this.props.webpage !== undefined) {
+            if(Array.isArray(this.props.webpage)){
+                return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage[0]} target="_blank">{this.props.webpage[0]}</a>&nbsp;<a href={this.props.webpage[1]} target="_blank">{this.props.webpage[1]}</a></p>;
+            }
+            else
+                return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>;
+        }
+        else
+            return null;
+    }
+});
+
+var SourceElement = React.createClass({
+    render: function() {
+        if(Array.isArray(this.props.source)){
+            return <div><div>{this.props.source[0]}</div><div>{this.props.source[1]}</div></div>;
+        }
+        else {
+            return <div className="thumbnail"><img src={context + "/assets/images/datasources/" + this.props.source + ".png"} alt={"Information from " + this.props.source} height="45" width="45" title={this.props.source}/></div>;
+        }
+    }
+});
+
+var LabelElement = React.createClass({
+    render: function() {
+        var singleName = getValue(this.props.name);
+        return <a href={this.props.pageUrl} target="_blank"><h2 className="title">{singleName}</h2></a>;
+    }
+});
 
 React.render(<ContainerResults url={context + "/keyword"} pollInterval={200000}/>, document.getElementById('skeleton'));

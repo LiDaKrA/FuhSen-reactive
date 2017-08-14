@@ -37,7 +37,23 @@ object MergeOperator {
     model.add(merged)
   }
 
-  val unionPolicy = (r1: Model, r2: Model) => r1.add(r2)
+  val unionPolicy = (r1: Model, r2: Model) => {
+    r1.add(r2)
+    val query = QueryFactory.create(
+      s"""
+         |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+         |PREFIX fs: <http://vocab.lidakra.de/fuhsen#>
+         |PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+         |PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+         |
+         |CONSTRUCT   {
+         |<http://vocab.lidakra.de/fuhsen/search/merged_entity/399064019> ?p ?o .
+         |}
+         |WHERE {
+         |?s ?p ?o .
+         |}""".stripMargin)
+    QueryExecutionFactory.create(query, r1).execConstruct()
+  }
 
   private def deleteRms(uri: String, model: Model) = {
     val query = UpdateFactory.create(s"""
