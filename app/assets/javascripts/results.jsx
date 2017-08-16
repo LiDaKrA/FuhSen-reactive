@@ -254,7 +254,7 @@ var Container = React.createClass({
                 link[1]= data;
             }
             else{
-                alert("Only two results can be merged at once");
+                alert(getTranslation("merge_error"));
                 state = false;
             }
         }
@@ -1615,7 +1615,7 @@ var SnapshotLink = React.createClass({
     },
     render: function () {
         return (
-            <a className="snapshot" href="#" title="See Snapshot" onClick={this.showPDF}></a>
+            <a className="snapshot" href="#" title={getTranslation("see_snapshot")} onClick={this.showPDF}></a>
         );
     }
 });
@@ -1898,7 +1898,7 @@ var FavouritesButton = React.createClass({
    },
    render: function (){
        return(
-           <button className={this.state.style} title="Favourite" onClick={this.handleClick}/>
+           <button className={this.state.style} title={getTranslation("favourite")} onClick={this.handleClick}/>
        )
    }
 });
@@ -2026,17 +2026,17 @@ var LinkResults = React.createClass({
         return(
             <div className="compare-objects bt br bb bl">
                 <div className="compare-header">
-                    <b>Merge Results</b>
-                    <span className="contextual-help hidden-phone hidden-tablet" data-content="To merge results, please select two results by clicking on the appropriate icon in the results list.">
+                    <b>{getTranslation("merge_result")}</b>
+                    <span className="contextual-help hidden-phone hidden-tablet" data-content={getTranslation("merge_help")}>
   </span>
 
-                    <div className="tooltip hasArrow" style={{display: 'none'}}>To merge results, please select two results by clicking on the appropriate icon in the results list.<div className="arrow"></div></div>
+                    <div className="tooltip hasArrow" style={{display: 'none'}}>{getTranslation("merge_help")}<div className="arrow"></div></div>
                 </div>
                 <div className="compare-main">
                     <div id="compare-object1" className="compare-object bt br bb bl">
                         <div className="compare-table">
                             <span className={style1.span1}></span>
-                            <span className={style1.span2}>First result</span>
+                            <span className={style1.span2}>{getTranslation("first_result")}</span>
                             <a className="compare-link">
                                 <span className="compare-text off"></span>
                                 <img className={style1.img} title={style1.title} alt={style1.title} src={style1.src}/>
@@ -2048,7 +2048,7 @@ var LinkResults = React.createClass({
                     <div id="compare-object2" className="compare-object bt br bb bl">
                         <div className="compare-table">
                             <span className={style2.span1}></span>
-                            <span className={style2.span2}>Second result</span>
+                            <span className={style2.span2}>{getTranslation("second_result")}</span>
                             <a className="compare-link">
                                 <span className="compare-text off"></span>
                                 <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
@@ -2061,7 +2061,7 @@ var LinkResults = React.createClass({
                 <div className="compare-footer bt bb bl br">
                     <a id="compare-button">
                         <div className={buttonStyle} onClick={this.props.merge}>
-                            Merge Results
+                            {getTranslation("merge_result")}
                         </div>
                     </a>
                 </div>
@@ -2083,7 +2083,7 @@ var LinkResultsButton = React.createClass({
     },
     render: function(){
         return (
-            <button className={this.state.style} title="Merge Result" onClick={this.handleClick}/>
+            <button className={this.state.style} title={getTranslation("merge")} onClick={this.handleClick}/>
         )
     }
 });
@@ -2113,7 +2113,7 @@ var FavouritesHeader= React.createClass({
     render: function(){
         var favoritesPageUri = context + "/favorites?" + "uid=" + this.props.searchUid;
         return (
-            <a href={favoritesPageUri} target="_blank" className="header-links-child" value="favourites">Favourites({this.state.count})</a>
+            <a href={favoritesPageUri} target="_blank" className="header-links-child" value="favourites">{getTranslation("fav_link")}({this.state.count})</a>
         )
     }
 });
