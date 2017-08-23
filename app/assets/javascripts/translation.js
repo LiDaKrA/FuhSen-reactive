@@ -128,7 +128,15 @@ var dictEng = {
     "data_sources_help" : "Data sources: 1) Crawled Onion websites: Containing Darknet websites crawled with FuhSen application, entities such as persons or products are extracted and annotated. 2) Facebook: Containing person profiles. 3) Google Knowledge Graph: Containing information about People (such as politicians) and well-known Organizations. 4) Google+: Containing person and organization profiles. 5) ICIJ Offshore Leaks: Containing the Panama Papers leak. 6) OCCRP. Containing Organized Crimes and Corruption reports collected from all around the world. 7) Onion websites: Containing websites from the Darknet. 8) Twitter: Containing person profiles 9) Xing: Containing person professional profiles. 10) eBay: Containing product offers.",
     "entity_types_help" : "The current version of FuhSen is able to search for: People profiles, Product offers, Organization profiles, Documents containing data leaks, organized crime and corruption reports, and Darknet websites.",
     "searching_too_long" : "Is the search taking too long?",
-    "cancel_search_btn" : "Cancel Search"
+    "cancel_search_btn" : "Cancel Search",
+    "merge_result" : "Merge Results",
+    "merge" : "Merge",
+    "favourite" : "Favourite",
+    "fav_link" : "Favourites",
+    "first_result" : "First Result",
+    "second_result" : "Second Result",
+    "merge_error" : "Only two results can be merged at once",
+    "merge_help" : "To merge results, please select two results by clicking on the appropriate icon in the results list."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -267,7 +275,15 @@ var dictGer = {
     "data_sources_help" : "Datenquellen: 1) Crawled Darknet Webseiten: Beinhaltet Darknet Webseiten, die mit der FuhSen-Anwendung gecrawlt werden. Es werden Entitäten, wie z.B. Personen oder Produkte extrahiert und kommentiert. 2) Facebook: Beinhaltet darin enthaltene Personenprofile. 3) Google Knowledge Graph: Enthält Informationen über Menschen (wie Politiker) und bekannte Organisationen. 4) Google+: Beinhaltet Personen- und Organisationsprofile. 5) ICIJ Offshore Lecks: Beinhalten die Panama Papers Leckage. 6) OCCRP Beinhalten organisierte Verbrechen und Korruptionsberichte aus aller der Welt. ) Darknet Webseiten: Beinhalten Webseiten aus dem Darknet. 8) Twitter: Beinhaltet Personenprofile. 9) Xing: Beinhaltet Personendienstprofile. 10) eBay: Beinhaltet Produkt- und Lieferumfang.",
     "entity_types_help" : "Die aktuelle Version von FuhSen sucht nach: Personenprofilen, Produktangeboten, Organisationsprofilen, Dokumenten mit Datenlecks, organisiertem Verbrechen und Korruptionsberichten und Darknet Webseiten.",
     "searching_too_long" : "Ist die Suche zu lange?",
-    "cancel_search_btn" : "Suche abbrechen"
+    "cancel_search_btn" : "Suche abbrechen",
+    "merge_result" : "Ergebnisse zusammenführen",
+    "merge" : "Zusammenführen",
+    "favourite" : "Favorit",
+    "fav_link" : "Favoriten",
+    "first_result" : "1. Ergebnis",
+    "second_result" : "2. Ergebnis",
+    "merge_error" : "Ergebnisse können nur paarweise zusammengeführt werden. Bitte wählen Sie zwei Ergebnisse aus.",
+    "merge_help" : "Um zwei Ergebnisse zusammenzuführen, klicken Sie bitte auf den entsprechenden Button in der Ergebnisliste."
 };
 
 window.dictGer = dictGer;
