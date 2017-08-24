@@ -955,6 +955,23 @@ var ResultsContainer = React.createClass({
             view: this.state.view
         });
     },
+    mergeAll: function(){
+        let mergeUrl = context + '/' + this.props.searchUid + '/merge';
+        $.ajax({
+            url: mergeUrl,
+            cache: false,
+            type: 'GET',
+            success: function() {
+                console.log("success");
+                alert("The data was merged");
+                this.setState({entityType: this.state.entityType, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: true, mergeData: {1: null, 2: null}});
+            }.bind(this),
+            error: function(xhr) {
+                console.log("error");
+                console.log(xhr);
+            }.bind(this)
+        });
+    },
     loadDataFromServer: function (eType, exactMatching, loadmore) {
         this.setState({selected: eType, loading: true});
 
@@ -1302,6 +1319,8 @@ var ResultsContainer = React.createClass({
                         {/*{ this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"*/}
                                                                           {/*func={this.crawlAll}/> : null }*/}
                         {/*{ this.state.selected === "website" ? <div className="divider"/> : null }*/}
+                        <CustomForm id="btn_merge" class_identifier="merge_icon" func={this.mergeAll}/>
+                        <div className="divider"/>
                         <CustomForm id="btn_view_selector"
     class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
     func={this.toggleResultsView}/>
