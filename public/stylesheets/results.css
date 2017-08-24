@@ -1687,3 +1687,7 @@ ul.unstyled {
   list-style: none;
   padding:0;
 }
+
+.flexslider .slides img {
+  width: 75px;
+}
