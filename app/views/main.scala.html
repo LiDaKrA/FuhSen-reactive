@@ -13,6 +13,7 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/graph.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/details.css")">
         <link rel='stylesheet' href='@routes.WebJarAssets.at(WebJarAssets.locate("css/font-awesome.min.css"))'>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/flexslider.css")">
     </head>
     <body data-context="@play.Play.application().configuration().getString("play.http.context")">
         <noscript>
@@ -29,6 +30,7 @@
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("JSXTransformer.js"))'></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jszip.js"))'></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("FileSaver.js"))'></script>
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("jquery.flexslider.js"))'></script>
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.fullPath("react", "react.js"))'></script>
         <script src="http://d3js.org/d3.v3.min.js"></script>
         @if(addHeader) {

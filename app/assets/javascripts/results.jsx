@@ -280,7 +280,6 @@ var Container = React.createClass({
             type: 'GET',
             success: function() {
                 console.log("success");
-                //window.location.reload()
                 alert("The data was merged");
                 this.setState({entityType: this.state.entityType, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: true, mergeData: {1: null, 2: null}});
             }.bind(this),
@@ -1362,6 +1361,7 @@ var ResultsList = React.createClass({
         var resultsNodesSorted = this.props.data;
 
         var already_crawled = this.props.crawled;
+        console.log(resultsNodesSorted)
         var resultsNodes = resultsNodesSorted.map(function (result,idx) {
             if (result["@type"] === "foaf:Person") {
                 return (
@@ -1610,8 +1610,13 @@ var WebResultElement = React.createClass({
 
 var SnapshotLink = React.createClass({
     showPDF: function () {
-        var url = context + "/screenshot?url=" + this.props.webpage;
-        window.open(url);
+        if(Array.isArray(this.props.webpage)){
+            var webpages = this.props.webpage;
+            webpages.map(function(webpage){
+                var url = context + "/screenshot?url=" + webpage;
+                window.open(url);
+            });
+        }
     },
     render: function () {
         return (
@@ -1680,7 +1685,7 @@ var PersonResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} />
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -2123,13 +2128,42 @@ var FavouritesHeader= React.createClass({
 */
 
 var ThumbnailElement = React.createClass({
-    render: function() {
+    componentDidMount: function(){
+        $('.flexslider').flexslider({
+            animation: "slide",
+            directionNav: false
+        });
+    },
+    render: function () {
         if (this.props.img !== undefined) {
-            var imgVal = getValue(this.props.img);
-            return <img src={imgVal} height="60px" width="75px"/>;
+            if (Array.isArray(this.props.webpage)) {
+                //definitely merged entity
+                var imgArr = this.props.img;
+                var imgList = imgArr.map(function (img, index) {
+                    var imgVal = getValue(img);
+                    return (<li><img src={imgVal} height="60px" width="75px"/></li>)
+                });
+                return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
+            }
+            else {
+                //single result
+                var imgVal = getValue(this.props.img);
+                return <img src={imgVal} height="60px" width="75px"></img>
+            }
         }
-        else
-            return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>;
+        else {
+            var imgList = {};
+            if (Array.isArray(this.props.webpage)) {
+                var arr = this.props.webpage;
+                imgList = arr.map(function(){
+                    return <li><img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/></li>;
+                });
+                return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
+            }
+            else{
+                return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>
+            }
+        }
     }
 });
 
@@ -2137,7 +2171,11 @@ var LinkElement = React.createClass({
     render: function() {
         if (this.props.webpage !== undefined) {
             if(Array.isArray(this.props.webpage)){
-                return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage[0]} target="_blank">{this.props.webpage[0]}</a>&nbsp;<a href={this.props.webpage[1]} target="_blank">{this.props.webpage[1]}</a></p>;
+                var webpages = this.props.webpage;
+                var list = webpages.map(function(webpage){
+                    return (<li><a href={webpage} target="_blank">{webpage}</a></li>);
+                });
+                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
             }
             else
                 return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>;
