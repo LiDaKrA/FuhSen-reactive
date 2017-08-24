@@ -1,6 +1,7 @@
 checkLanguage();
 
 var context = $('body').data('context')
+var mergeEnabled = $('body').data('merge')
 
 function extractQuery(key) {
     var query = window.location.search.substring(1);
@@ -367,7 +368,6 @@ var FacetList = React.createClass({
             data:JSON.stringify(selectedFacets),
             contentType: 'application/json',
             success: function (response) {
-                console.log(response)
                 if(exact && JSON.stringify(response["@graph"]) == undefined){
                     //alert(getTranslation("no_exact_match_results"));
                 }else{
@@ -1361,7 +1361,6 @@ var ResultsList = React.createClass({
         var resultsNodesSorted = this.props.data;
 
         var already_crawled = this.props.crawled;
-        console.log(resultsNodesSorted)
         var resultsNodes = resultsNodesSorted.map(function (result,idx) {
             if (result["@type"] === "foaf:Person") {
                 return (
@@ -2024,54 +2023,57 @@ var LinkResults = React.createClass({
 
     },
     render: function () {
-        let data = this.props.data;
-        let style1 = this.getStyle(data[1]);
-        let style2 = this.getStyle(data[2]);
-        let buttonStyle = data[1] && data[2] ? "button" : "button disabled";
-        return(
-            <div className="compare-objects bt br bb bl">
-                <div className="compare-header">
-                    <b>{getTranslation("merge_result")}</b>
-                    <span className="contextual-help hidden-phone hidden-tablet" data-content={getTranslation("merge_help")}>
+        if(mergeEnabled){
+            let data = this.props.data;
+            let style1 = this.getStyle(data[1]);
+            let style2 = this.getStyle(data[2]);
+            let buttonStyle = data[1] && data[2] ? "button" : "button disabled";
+            return(
+                <div className="compare-objects bt br bb bl">
+                    <div className="compare-header">
+                        <b>{getTranslation("merge_result")}</b>
+                        <span className="contextual-help hidden-phone hidden-tablet" data-content={getTranslation("merge_help")}>
   </span>
 
-                    <div className="tooltip hasArrow" style={{display: 'none'}}>{getTranslation("merge_help")}<div className="arrow"></div></div>
-                </div>
-                <div className="compare-main">
-                    <div id="compare-object1" className="compare-object bt br bb bl">
-                        <div className="compare-table">
-                            <span className={style1.span1}></span>
-                            <span className={style1.span2}>{getTranslation("first_result")}</span>
-                            <a className="compare-link">
-                                <span className="compare-text off"></span>
-                                <img className={style1.img} title={style1.title} alt={style1.title} src={style1.src}/>
-                            </a>
-                            <span className={style1.titleStyle}>{style1.title}</span>
-                            <span data-index="1" className={style1.cancel} onClick={this.cancelLink}></span>
+                        <div className="tooltip hasArrow" style={{display: 'none'}}>{getTranslation("merge_help")}<div className="arrow"></div></div>
+                    </div>
+                    <div className="compare-main">
+                        <div id="compare-object1" className="compare-object bt br bb bl">
+                            <div className="compare-table">
+                                <span className={style1.span1}></span>
+                                <span className={style1.span2}>{getTranslation("first_result")}</span>
+                                <a className="compare-link">
+                                    <span className="compare-text off"></span>
+                                    <img className={style1.img} title={style1.title} alt={style1.title} src={style1.src}/>
+                                </a>
+                                <span className={style1.titleStyle}>{style1.title}</span>
+                                <span data-index="1" className={style1.cancel} onClick={this.cancelLink}></span>
+                            </div>
+                        </div>
+                        <div id="compare-object2" className="compare-object bt br bb bl">
+                            <div className="compare-table">
+                                <span className={style2.span1}></span>
+                                <span className={style2.span2}>{getTranslation("second_result")}</span>
+                                <a className="compare-link">
+                                    <span className="compare-text off"></span>
+                                    <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
+                                </a>
+                                <span className={style2.titleStyle}>{style2.title}</span>
+                                <span data-index="2" className={style2.cancel} onClick={this.cancelLink}></span>
+                            </div>
                         </div>
                     </div>
-                    <div id="compare-object2" className="compare-object bt br bb bl">
-                        <div className="compare-table">
-                            <span className={style2.span1}></span>
-                            <span className={style2.span2}>{getTranslation("second_result")}</span>
-                            <a className="compare-link">
-                                <span className="compare-text off"></span>
-                                <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
-                            </a>
-                            <span className={style2.titleStyle}>{style2.title}</span>
-                            <span data-index="2" className={style2.cancel} onClick={this.cancelLink}></span>
-                        </div>
+                    <div className="compare-footer bt bb bl br">
+                        <a id="compare-button">
+                            <div className={buttonStyle} onClick={this.props.merge}>
+                                {getTranslation("merge_result")}
+                            </div>
+                        </a>
                     </div>
                 </div>
-                <div className="compare-footer bt bb bl br">
-                    <a id="compare-button">
-                        <div className={buttonStyle} onClick={this.props.merge}>
-                            {getTranslation("merge_result")}
-                        </div>
-                    </a>
-                </div>
-            </div>
-        );
+            );
+        }
+        return(<div></div>);
     }
 });
 
@@ -2087,9 +2089,12 @@ var LinkResultsButton = React.createClass({
         e.preventDefault();
     },
     render: function(){
-        return (
-            <button className={this.state.style} title={getTranslation("merge")} onClick={this.handleClick}/>
-        )
+        if(mergeEnabled){
+            return (
+                <button className={this.state.style} title={getTranslation("merge")} onClick={this.handleClick}/>
+            )
+        }
+        return(<div></div>)
     }
 });
 
