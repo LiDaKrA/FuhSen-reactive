@@ -63,3 +63,6 @@ GET    /:graphUid/merge                                    controllers.de.fuhsen
 GET    /:graphUid/favorites                                controllers.de.fuhsen.engine.RdfGraphController.getFavorites(graphUid: String)
 GET    /:graphUid/favorites/count                          controllers.de.fuhsen.engine.RdfGraphController.countFavorites(graphUid: String)
 POST   /:graphUid/favorites                                controllers.de.fuhsen.engine.RdfGraphController.addToFavorites(graphUid: String, uri: String)
+
+# Visualization
+GET    /graphVowlJSON                                      controllers.de.fuhsen.visualization.Instance2VOWLJSONController.convertGraph(graphURI: String)

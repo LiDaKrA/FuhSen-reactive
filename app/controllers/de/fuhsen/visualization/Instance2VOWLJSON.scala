@@ -1,4 +1,4 @@
-package controllers.de.fuhsen.visualization.converter
+package controllers.de.fuhsen.visualization
 
 import java.io.{BufferedWriter, FileWriter}
 import java.util.logging.Logger
@@ -35,7 +35,7 @@ object Instance2VOWLJSON {
   )
 
   /** Turn Jena Model into VOWL-JSON */
-  def convert(model: Model): String = {
+  def convertModelToJson(model: Model): JsObject = {
     val idGenerator = IdGenerator()
     val (literalNodes: List[LiteralNode], propertyNodes: List[VowlProperty]) = extractVowlItemsFromModel(model, idGenerator)
     val instanceNodes = idGenerator.instanceNodes.toSeq
@@ -57,7 +57,11 @@ object Instance2VOWLJSON {
       "property" -> JsArray(propertyJson),
       "propertyAttribute" -> JsArray(propertyAttributeJson)
     )
-    result.toString()
+    result
+  }
+
+  def convertModelToJsonString(model: Model): String = {
+    convertModelToJson(model).toString
   }
 
   /** Extracts instances, properties and literals from Jena Model. Instances are stored in the idGenerator object. */
@@ -285,7 +289,7 @@ object Test {
     }
     val turtleFile = args(0)
     val model = RDFUtil.rdfStringToModel(Source.fromFile(turtleFile).mkString, Lang.TTL)
-    val result = Instance2VOWLJSON.convert(model)
+    val result = Instance2VOWLJSON.convertModelToJsonString(model)
     val out = new BufferedWriter(new FileWriter(args(1)))
     out.append(result)
     out.flush()
