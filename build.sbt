@@ -26,7 +26,8 @@ libraryDependencies ++= Seq(
   "org.webjars" 		%  "font-awesome" 			% "4.7.0",
   "org.webjars" % "jszip" % "3.1.0",
   "org.webjars" % "jszip-utils" % "0.0.2",
-  "org.webjars.bower" % "FileSaver.js" % "0.0.2"
+  "org.webjars.bower" % "FileSaver.js" % "0.0.2",
+  "org.webjars" % "FlexSlider" % "2.2.2"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"

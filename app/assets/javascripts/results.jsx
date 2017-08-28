@@ -1,6 +1,7 @@
 checkLanguage();
 
 var context = $('body').data('context')
+var mergeEnabled = $('body').data('merge')
 
 function extractQuery(key) {
     var query = window.location.search.substring(1);
@@ -254,7 +255,7 @@ var Container = React.createClass({
                 link[1]= data;
             }
             else{
-                alert("Only two results can be merged at once");
+                alert(getTranslation("merge_error"));
                 state = false;
             }
         }
@@ -280,7 +281,6 @@ var Container = React.createClass({
             type: 'GET',
             success: function() {
                 console.log("success");
-                //window.location.reload()
                 alert("The data was merged");
                 this.setState({entityType: this.state.entityType, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: true, mergeData: {1: null, 2: null}});
             }.bind(this),
@@ -368,7 +368,6 @@ var FacetList = React.createClass({
             data:JSON.stringify(selectedFacets),
             contentType: 'application/json',
             success: function (response) {
-                console.log(response)
                 if(exact && JSON.stringify(response["@graph"]) == undefined){
                     //alert(getTranslation("no_exact_match_results"));
                 }else{
@@ -956,6 +955,23 @@ var ResultsContainer = React.createClass({
             view: this.state.view
         });
     },
+    mergeAll: function(){
+        let mergeUrl = context + '/' + this.props.searchUid + '/merge';
+        $.ajax({
+            url: mergeUrl,
+            cache: false,
+            type: 'GET',
+            success: function() {
+                console.log("success");
+                alert("The data was merged");
+                this.setState({entityType: this.state.entityType, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: true, mergeData: {1: null, 2: null}});
+            }.bind(this),
+            error: function(xhr) {
+                console.log("error");
+                console.log(xhr);
+            }.bind(this)
+        });
+    },
     loadDataFromServer: function (eType, exactMatching, loadmore) {
         this.setState({selected: eType, loading: true});
 
@@ -1303,6 +1319,8 @@ var ResultsContainer = React.createClass({
                         {/*{ this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"*/}
                                                                           {/*func={this.crawlAll}/> : null }*/}
                         {/*{ this.state.selected === "website" ? <div className="divider"/> : null }*/}
+                        <CustomForm id="btn_merge" class_identifier="merge_icon" func={this.mergeAll}/>
+                        <div className="divider"/>
                         <CustomForm id="btn_view_selector"
     class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
     func={this.toggleResultsView}/>
@@ -1610,12 +1628,17 @@ var WebResultElement = React.createClass({
 
 var SnapshotLink = React.createClass({
     showPDF: function () {
-        var url = context + "/screenshot?url=" + this.props.webpage;
-        window.open(url);
+        if(Array.isArray(this.props.webpage)){
+            var webpages = this.props.webpage;
+            webpages.map(function(webpage){
+                var url = context + "/screenshot?url=" + webpage;
+                window.open(url);
+            });
+        }
     },
     render: function () {
         return (
-            <a className="snapshot" href="#" title="See Snapshot" onClick={this.showPDF}></a>
+            <a className="snapshot" href="#" title={getTranslation("see_snapshot")} onClick={this.showPDF}></a>
         );
     }
 });
@@ -1680,7 +1703,7 @@ var PersonResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} />
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1898,7 +1921,7 @@ var FavouritesButton = React.createClass({
    },
    render: function (){
        return(
-           <button className={this.state.style} title="Favourite" onClick={this.handleClick}/>
+           <button className={this.state.style} title={getTranslation("favourite")} onClick={this.handleClick}/>
        )
    }
 });
@@ -2019,54 +2042,57 @@ var LinkResults = React.createClass({
 
     },
     render: function () {
-        let data = this.props.data;
-        let style1 = this.getStyle(data[1]);
-        let style2 = this.getStyle(data[2]);
-        let buttonStyle = data[1] && data[2] ? "button" : "button disabled";
-        return(
-            <div className="compare-objects bt br bb bl">
-                <div className="compare-header">
-                    <b>Merge Results</b>
-                    <span className="contextual-help hidden-phone hidden-tablet" data-content="To merge results, please select two results by clicking on the appropriate icon in the results list.">
+        if(mergeEnabled){
+            let data = this.props.data;
+            let style1 = this.getStyle(data[1]);
+            let style2 = this.getStyle(data[2]);
+            let buttonStyle = data[1] && data[2] ? "button" : "button disabled";
+            return(
+                <div className="compare-objects bt br bb bl">
+                    <div className="compare-header">
+                        <b>{getTranslation("merge_result")}</b>
+                        <span className="contextual-help hidden-phone hidden-tablet" data-content={getTranslation("merge_help")}>
   </span>
 
-                    <div className="tooltip hasArrow" style={{display: 'none'}}>To merge results, please select two results by clicking on the appropriate icon in the results list.<div className="arrow"></div></div>
-                </div>
-                <div className="compare-main">
-                    <div id="compare-object1" className="compare-object bt br bb bl">
-                        <div className="compare-table">
-                            <span className={style1.span1}></span>
-                            <span className={style1.span2}>First result</span>
-                            <a className="compare-link">
-                                <span className="compare-text off"></span>
-                                <img className={style1.img} title={style1.title} alt={style1.title} src={style1.src}/>
-                            </a>
-                            <span className={style1.titleStyle}>{style1.title}</span>
-                            <span data-index="1" className={style1.cancel} onClick={this.cancelLink}></span>
+                        <div className="tooltip hasArrow" style={{display: 'none'}}>{getTranslation("merge_help")}<div className="arrow"></div></div>
+                    </div>
+                    <div className="compare-main">
+                        <div id="compare-object1" className="compare-object bt br bb bl">
+                            <div className="compare-table">
+                                <span className={style1.span1}></span>
+                                <span className={style1.span2}>{getTranslation("first_result")}</span>
+                                <a className="compare-link">
+                                    <span className="compare-text off"></span>
+                                    <img className={style1.img} title={style1.title} alt={style1.title} src={style1.src}/>
+                                </a>
+                                <span className={style1.titleStyle}>{style1.title}</span>
+                                <span data-index="1" className={style1.cancel} onClick={this.cancelLink}></span>
+                            </div>
+                        </div>
+                        <div id="compare-object2" className="compare-object bt br bb bl">
+                            <div className="compare-table">
+                                <span className={style2.span1}></span>
+                                <span className={style2.span2}>{getTranslation("second_result")}</span>
+                                <a className="compare-link">
+                                    <span className="compare-text off"></span>
+                                    <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
+                                </a>
+                                <span className={style2.titleStyle}>{style2.title}</span>
+                                <span data-index="2" className={style2.cancel} onClick={this.cancelLink}></span>
+                            </div>
                         </div>
                     </div>
-                    <div id="compare-object2" className="compare-object bt br bb bl">
-                        <div className="compare-table">
-                            <span className={style2.span1}></span>
-                            <span className={style2.span2}>Second result</span>
-                            <a className="compare-link">
-                                <span className="compare-text off"></span>
-                                <img className={style2.img} title={style2.title} alt={style2.title} src={style2.src}/>
-                            </a>
-                            <span className={style2.titleStyle}>{style2.title}</span>
-                            <span data-index="2" className={style2.cancel} onClick={this.cancelLink}></span>
-                        </div>
+                    <div className="compare-footer bt bb bl br">
+                        <a id="compare-button">
+                            <div className={buttonStyle} onClick={this.props.merge}>
+                                {getTranslation("merge_result")}
+                            </div>
+                        </a>
                     </div>
                 </div>
-                <div className="compare-footer bt bb bl br">
-                    <a id="compare-button">
-                        <div className={buttonStyle} onClick={this.props.merge}>
-                            Merge Results
-                        </div>
-                    </a>
-                </div>
-            </div>
-        );
+            );
+        }
+        return(<div></div>);
     }
 });
 
@@ -2082,9 +2108,12 @@ var LinkResultsButton = React.createClass({
         e.preventDefault();
     },
     render: function(){
-        return (
-            <button className={this.state.style} title="Merge Result" onClick={this.handleClick}/>
-        )
+        if(mergeEnabled){
+            return (
+                <button className={this.state.style} title={getTranslation("merge")} onClick={this.handleClick}/>
+            )
+        }
+        return(<div></div>)
     }
 });
 
@@ -2113,7 +2142,7 @@ var FavouritesHeader= React.createClass({
     render: function(){
         var favoritesPageUri = context + "/favorites?" + "uid=" + this.props.searchUid;
         return (
-            <a href={favoritesPageUri} target="_blank" className="header-links-child" value="favourites">Favourites({this.state.count})</a>
+            <a href={favoritesPageUri} target="_blank" className="header-links-child" value="favourites">{getTranslation("fav_link")}({this.state.count})</a>
         )
     }
 });
@@ -2123,13 +2152,42 @@ var FavouritesHeader= React.createClass({
 */
 
 var ThumbnailElement = React.createClass({
-    render: function() {
+    componentDidMount: function(){
+        $('.flexslider').flexslider({
+            animation: "slide",
+            directionNav: false
+        });
+    },
+    render: function () {
         if (this.props.img !== undefined) {
-            var imgVal = getValue(this.props.img);
-            return <img src={imgVal} height="60px" width="75px"/>;
+            if (Array.isArray(this.props.webpage)) {
+                //definitely merged entity
+                var imgArr = this.props.img;
+                var imgList = imgArr.map(function (img, index) {
+                    var imgVal = getValue(img);
+                    return (<li><img src={imgVal} height="60px" width="75px"/></li>)
+                });
+                return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
+            }
+            else {
+                //single result
+                var imgVal = getValue(this.props.img);
+                return <img src={imgVal} height="60px" width="75px"></img>
+            }
         }
-        else
-            return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>;
+        else {
+            var imgList = {};
+            if (Array.isArray(this.props.webpage)) {
+                var arr = this.props.webpage;
+                imgList = arr.map(function(){
+                    return <li><img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/></li>;
+                });
+                return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
+            }
+            else{
+                return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>
+            }
+        }
     }
 });
 
@@ -2137,7 +2195,11 @@ var LinkElement = React.createClass({
     render: function() {
         if (this.props.webpage !== undefined) {
             if(Array.isArray(this.props.webpage)){
-                return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage[0]} target="_blank">{this.props.webpage[0]}</a>&nbsp;<a href={this.props.webpage[1]} target="_blank">{this.props.webpage[1]}</a></p>;
+                var webpages = this.props.webpage;
+                var list = webpages.map(function(webpage){
+                    return (<li><a href={webpage} target="_blank">{webpage}</a></li>);
+                });
+                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
             }
             else
                 return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>;

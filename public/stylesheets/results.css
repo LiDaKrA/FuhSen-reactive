@@ -26,6 +26,15 @@
   height: 25px;
 }
 
+.merge_icon {
+  background-image: url("../images/icons/merge_icon.png");
+  width: 24px;
+  height: 24px;
+  border: 1px solid #c0c0c0;
+  background-color: #F6F6F6;
+  background-position: center;
+}
+
 .graph_icon {
   background-image: url("../images/icons/graph-icon.png");
   width: 25px;
@@ -1672,4 +1681,13 @@ ul.unstyled {
 
 .header-links-child{
   margin-right: 15px;
+}
+
+.links-list{
+  list-style: none;
+  padding:0;
+}
+
+.flexslider .slides img {
+  width: 75px;
 }
