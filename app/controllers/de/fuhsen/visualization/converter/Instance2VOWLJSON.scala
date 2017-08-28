@@ -17,39 +17,27 @@ import scala.io.Source
   * A converter that turns RDF instance data into the VOWL-JSON format
   */
 object Instance2VOWLJSON {
-  val sourceUriProperty = "http://vocab.lidakra.de/fuhsen#merge/sourceUri"
   val log: Logger = Logger.getLogger(this.getClass.getName)
+
+  // URI for tracking provenance of a resource, only provenance property that is present on all resources not just root resources
+  val sourceUriProperty = "http://vocab.lidakra.de/fuhsen#merge/sourceUri"
+  // Properties that should be ignored in the visualization
   val propertyBlacklist: Set[String] = Set[String](
-    RDF.`type`.getURI,
-    "http://vocab.lidakra.de/fuhsen#merge/sourceUri",
-    "http://vocab.lidakra.de/fuhsen#url",
-    "http://vocab.lidakra.de/fuhsen#source",
+    RDF.`type`.getURI, // Else entities will link/cluster only because of the same type
+    "http://vocab.lidakra.de/fuhsen#merge/sourceUri", // same here, same source is not specific enough
+    "http://vocab.lidakra.de/fuhsen#url", // same here
+    "http://vocab.lidakra.de/fuhsen#source", // same here
     RDFS.label.getURI
   )
+  // Classes that should be ignored in the visualization
   val classBlacklist: Set[String] = Set[String](
-    "http://www.w3.org/ns/prov#Activity"
+    "http://www.w3.org/ns/prov#Activity" // this is meta data which should not be displayed
   )
 
   /** Turn Jena Model into VOWL-JSON */
   def convert(model: Model): String = {
     val idGenerator = IdGenerator()
-    val sourceUri = model.getProperty(sourceUriProperty)
-    val instances = model.listResourcesWithProperty(sourceUri)
-    var literalNodes = List.empty[LiteralNode]
-    var propertyNodes = List.empty[VowlProperty]
-    var counter = 0
-    while (instances.hasNext) {
-      val instance = instances.nextResource()
-      val types = propertyObjects(instance, RDF.`type`)
-      val provString: Option[String] = extractProvenance(sourceUri, instance)
-      if (types.forall(t => !t.isURIResource || !classBlacklist.contains(t.asResource().getURI))) {
-        val instanceId = idGenerator.uri2Id(instance)
-        val (ps, ls) = extractVowlProperties(instanceId, idGenerator, literalNodes, instance, provString)
-        propertyNodes :::= ps
-        literalNodes :::= ls
-      }
-      counter += 1
-    }
+    val (literalNodes: List[LiteralNode], propertyNodes: List[VowlProperty]) = extractVowlItemsFromModel(model, idGenerator)
     val instanceNodes = idGenerator.instanceNodes.toSeq
     val instanceNodesJson = generateClassJson(instanceNodes, literalNodes)
     val instanceNodeAttributesJson = generateClassAttributeJson(instanceNodes, literalNodes)
@@ -72,7 +60,30 @@ object Instance2VOWLJSON {
     result.toString()
   }
 
-  private def extractProvenance(sourceUri: Property, instance: Resource) = {
+  /** Extracts instances, properties and literals from Jena Model. Instances are stored in the idGenerator object. */
+  private def extractVowlItemsFromModel(model: Model, idGenerator: IdGenerator): (List[LiteralNode], List[VowlProperty]) = {
+    val sourceUri = model.getProperty(sourceUriProperty)
+    val instances = model.listResourcesWithProperty(sourceUri)
+    var literalNodes = List.empty[LiteralNode]
+    var propertyNodes = List.empty[VowlProperty]
+    var counter = 0
+    while (instances.hasNext && counter < 10) {
+      val instance = instances.nextResource()
+      val types = propertyObjects(instance, RDF.`type`)
+      val provString: Option[String] = extractProvenance(sourceUri, instance)
+      if (types.forall(t => !t.isURIResource || !classBlacklist.contains(t.asResource().getURI))) {
+        val instanceId = idGenerator.uri2Id(instance)
+        val (ps, ls) = extractVowlProperties(instanceId, idGenerator, literalNodes, instance, provString)
+        propertyNodes :::= ps
+        literalNodes :::= ls
+      }
+      counter += 1
+    }
+    (literalNodes, propertyNodes)
+  }
+
+  // Extract the provenance and return it as string that can be appended to property labels and literal values
+  private def extractProvenance(sourceUri: Property, instance: Resource): Option[String] = {
     val source = propertyObjects(instance, sourceUri)
     val provString = source.headOption.map { s =>
       " (" + extractLocalName(s.asResource().getURI) + ")"
@@ -80,6 +91,7 @@ object Instance2VOWLJSON {
     provString
   }
 
+  // Fetch the object nodes of the instance for a specific property
   private def propertyObjects(instance: Resource, propertyUri: String): Seq[RDFNode] = {
     instance.listProperties(instance.getModel.getProperty(propertyUri)).asScala.toSeq.map(_.getObject)
   }
@@ -104,8 +116,20 @@ object Instance2VOWLJSON {
           case r: Resource =>
             Some((idGenerator.uri2Id(r), ObjectPropertyType))
           case l: Literal =>
+            val literalValue = l.getValue match {
+              case d: java.lang.Double if d < 1 && d > 0.0001 =>
+                d.formatted("%f.5")
+              case f: java.lang.Float if f < 1 && f > 0.0001 =>
+                f.formatted("%f.5")
+              case d: java.lang.Double if d >= 1 =>
+                fmt(d)
+              case f: java.lang.Float if f >= 1 =>
+                fmt(f.toDouble)
+              case _ =>
+                l.getLexicalForm
+            }
             val literalId = idGenerator.nextId()
-            val literalNode = LiteralNode(literalId, l.getString + provString.getOrElse("")) // TODO: Get better lexical representation for some data types, e.g. date
+            val literalNode = LiteralNode(literalId, literalValue + provString.getOrElse(""))
             literalNodes ::= literalNode
             Some((literalId, LiteralPropertyType))
           case other: RDFNode =>
@@ -116,7 +140,7 @@ object Instance2VOWLJSON {
         objectIdOpt foreach { case (objId, typ) =>
           val vowlProperty = VowlProperty(
             id = idGenerator.nextId(),
-            label = prop.getLocalName + (if(typ == ObjectPropertyType) provString.getOrElse("") else ""),
+            label = prop.getLocalName + (if (typ == ObjectPropertyType) provString.getOrElse("") else ""),
             domain = instanceId,
             range = objId,
             propertyType = typ
@@ -150,6 +174,13 @@ object Instance2VOWLJSON {
         "type" -> JsString(typeString)
       )
     }
+  }
+
+  private def fmt(d: Double): String = {
+    if(d == d.toLong)
+      d.toLong.formatted("%d")
+    else
+      d.formatted("%s")
   }
 
   private def generateClassAttributeJson(instanceNodes: Seq[InstanceNode], literalNodes: Seq[LiteralNode]): Seq[JsObject] = {
