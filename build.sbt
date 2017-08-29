@@ -27,7 +27,10 @@ libraryDependencies ++= Seq(
   "org.webjars" % "jszip" % "3.1.0",
   "org.webjars" % "jszip-utils" % "0.0.2",
   "org.webjars.bower" % "FileSaver.js" % "0.0.2",
-  "org.webjars" % "FlexSlider" % "2.2.2"
+  "org.webjars" % "FlexSlider" % "2.2.2",
+  // Excel
+  "org.apache.poi" % "poi" % "3.16",
+  "org.apache.poi" % "poi-ooxml" % "3.16"
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
@@ -37,5 +40,7 @@ enablePlugins(SbtNativePackager)
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
 routesGenerator := InjectedRoutesGenerator
+
+fork in run := true
 
 fork in run := true
