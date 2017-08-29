@@ -972,7 +972,7 @@ var ResultsContainer = React.createClass({
             }.bind(this)
         });
     },
-    loadDataFromServer: function (eType, exactMatching, loadmore) {
+    loadDataFromServer: function (eType, exactMatching, loadmore, mergingEntities) {
         this.setState({selected: eType, loading: true});
 
         //alert("Loading results ResultsContainer "+loadmore);
@@ -998,7 +998,7 @@ var ResultsContainer = React.createClass({
                     alert(getTranslation("no_exact_match_results"));
                     this.props.onExactMatchingChange();
                 }else{
-                    if(Object.keys(this.state.results_stat).length == 0 || loadmore)
+                    if(Object.keys(this.state.results_stat).length == 0 || loadmore || mergingEntities)
                         this.computeDataStatistics();
                     data_to_handle = JSON.parse(JSON.stringify(data));
                     //alert(JSON.stringify(data_to_handle));
@@ -1032,6 +1032,7 @@ var ResultsContainer = React.createClass({
         });
     },
     computeDataStatistics: function(){
+        //alert("Computing Statistics");
         var stat_url = context + "/engine/api/searches/" + this.props.searchUid + "/results_stat";
         var moreResultsHelper = false;
       $.ajax({
@@ -1088,12 +1089,12 @@ var ResultsContainer = React.createClass({
         };
     },
     componentDidMount: function () {
-        this.loadDataFromServer(this.props.entityType, this.props.exactMatching, false);
+        this.loadDataFromServer(this.props.entityType, this.props.exactMatching, false, false);
     },
     componentWillReceiveProps: function (nextProps) {
         //see if it actually changed
         if (nextProps.entityType !== this.props.entityType || nextProps.exactMatching !== this.props.exactMatching || nextProps.loadMoreResults === true || nextProps.loadMergedData === true) {
-            this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults);
+            this.loadDataFromServer(nextProps.entityType, nextProps.exactMatching, nextProps.loadMoreResults, nextProps.loadMergedData);
         }
     },
     render: function () {
