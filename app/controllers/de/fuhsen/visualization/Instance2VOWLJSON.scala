@@ -70,8 +70,7 @@ object Instance2VOWLJSON {
     val instances = model.listResourcesWithProperty(sourceUri)
     var literalNodes = List.empty[LiteralNode]
     var propertyNodes = List.empty[VowlProperty]
-    var counter = 0
-    while (instances.hasNext && counter < 10) {
+    while (instances.hasNext) {
       val instance = instances.nextResource()
       val types = propertyObjects(instance, RDF.`type`)
       val provString: Option[String] = extractProvenance(sourceUri, instance)
@@ -81,7 +80,6 @@ object Instance2VOWLJSON {
         propertyNodes :::= ps
         literalNodes :::= ls
       }
-      counter += 1
     }
     (literalNodes, propertyNodes)
   }
