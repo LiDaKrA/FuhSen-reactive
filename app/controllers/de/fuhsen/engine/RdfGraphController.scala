@@ -8,7 +8,7 @@ import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.riot.Lang
 import play.Logger
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.mvc.{Action, Controller}
 
 import scala.concurrent.Future
@@ -41,22 +41,27 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  def addToFavorites(graphUid: String, uri: String) = Action.async {
+  def addToFavorites(graphUid: String, uri: String) = Action.async { implicit request =>
     Logger.info("Add to Favorites")
-    Logger.info(s"GraphUid: $graphUid Uri: $uri")
+    val favGraphUri = ConfigFactory.load.getString("store.favorites.graph.uri") + "/" + getFavouriteUid()
+    Logger.info(s"GraphUri: $favGraphUri Uri: $uri")
     GraphResultsCache.getModel(graphUid) match {
       case Some(model) =>
-        GraphStoreManager.postModelToStore(getUriModel(uri, model), ConfigFactory.load.getString("store.graph.uri"), ws).map(result => Ok(result))
+        GraphStoreManager.postModelToStore(getUriModel(uri, model), favGraphUri, ws).map(result => Ok(result))
       case None =>
         Future(InternalServerError("The provided UID has not a model associated in the cache."))
     }
   }
 
-  def getFavorites(graphUid: String) = Action.async {
+  def getFavorites(graphUid: String) = Action.async { implicit request =>
     Logger.info("Get Favorites")
-    Logger.info(s"GraphUid: $graphUid")
+
+    val favouriteUid = getFavouriteUid()
+    val favGraphUri = ConfigFactory.load.getString("store.favorites.graph.uri") + "/" + favouriteUid
+
+    Logger.info(s"GraphUid: $favGraphUri")
     ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
-      .withQueryString("query"->ConfigFactory.load.getString("store.favorites.sparql"))
+      .withQueryString("query"-> s"""construct ?s ?p ?o where {GRAPH <$favGraphUri> {?s ?p ?o . } }""")
       .withHeaders("Accept"->"application/n-triples")
       .get
       .map {
@@ -68,14 +73,18 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
 
   def countFavorites(graphUid: String) = Action.async { implicit request =>
     Logger.info("Count Favorites")
-    Logger.info(s"GraphUid: $graphUid")
     val favouriteUid = getFavouriteUid()
+    Logger.info(s"Graph Uid: $favouriteUid")
+    val favGraphUri = ConfigFactory.load.getString("store.favorites.graph.uri") + "/" + favouriteUid
+    Logger.info(s"Graph Uri: $favGraphUri")
+
     ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
-      .withQueryString("query"->ConfigFactory.load.getString("store.favorites.count.sparql"))
+      .withQueryString("query"-> s"""select count(?s) where { GRAPH <$favGraphUri> { ?s a <http://vocab.lidakra.de/fuhsen#SearchableEntity> . } }""")
       .withHeaders("Accept"->"application/json")
       .get
       .map {
         response =>
+          Logger.info(response.body)
           val _json = response.json
           val count = (((_json \ "results" \ "bindings")(0)) \ "COUNT1" \ "value").as[String]
           Ok(count).withCookies(Cookie("favorites_graph", favouriteUid.toString))
@@ -103,21 +112,6 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
     QueryExecutionFactory.create(query, model).execConstruct()
   }
 
-  /*
-  private def push2Dydra(model: String, graph: String): Future[String] = {
-    //val model =
-    push2Dydra(model, graph)
-  }
-
-  private def push2Dydra(model: Model, graph: String): Future[String] = {
-    Logger.info(s"Pushing ${model.size} triples to favorits to graph: $graph ")
-    val n3_model = RDFUtil.modelToTripleString(model, Lang.N3)
-    ws.url(ConfigFactory.load.getString("store.endpoint.service.url"))
-        .withQueryString("graph"-> graph).withHeaders("Content-Type"->"text/rdf+n3").post(n3_model).map(
-        response => "DYDRA.RESPONSE: "+response.body)
-  }
-  */
-
   private def getSameAsLinkGraph(uri1: String, uri2: String) : String = {
     s"""
        |<$uri1> <http://vocab.lidakra.de/fuhsen/sameAs> <$uri2> .
@@ -127,8 +121,12 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
 
   private def getFavouriteUid()(implicit req: Request[Any]) : String = {
     if(req.cookies.get("favorites_graph") == null || req.cookies.get("favorites_graph") == None)  {
+      Logger.info("Cookie is created")
       java.util.UUID.randomUUID.toString
-    } else req.cookies.get("favorites_graph").get.value
+    } else {
+      Logger.info("Cookie already exits")
+      req.cookies.get("favorites_graph").get.value
+    }
   }
 
 }
