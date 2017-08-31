@@ -2,6 +2,7 @@ checkLanguage();
 
 var context = $('body').data('context')
 var mergeEnabled = $('body').data('merge')
+var autoMergeEnabled = $('body').data('automerge')
 
 function extractQuery(key) {
     var query = window.location.search.substring(1);
@@ -1296,6 +1297,11 @@ var ResultsContainer = React.createClass({
             </div>
         }
 
+        var automaticMerge = <div></div>;
+        if(autoMergeEnabled){
+            automaticMerge = <CustomForm id="btn_merge" class_identifier="merge_icon" func={this.mergeAll}/>
+        }
+
         return <div className="col-md-9">
             <div id="results-paginator-options" className="results-paginator-options">
                 <div class="off result-pages-count"></div>
@@ -1320,7 +1326,8 @@ var ResultsContainer = React.createClass({
                         {/*{ this.state.selected === "website" ? <CustomForm id="btn_crawl" class_identifier="crawl_icon"*/}
                                                                           {/*func={this.crawlAll}/> : null }*/}
                         {/*{ this.state.selected === "website" ? <div className="divider"/> : null }*/}
-                        <CustomForm id="btn_merge" class_identifier="merge_icon" func={this.mergeAll}/>
+
+                        {automaticMerge}
                         <div className="divider"/>
                         <CustomForm id="btn_view_selector"
     class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
@@ -2156,7 +2163,9 @@ var ThumbnailElement = React.createClass({
     componentDidMount: function(){
         $('.flexslider').flexslider({
             animation: "slide",
-            directionNav: false
+            directionNav: false,
+            animationLoop: false,
+            slideshow: false
         });
     },
     render: function () {

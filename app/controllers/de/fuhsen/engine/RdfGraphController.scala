@@ -15,6 +15,8 @@ import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import utils.dataintegration._
 import utils.export.ExcelSink
+import play.api.mvc.Cookie
+import play.api.mvc.Request
 
 /**
   * Created by dcollarana on 7/21/2017
@@ -64,9 +66,10 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
       }
   }
 
-  def countFavorites(graphUid: String) = Action.async {
+  def countFavorites(graphUid: String) = Action.async { implicit request =>
     Logger.info("Count Favorites")
     Logger.info(s"GraphUid: $graphUid")
+    val favouriteUid = getFavouriteUid()
     ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
       .withQueryString("query"->ConfigFactory.load.getString("store.favorites.count.sparql"))
       .withHeaders("Accept"->"application/json")
@@ -75,7 +78,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
         response =>
           val _json = response.json
           val count = (((_json \ "results" \ "bindings")(0)) \ "COUNT1" \ "value").as[String]
-          Ok(count)
+          Ok(count).withCookies(Cookie("favorites_graph", favouriteUid.toString))
       }
   }
 
@@ -120,6 +123,12 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
        |<$uri1> <http://vocab.lidakra.de/fuhsen/sameAs> <$uri2> .
        |
       """.stripMargin
+  }
+
+  private def getFavouriteUid()(implicit req: Request[Any]) : String = {
+    if(req.cookies.get("favorites_graph") == null || req.cookies.get("favorites_graph") == None)  {
+      java.util.UUID.randomUUID.toString
+    } else req.cookies.get("favorites_graph").get.value
   }
 
 }
