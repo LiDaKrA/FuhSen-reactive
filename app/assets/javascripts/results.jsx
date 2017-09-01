@@ -1517,10 +1517,22 @@ var ResultsList = React.createClass({
 
 var WebResultElement = React.createClass({
     checkOnionSite: function () {
-        var searchUrl = context + "/checkOnionSite?site=" + this.props.onion_url;
-
+        if(Array.isArray(this.props.onion_url)){
+            var pages = this.props.onion_url;
+            var ref = this;
+            pages.map(function(onion_url){
+                    var searchUrl =  context + "/checkOnionSite?site=" + onion_url;
+                    ref.crawlRequest(searchUrl);
+            });
+        }
+        else{
+            var searchUrl = context + "/checkOnionSite?site=" + this.props.onion_url;
+            this.crawlRequest(searchUrl)
+        }
+    },
+    crawlRequest: function(url) {
         $.ajax({
-            url: searchUrl,
+            url: url,
             dataType: 'json',
             cache: false,
             success: function (data) {
@@ -1594,6 +1606,14 @@ var WebResultElement = React.createClass({
         window.open(url,'_blank');
     },
     render: function () {
+        var labels = <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label>;
+        if(Array.isArray(this.props.onion_url)){
+            var links = this.props.onion_url;
+            var ref = this;
+            labels = links.map(function(link){
+               return (<label>{ref.state.jobStatus !== "crawlJobFINISHED" && ref.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(ref.state.jobStatus)}</label>)
+            });
+        }
         return (
             <li className="item bt">
                 <div className="summary row">
@@ -1625,7 +1645,7 @@ var WebResultElement = React.createClass({
                             <div>
                                 <div className="crawl_thumbnail">
                                     {this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
-                                        <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label> : <button
+                                        {labels} : <button
                                             className="crawl_icon" onClick={this.onCreateCrawlJobClick} title={getTranslation("createCrawlJob")}></button> : <span> {getTranslation("invalid_website")} </span> }
                                 </div>
                             </div>
