@@ -271,6 +271,7 @@ var Container = React.createClass({
     },
     onMerge: function(){
       let data = this.state.mergeData;
+      console.log(data);
       let mergeUrl = context + '/' + this.props.searchUid + '/merge';
         $.ajax({
             url: mergeUrl,
@@ -2210,8 +2211,9 @@ var LinkElement = React.createClass({
         else if (this.props.onion_url !== undefined && this.props.onion_url !== null){
             if(Array.isArray(this.props.onion_url)){
                 var webpages = this.props.onion_url;
+                var ref = this;
                 var list = webpages.map(function(webpage){
-                    return (<li><a href={webpage} target="_blank" onClick={this.props.onOnionClick.bind(this,webpage)}>{webpage}</a></li>);
+                    return (<li><a href={webpage} target="_blank" onClick={ref.props.onOnionClick.bind(ref,webpage)}>{webpage}</a></li>);
                 });
                 return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
             }
