@@ -271,6 +271,7 @@ var Container = React.createClass({
     },
     onMerge: function(){
       let data = this.state.mergeData;
+      console.log(data);
       let mergeUrl = context + '/' + this.props.searchUid + '/merge';
         $.ajax({
             url: mergeUrl,
@@ -1459,6 +1460,7 @@ var ResultsList = React.createClass({
                 if (result["fs:source"] === "ELASTIC") {
                     return (
                         <ElasticSearchResultElement
+                            uri = {result["@id"]}
                             img={context + "/assets/images/datasources/Elasticsearch.png"}
                             content={result["fs:content"]}
                             label={result["fs:title"]}
@@ -1474,6 +1476,7 @@ var ResultsList = React.createClass({
                 } else {
                     return (
                         <WebResultElement
+                            uri = {result["@id"]}
                             img={context + "/assets/images/datasources/TorLogo.png"}
                             onion_url={result["url"]}
                             comment={result["fs:comment"]}
@@ -1488,6 +1491,7 @@ var ResultsList = React.createClass({
             } else if (result["@type"] === "fs:Document") {
                 return (
                     <DocumentResultElement
+                        uri = {result["@id"]}
                         label={result["fs:label"]}
                         comment={result["fs:comment"]}
                         webpage={result.url}
@@ -1513,10 +1517,22 @@ var ResultsList = React.createClass({
 
 var WebResultElement = React.createClass({
     checkOnionSite: function () {
-        var searchUrl = context + "/checkOnionSite?site=" + this.props.onion_url;
-
+        if(Array.isArray(this.props.onion_url)){
+            var pages = this.props.onion_url;
+            var ref = this;
+            pages.map(function(onion_url){
+                    var searchUrl =  context + "/checkOnionSite?site=" + onion_url;
+                    ref.crawlRequest(searchUrl);
+            });
+        }
+        else{
+            var searchUrl = context + "/checkOnionSite?site=" + this.props.onion_url;
+            this.crawlRequest(searchUrl)
+        }
+    },
+    crawlRequest: function(url) {
         $.ajax({
-            url: searchUrl,
+            url: url,
             dataType: 'json',
             cache: false,
             success: function (data) {
@@ -1590,12 +1606,20 @@ var WebResultElement = React.createClass({
         window.open(url,'_blank');
     },
     render: function () {
+        var labels = <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label>;
+        if(Array.isArray(this.props.onion_url)){
+            var links = this.props.onion_url;
+            var ref = this;
+            labels = links.map(function(link){
+               return (<label>{ref.state.jobStatus !== "crawlJobFINISHED" && ref.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(ref.state.jobStatus)}</label>)
+            });
+        }
         return (
             <li className="item bt">
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={this.props.img} height="60px" width="75px"/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1606,8 +1630,7 @@ var WebResultElement = React.createClass({
                             <div className="subtitle">
                                 <p><b>Web title</b>: {this.props.onion_label}</p>
                                 <p><b>{getTranslation("comment")}</b>: {this.props.comment}</p>
-                                <p><b>Link: </b><a href={this.props.onion_url}
-                                                     onClick={this.onClickLink.bind(this,this.props.onion_url)}>{getTranslation("clickhere")}</a></p>
+                                <LinkElement onion_url={this.props.onion_url} onOnionClick={this.onClickLink} />
                             </div>
                         </div>
                     </div>
@@ -1622,7 +1645,7 @@ var WebResultElement = React.createClass({
                             <div>
                                 <div className="crawl_thumbnail">
                                     {this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
-                                        <label>{this.state.jobStatus !== "crawlJobFINISHED" && this.state.jobStatus !== "crawlJobFAILED" ? <img src={context+"/assets/images/ajaxLoader.gif"}/> : null }{getTranslation(this.state.jobStatus)}</label> : <button
+                                        {labels} : <button
                                             className="crawl_icon" onClick={this.onCreateCrawlJobClick} title={getTranslation("createCrawlJob")}></button> : <span> {getTranslation("invalid_website")} </span> }
                                 </div>
                             </div>
@@ -1659,7 +1682,7 @@ var ProductResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <img src={this.props.img} height="60px" width="75px"/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1678,9 +1701,7 @@ var ProductResultElement = React.createClass({
                                     <p>{getTranslation("price")}: {this.props.price}</p> : null }
                                 { this.props.condition !== undefined ?
                                     <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
-                                                                           target="_blank">{this.props.webpage}</a></p> : null }
+                                <LinkElement webpage={this.props.webpage} />
                             </div>
                         </div>
                     </div>
@@ -1770,8 +1791,7 @@ var OrganizationResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
-                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1788,9 +1808,7 @@ var OrganizationResultElement = React.createClass({
                                     <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.location !== undefined ?
                                     <p>{getTranslation("location")}: {this.props.location}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
-                                                                           target="_blank">{this.props.webpage}</a></p> : null }
+                                <LinkElement webpage={this.props.webpage} />
                             </div>
                         </div>
                     </div>
@@ -1824,8 +1842,7 @@ var ElasticSearchResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/>:
-                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                            <ThumbnailElement img={this.props.img} webpage={this.props.onion_url}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1834,9 +1851,7 @@ var ElasticSearchResultElement = React.createClass({
                                 {this.props.label}
                             </h2>
                             <div className="subtitle">
-                                { this.props.onion_url !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url}
-                                                                           onClick={this.onClickLink.bind(this,this.props.onion_url)}>{this.props.onion_url}</a></p> : null }
+                                <LinkElement onion_url={this.props.onion_url} onOnionClick={this.onClickLink} />
                                 { this.props.content !== undefined ?
                                     <p><b>Content: </b>{<RichText label="Content" text={this.props.content} maxLength={300}/>}</p> : null }
                                 { this.props.entity_url !== undefined ?
@@ -1873,8 +1888,7 @@ var DocumentResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            { this.props.extension !== undefined ? <img src={context + "/assets/images/icons/" + this.props.extension + ".png"} height="60px" width="75px"/>:
-                                <img src={context + "/assets/images/datasources/Unknown_Thing.jpg"} height="60px" width="75px"/> }
+                            <ThumbnailElement img={this.props.extension} webpage={this.props.webpage} document={true}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1890,9 +1904,7 @@ var DocumentResultElement = React.createClass({
                                     <p>{getTranslation("language")}: {this.props.language}</p> : null }
                                 { this.props.filename !== undefined ?
                                     <p>{getTranslation("filename")}: {this.props.filename}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b><a href={this.props.webpage}
-                                                                           target="_blank">{this.props.webpage}</a></p> : null }
+                                <LinkElement webpage={this.props.webpage} />
                             </div>
                         </div>
                     </div>
@@ -2175,6 +2187,7 @@ var ThumbnailElement = React.createClass({
                 var imgArr = this.props.img;
                 var imgList = imgArr.map(function (img, index) {
                     var imgVal = getValue(img);
+                    if(this.props.document !== undefined) imgVal = context + "/assets/images/icons/" + imgVal + ".png"
                     return (<li><img src={imgVal} height="60px" width="75px"/></li>)
                 });
                 return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
@@ -2182,6 +2195,7 @@ var ThumbnailElement = React.createClass({
             else {
                 //single result
                 var imgVal = getValue(this.props.img);
+                if(this.props.document !== undefined) imgVal = context + "/assets/images/icons/" + imgVal + ".png"
                 return <img src={imgVal} height="60px" width="75px"></img>
             }
         }
@@ -2213,6 +2227,18 @@ var LinkElement = React.createClass({
             }
             else
                 return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>;
+        }
+        else if (this.props.onion_url !== undefined && this.props.onion_url !== null){
+            if(Array.isArray(this.props.onion_url)){
+                var webpages = this.props.onion_url;
+                var ref = this;
+                var list = webpages.map(function(webpage){
+                    return (<li><a href={webpage} target="_blank" onClick={ref.props.onOnionClick.bind(ref,webpage)}>{webpage}</a></li>);
+                });
+                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
+            }
+            else
+                return <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url} target="_blank">{this.props.onion_url}</a></p>;
         }
         else
             return null;
