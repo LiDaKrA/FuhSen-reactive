@@ -71,6 +71,19 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
       }
   }
 
+  def cleanFavorites(graphUid: String) = Action.async { implicit request =>
+    Logger.info("Clean Favorites")
+
+    val favouriteUid = getFavouriteUid()
+    val favGraphUri = ConfigFactory.load.getString("store.favorites.graph.uri") + "/" + favouriteUid
+
+    Logger.info(s"GraphUid: $favGraphUri")
+    ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
+      .withQueryString("query"-> s"""DELETE { ?s ?p ?o } WHERE { GRAPH <$favGraphUri> {?s ?p ?o . } }""")
+      .withHeaders("Accept"->"application/n-triples")
+      .get.map( r => Ok(r.body) )
+  }
+
   def countFavorites(graphUid: String) = Action.async { implicit request =>
     Logger.info("Count Favorites")
     val favouriteUid = getFavouriteUid()
@@ -84,7 +97,6 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
       .get
       .map {
         response =>
-          Logger.info(response.body)
           val _json = response.json
           val count = (((_json \ "results" \ "bindings")(0)) \ "COUNT1" \ "value").as[String]
           Ok(count).withCookies(Cookie("favorites_graph", favouriteUid.toString))

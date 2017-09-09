@@ -1619,7 +1619,7 @@ var WebResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1682,7 +1682,7 @@ var ProductResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1732,7 +1732,7 @@ var PersonResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1791,7 +1791,7 @@ var OrganizationResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1842,7 +1842,7 @@ var ElasticSearchResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.onion_url}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.onion_url} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1888,7 +1888,7 @@ var DocumentResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.extension} webpage={this.props.webpage} document={true}/>
+                            <ThumbnailElement img={this.props.extension} webpage={this.props.webpage} isDoc={true}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -2187,15 +2187,15 @@ var ThumbnailElement = React.createClass({
                 var imgArr = this.props.img;
                 var imgList = imgArr.map(function (img, index) {
                     var imgVal = getValue(img);
-                    if(this.props.document !== undefined) imgVal = context + "/assets/images/icons/" + imgVal + ".png"
+                    if(this.props.isDoc !== undefined && this.props.isDoc == true) imgVal = context + "/assets/images/icons/" + imgVal + ".png";
                     return (<li><img src={imgVal} height="60px" width="75px"/></li>)
-                });
+                }.bind(this));
                 return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
             }
             else {
                 //single result
                 var imgVal = getValue(this.props.img);
-                if(this.props.document !== undefined) imgVal = context + "/assets/images/icons/" + imgVal + ".png"
+                if(this.props.isDoc !== undefined && this.props.isDoc == true) imgVal = context + "/assets/images/icons/" + imgVal + ".png";
                 return <img src={imgVal} height="60px" width="75px"></img>
             }
         }

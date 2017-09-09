@@ -137,7 +137,8 @@ var dictEng = {
     "second_result" : "Second Result",
     "merge_error" : "Only two results can be merged at once",
     "merge_help" : "To merge results, please select two results by clicking on the appropriate icon in the results list.",
-    "merge_icon" : "Merge Automatically"
+    "merge_icon" : "Merge Automatically",
+    "clean_favorites": "Clean Favorites"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -285,7 +286,8 @@ var dictGer = {
     "second_result" : "2. Ergebnis",
     "merge_error" : "Ergebnisse können nur paarweise zusammengeführt werden. Bitte wählen Sie zwei Ergebnisse aus.",
     "merge_help" : "Um zwei Ergebnisse zusammenzuführen, klicken Sie bitte auf den entsprechenden Button in der Ergebnisliste.",
-    "merge_icon" : "Automatisch zusammenführen"
+    "merge_icon" : "Automatisch zusammenführen",
+    "clean_favorites": "Clean Favorites"
 };
 
 window.dictGer = dictGer;

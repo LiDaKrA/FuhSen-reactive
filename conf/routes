@@ -64,3 +64,4 @@ GET    /:graphUid/favorites                                controllers.de.fuhsen
 GET    /:graphUid/favorites/count                          controllers.de.fuhsen.engine.RdfGraphController.countFavorites(graphUid: String)
 POST   /:graphUid/favorites                                controllers.de.fuhsen.engine.RdfGraphController.addToFavorites(graphUid: String, uri: String)
 GET    /:graphUid/export/:item                             controllers.de.fuhsen.engine.RdfGraphController.exportToExcel(graphUid: String, item: String)
+GET    /:graphUid/favorites/clean                          controllers.de.fuhsen.engine.RdfGraphController.cleanFavorites(graphUid: String)

@@ -14,8 +14,41 @@ var FavoritesContainer = React.createClass({
             type: 'GET',
             success: function(response) {
                 var obj = JSON.parse(response);
-                console.log(obj);
-                ref.setState({searchUid: searchUid, data: obj['@graph']});
+                var objGraph = undefined;
+                if (obj["@graph"] !== undefined) {
+                    //alert("It contains Graph");
+                    objGraph = obj["@graph"];
+                }
+                else {
+                    //alert("Looking for id");
+                    //if (obj["@id"] !== undefined) {
+                        //alert("Id was found");
+                        var obj2 = JSON.parse("{ \"@graph\": [" + JSON.stringify(response) + "]}");
+                        objGraph = obj2["@graph"];
+                    //}
+                }
+                console.log("Graph: "+obj);
+                ref.setState({searchUid: searchUid, data: objGraph});
+            },
+            error: function(xhr) {
+                console.log(xhr)
+            }
+        });
+    },
+    handleClean: function ()
+    {
+        var urlString = window.location.href.toString();
+        var parts = urlString.split('=');
+        var searchUid = parts[1];
+        let url = context + '/' + searchUid + '/favorites/clean';
+        var ref = this;
+        $.ajax({
+            url: url,
+            cache: false,
+            type: 'GET',
+            success: function(response) {
+                console.log("Response Cleaning Favorites: "+response);
+                ref.setState({searchUid: searchUid, data: null});
             },
             error: function(xhr) {
                 console.log(xhr)
@@ -46,9 +79,21 @@ var FavoritesContainer = React.createClass({
 
         return (
             <div className="favContainer">
-                <h1>List of Favourites</h1>
-                {results}
+                <div>
+                    <h1>List of Favourites</h1>
+                    {results}
+                </div>
+                <div>
+                    <span className="btn btn-primary btn-file btn-md">
+                    {getTranslation("select_file")} <input type="file"></input>
+                    </span>
+                    &nbsp;&nbsp;
+                    <span className="btn btn-primary btn-file btn-md">
+                    {getTranslation("clean_favorites")} <input type="file" onChange={this.handleClean}></input>
+                    </span>
+                </div>
             </div>
+
         );
     }
 });
