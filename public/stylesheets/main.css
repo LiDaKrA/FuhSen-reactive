@@ -2148,3 +2148,7 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
 .favSlide img{
     width: 75px !important;
 }
+
+.btn-fav{
+    height:40px;
+}
