@@ -2138,5 +2138,13 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
 
 .favContainer{
     margin-left: 25%;
-    width:50%;
+    width:60%;
+}
+
+.favSlide{
+    margin-left: -15px !important;
+}
+
+.favSlide img{
+    width: 75px !important;
 }

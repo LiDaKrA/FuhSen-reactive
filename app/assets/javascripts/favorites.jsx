@@ -14,6 +14,7 @@ var FavoritesContainer = React.createClass({
             type: 'GET',
             success: function(response) {
                 var obj = JSON.parse(response);
+                console.log(obj);
                 var objGraph = undefined;
                 if (obj["@graph"] !== undefined) {
                     //alert("It contains Graph");
@@ -70,7 +71,7 @@ var FavoritesContainer = React.createClass({
                         alias={result["http://vocab.lidakra.de/fuhsen#alias"]}
                         location={result["http://vocab.lidakra.de/fuhsen#location"]}
                         label={result["http://www.w3.org/2000/01/rdf-schema#label"]}
-                        webpage={result["website"]}
+                        webpage={result["url"]}
                         uid ={this.state.searchUid}>
                     </FavouriteResult>
                 );
@@ -109,9 +110,7 @@ var FavouriteResult = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            { this.props.img !== undefined ? <img src={this.props.img} height="60px" width="75px"/> :
-                                <img src={context + "/assets/images/datasources/Unknown.png"} height="60px"
-                                     width="75px"/> }
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -136,10 +135,7 @@ var FavouriteResult = React.createClass({
                                     <p>{getTranslation("country")}: {this.props.country}</p> : null }
                                 { this.props.label !== undefined ? <p>{this.props.label}</p> : null }
                                 { this.props.comment !== undefined ? <p>{this.props.comment}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b>
-                                        <a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>
-                                    : null }
+                                <LinkElement webpage={this.props.webpage} />
                                 { this.props.active_email !== undefined ?
                                     <p><b>{getTranslation("active_email")}:</b> {this.props.active_email}</p> : null }
                                 { this.props.wants !== undefined ?
@@ -163,6 +159,80 @@ var FavouriteResult = React.createClass({
                 </div>
             </li>
         );
+    }
+});
+
+var ThumbnailElement = React.createClass({
+    componentDidMount: function(){
+        $('.flexslider').flexslider({
+            animation: "slide",
+            directionNav: false,
+            animationLoop: false,
+            slideshow: false
+        });
+    },
+    render: function () {
+        if (this.props.img !== undefined) {
+            if (Array.isArray(this.props.webpage)) {
+                //definitely merged entity
+                var imgArr = this.props.img;
+                var imgList = imgArr.map(function (img, index) {
+                    var imgVal = getValue(img);
+                    if(this.props.isDoc !== undefined && this.props.isDoc == true) imgVal = context + "/assets/images/icons/" + imgVal + ".png";
+                    return (<li><img src={imgVal} height="60px" width="75px"/></li>)
+                }.bind(this));
+                return (<div className="flexslider favSlide"><ul className="slides">{imgList}</ul></div>)
+            }
+            else {
+                //single result
+                var imgVal = getValue(this.props.img);
+                if(this.props.isDoc !== undefined && this.props.isDoc == true) imgVal = context + "/assets/images/icons/" + imgVal + ".png";
+                return <img src={imgVal} height="60px" width="75px"></img>
+            }
+        }
+        else {
+            var imgList = {};
+            if (Array.isArray(this.props.webpage)) {
+                var arr = this.props.webpage;
+                imgList = arr.map(function(){
+                    return <li><img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/></li>;
+                });
+                return (<div className="flexslider favSlide"><ul className="slides">{imgList}</ul></div>)
+            }
+            else{
+                return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>
+            }
+        }
+    }
+});
+
+var LinkElement = React.createClass({
+    render: function() {
+        if (this.props.webpage !== undefined) {
+            if(Array.isArray(this.props.webpage)){
+                var webpages = this.props.webpage;
+                var list = webpages.map(function(webpage){
+                    return (<li><a href={webpage} target="_blank">{webpage}</a></li>);
+                });
+                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
+            }
+            else
+                return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>;
+        }
+        else if (this.props.onion_url !== undefined && this.props.onion_url !== null){
+            if(Array.isArray(this.props.onion_url)){
+                var webpages = this.props.onion_url;
+                var ref = this;
+                var list = webpages.map(function(webpage){
+                    return (<li><a href={webpage} target="_blank" onClick={ref.props.onOnionClick.bind(ref,webpage)}>{webpage}</a></li>);
+                });
+                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
+            }
+            else
+                return <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url} target="_blank">{this.props.onion_url}</a></p>;
+        }
+        else
+            return null;
     }
 });
 
