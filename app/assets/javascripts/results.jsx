@@ -984,7 +984,7 @@ var ResultsContainer = React.createClass({
         });
     },
     graphView: function(){
-        var url = "/fuhsen/assets/webvowl/index.html";
+        var url = context + "/assets/webvowl/index.html?uid="+ this.props.searchUid;
         window.open(url,'_blank');
     },
     loadDataFromServer: function (eType, exactMatching, loadmore, mergingEntities) {
