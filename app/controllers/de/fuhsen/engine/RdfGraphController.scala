@@ -1,6 +1,5 @@
 package controllers.de.fuhsen.engine
 
-import java.io.File
 import javax.inject.Inject
 
 import com.typesafe.config.ConfigFactory
@@ -8,20 +7,21 @@ import org.apache.jena.query.{QueryExecutionFactory, QueryFactory}
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.riot.Lang
 import play.Logger
-import play.api.libs.ws.{WSClient, WSRequest}
-import play.api.mvc.{Action, Controller}
-
-import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.{JsError, JsValue, Json}
+import play.api.libs.ws.WSClient
+import play.api.mvc._
 import utils.dataintegration._
 import utils.export.ExcelSink
-import play.api.mvc.Cookie
-import play.api.mvc.Request
+
+import scala.concurrent.Future
 
 /**
   * Created by dcollarana on 7/21/2017
   */
 class RdfGraphController @Inject()(ws: WSClient) extends Controller {
+  implicit private val excelSheetReads = Json.reads[ExcelSheetJson]
+  implicit private val excelRequestReads = Json.reads[GenerateExcelJsonRequest]
 
   def mergeEntities(graphUid: String, uri1: String, uri2: String) = Action {
     Logger.info("Merge Entities")
@@ -34,7 +34,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
             GraphResultsCache.updateModel(graphUid, success.model)
             GraphStoreManager.postModelToStore(getSameAsLinkGraph(uri1, uri2), ConfigFactory.load.getString("store.same.graph.uri"), "application/n-triples", ws)
             Ok
-          case nothigToMerge: NothingToMerge => Ok
+          case _: NothingToMerge => Ok
         }
       case None =>
         InternalServerError("Provided uid has not result model associated.")
@@ -53,7 +53,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
     }
   }
 
-  def getFavorites(graphUid: String) = Action.async { implicit request =>
+  def getFavorites(graphUid: String): Action[AnyContent] = Action.async { implicit request =>
     Logger.info("Get Favorites")
 
     val favouriteUid = getFavouriteUid()
@@ -98,14 +98,21 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
       .map {
         response =>
           val _json = response.json
-          val count = (((_json \ "results" \ "bindings")(0)) \ "COUNT1" \ "value").as[String]
+          val count = ((_json \ "results" \ "bindings")(0) \ "COUNT1" \ "value").as[String]
           Ok(count).withCookies(Cookie("favorites_graph", favouriteUid.toString))
       }
   }
 
-  def exportToExcel(graphUid: String, item: String) = Action {
-    Logger.info(s"Exporting $item to excel from $graphUid")
-    Ok(ExcelSink.generate().toByteArray).withHeaders("" -> "application/x-download", "Content-disposition" -> "attachment; filename=results.xlsx")
+  def exportToExcel(): Action[JsValue] = Action(BodyParsers.parse.json) { implicit request =>
+    val parsedResult = request.body.validate[GenerateExcelJsonRequest]
+    parsedResult.fold(
+      errors => {
+        BadRequest(Json.obj("status" -> "JSON parse error", "message" -> JsError.toJson(errors)))
+      },
+      obj => {
+        Ok(ExcelSink.generate(obj).toByteArray).withHeaders("" -> "application/x-download", "Content-disposition" -> "attachment; filename=results.xlsx")
+      }
+    )
   }
 
   private def getUriModel(uri: String, model: Model) : Model = {
@@ -132,7 +139,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
   }
 
   private def getFavouriteUid()(implicit req: Request[Any]) : String = {
-    if(req.cookies.get("favorites_graph") == null || req.cookies.get("favorites_graph") == None)  {
+    if(req.cookies.get("favorites_graph") == null || req.cookies.get("favorites_graph").isEmpty)  {
       Logger.info("Cookie is created")
       java.util.UUID.randomUUID.toString
     } else {
@@ -140,5 +147,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
       req.cookies.get("favorites_graph").get.value
     }
   }
-
 }
+
+case class GenerateExcelJsonRequest(sheets: Seq[ExcelSheetJson])
+case class ExcelSheetJson(name: String, rows: Seq[Seq[String]])
