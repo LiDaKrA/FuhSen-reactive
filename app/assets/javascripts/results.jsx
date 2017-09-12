@@ -3,6 +3,7 @@ checkLanguage();
 var context = $('body').data('context')
 var mergeEnabled = $('body').data('merge')
 var autoMergeEnabled = $('body').data('automerge')
+var graphViewEnabled = $('body').data('graphview')
 
 function extractQuery(key) {
     var query = window.location.search.substring(1);
@@ -982,6 +983,10 @@ var ResultsContainer = React.createClass({
             }.bind(this)
         });
     },
+    graphView: function(){
+        var url = "/fuhsen/assets/webvowl/index.html";
+        window.open(url,'_blank');
+    },
     loadDataFromServer: function (eType, exactMatching, loadmore, mergingEntities) {
         this.setState({selected: eType, loading: true});
 
@@ -1311,6 +1316,11 @@ var ResultsContainer = React.createClass({
             automaticMerge = <CustomForm id="btn_merge" class_identifier="merge_icon" func={this.mergeAll}/>
         }
 
+        var graphView = null;
+        if(graphViewEnabled){
+            graphView = <CustomForm id="btn_graph" class_identifier="graph_icon" func={this.graphView}/>
+        }
+
         return <div className="col-md-9">
             <div id="results-paginator-options" className="results-paginator-options">
                 <div class="off result-pages-count"></div>
@@ -1337,6 +1347,7 @@ var ResultsContainer = React.createClass({
                         {/*{ this.state.selected === "website" ? <div className="divider"/> : null }*/}
 
                         {automaticMerge}
+                        {graphView}
                         <div className="divider"/>
                         <CustomForm id="btn_view_selector"
     class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
