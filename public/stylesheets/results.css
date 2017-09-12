@@ -22,8 +22,22 @@
 
 .csv_icon {
   background-image: url("../images/icons/csv-icon2.png");
-  width: 25px;
-  height: 25px;
+  width: 24px;
+  height: 24px;
+  padding: 1px;
+}
+
+.merge_icon {
+  background-image: url("../images/icons/merge_icon.png");
+  width: 24px;
+  height: 24px;
+  border: 1px solid #c0c0c0 !important;
+  background-color: #F6F6F6;
+  background-position: center !important;
+}
+
+.csv_icon:hover{
+  padding:1px;
 }
 
 .graph_icon {
@@ -42,6 +56,7 @@
   background-image: url("../images/icons/table_view.png");
   width: 24px;
   height: 24px;
+  padding: 1px;
 }
 .list_icon {
   background-image: url("../images/icons/list_view.png");
@@ -594,6 +609,7 @@ input[type="checkbox"],input[type="radio"] {
 .search-results .results-list .thumbnail img {
   max-width: 100%;
   max-height: 105px;
+  width:75px !important;
   display: block;
   float: none;
   border: 0;
@@ -1672,4 +1688,13 @@ ul.unstyled {
 
 .header-links-child{
   margin-right: 15px;
+}
+
+.links-list{
+  list-style: none;
+  padding:0;
+}
+
+.flexslider .slides img {
+  width: 75px;
 }

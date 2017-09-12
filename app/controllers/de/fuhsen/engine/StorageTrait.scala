@@ -12,6 +12,8 @@ trait StorageTrait {
 
   def saveModel(uid :String, model : Model)
 
+  def updateModel(uid :String, model : Model)
+
   def deleteModel(uid :String)
 
   def getModel(uid :String) : Option[Model]
@@ -39,6 +41,11 @@ object GraphResultsCache extends StorageTrait {
   }
 
   override def getModel(uid: String): Option[Model] = searchList.get(uid)
+
+  override def updateModel(uid: String, model: Model) {
+    deleteModel(uid)
+    saveModel(uid, model)
+  }
 
   override def size(): Integer = {
     searchList.size

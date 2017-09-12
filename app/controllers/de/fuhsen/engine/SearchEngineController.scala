@@ -44,7 +44,6 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
 
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
-
         if (getQueryDate(model) == null || !loadMoreResults.isEmpty) {
           //Search results are not in storage, searching process starting
 
@@ -101,8 +100,6 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
           Logger.info("Results are in cache.")
           Future.successful(Ok(RDFUtil.modelToTripleString(getSubModel(entityType, model, exact), Lang.JSONLD)))
         }
-
-
       case None =>
         Future.successful(InternalServerError("Provided uid has not result model associated."))
     }
@@ -155,12 +152,12 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |SELECT (SAMPLE(?type) AS ?entity_type) (SAMPLE(?key) AS ?entity_key) (COUNT(?type) AS ?count)
              |WHERE {
              |  {
-             |  ?s rdf:type ?type .
-             |  ?type fs:key ?key .
-             |  ?s fs:name ?name .
-             |  ?s fs:source ?source .
-             |  ?s fs:rank ?rank .
-             |  FILTER(?key = "person") .
+             |    ?s rdf:type ?type .
+             |    ?type fs:key ?key .
+             |    ?s fs:name ?name .
+             |    ?s fs:source ?source .
+             |    ?s fs:rank ?rank .
+             |    FILTER(?key = "person") .
              |  }
              |  UNION
              |  {
@@ -178,7 +175,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |    ?s fs:source ?source .
              |    FILTER(?key = "product") .
              |  }
-             |    UNION
+             |  UNION
              |  {
              |    ?s rdf:type ?type .
              |    ?type fs:key ?key .
