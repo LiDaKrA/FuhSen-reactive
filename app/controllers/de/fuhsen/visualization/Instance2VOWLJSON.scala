@@ -27,6 +27,7 @@ object Instance2VOWLJSON {
     "http://vocab.lidakra.de/fuhsen#merge/sourceUri", // same here, same source is not specific enough
     "http://vocab.lidakra.de/fuhsen#url", // same here
     "http://vocab.lidakra.de/fuhsen#source", // same here
+    "http://vocab.lidakra.de/fuhsen#type", // same here
     RDFS.label.getURI
   )
   // Classes that should be ignored in the visualization
