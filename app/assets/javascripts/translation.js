@@ -287,7 +287,7 @@ var dictGer = {
     "merge_error" : "Ergebnisse können nur paarweise zusammengeführt werden. Bitte wählen Sie zwei Ergebnisse aus.",
     "merge_help" : "Um zwei Ergebnisse zusammenzuführen, klicken Sie bitte auf den entsprechenden Button in der Ergebnisliste.",
     "merge_icon" : "Automatisch zusammenführen",
-    "clean_favorites": "Clean Favorites"
+    "clean_favorites": "Saubere Favoriten"
 };
 
 window.dictGer = dictGer;
