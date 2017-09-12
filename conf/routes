@@ -65,3 +65,6 @@ GET    /:graphUid/favorites/count                          controllers.de.fuhsen
 POST   /:graphUid/favorites                                controllers.de.fuhsen.engine.RdfGraphController.addToFavorites(graphUid: String, uri: String)
 GET    /:graphUid/export/:item                             controllers.de.fuhsen.engine.RdfGraphController.exportToExcel(graphUid: String, item: String)
 GET    /:graphUid/favorites/clean                          controllers.de.fuhsen.engine.RdfGraphController.cleanFavorites(graphUid: String)
+
+# Visualization
+GET    /graphVowlJSON                                      controllers.de.fuhsen.visualization.Instance2VOWLJSONController.convertGraph(graphURI: String)
