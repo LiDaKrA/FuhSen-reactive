@@ -204,7 +204,7 @@ object Instance2VOWLJSON {
     val literals = literalNodes map { instanceNode =>
       Json.obj(
         "id" -> JsString(instanceNode.id.toString),
-        "type" -> JsString("owl:Thing") // FIXME: Change to rdfs:Literal when labelling is fixed
+        "type" -> JsString("rdfs:Literal")
       )
     }
     instances ++ literals
