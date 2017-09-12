@@ -1,9 +1,9 @@
 checkLanguage();
 
-var context = $('body').data('context')
-var mergeEnabled = $('body').data('merge')
-var autoMergeEnabled = $('body').data('automerge')
-var graphViewEnabled = $('body').data('graphview')
+var context = $('body').data('context');
+var mergeEnabled = $('body').data('merge');
+var autoMergeEnabled = $('body').data('automerge');
+var graphViewEnabled = $('body').data('graphview');
 
 function extractQuery(key) {
     var query = window.location.search.substring(1);
@@ -52,22 +52,25 @@ var ContainerResults = React.createClass({
             case "de":
                 window.globalDict = dictGer;
                 window.localStorage.lang = "de";
-                this.setState({dictionary: "de"});
+                this.setState({dictionary: "de", newFavouriteAdded: false});
                 globalFlushFilters();
                 break;
             case "en":
                 window.globalDict = dictEng;
                 window.localStorage.lang = "en";
-                this.setState({dictionary: "en"});
+                this.setState({dictionary: "en", newFavouriteAdded: false});
                 globalFlushFilters();
                 break;
         }
     },
     getInitialState: function(){
-        return({searchUid: null})
+        return({searchUid: null, newFavouriteAdded: null})
     },
     setSearchUid: function(id){
         this.setState({searchUid:id});
+    },
+    onAddFavourite: function () {
+        this.setState({newFavouriteAdded: true});
     },
     render: function () {
         return (
@@ -88,7 +91,7 @@ var ContainerResults = React.createClass({
                                     <div className="row">
                                         <div className="col-md-12">
                                             <div className="header-links">
-                                                <FavouritesHeader searchUid={this.state.searchUid}/>
+                                                <FavouritesHeader searchUid={this.state.searchUid} newFavouriteAdded={this.state.newFavouriteAdded}/>
                                                 <LangSwitcher onlangselect={this.setLang}/>
                                             </div>
                                             <SearchForm id_class="form-search-header" keyword={query}/>
@@ -101,7 +104,7 @@ var ContainerResults = React.createClass({
                 </div>
 
                 <div className="row search-results-container no-border">
-                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000} setSearchUid={this.setSearchUid} />
+                    <Trigger url={context + "/engine/api/searches?query=" + query} pollInterval={200000} setSearchUid={this.setSearchUid} onAddFavourite={this.onAddFavourite} />
                 </div>
 
                 <a href="http://www.bdk.de/lidakra" target="_blank" className="no-external-link-icon">
@@ -138,7 +141,7 @@ var Trigger = React.createClass({
     },
     render: function () {
         if (this.state.keyword) {
-            return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid}/>);
+            return ( <Container keyword={this.state.keyword} searchUid={this.state.searchUid} onAddFavourite={this.props.onAddFavourite} />);
         }
         return <LoadingResults/>;
     }
@@ -194,7 +197,7 @@ var Container = React.createClass({
                 console.error(this.props.url, status, err.toString());
 
                 if(err.toString().includes("Not Acceptable")){
-                    alert(getTranslation("no_valid_token_found"))
+                    alert(getTranslation("no_valid_token_found"));
                     window.location.href = "/fuhsen";
                 }else if(err.toString().includes("timeout")){
                     //alert(getTranslation("timeout"));
@@ -308,8 +311,9 @@ var Container = React.createClass({
             cache: false,
             type: 'POST',
             success: function(response) {
+                this.props.onAddFavourite();
                 console.log(response);
-            },
+            }.bind(this),
             error: function(xhr) {
                 console.log("error");
                 console.log(xhr);
@@ -2159,6 +2163,27 @@ var LinkResultsButton = React.createClass({
 var FavouritesHeader= React.createClass({
     getInitialState: function(){
         return({count:0, result: null});
+    },
+    componentWillReceiveProps: function (nextProps) {
+        if (nextProps.newFavouriteAdded === true) {
+            alert(getTranslation("add_favorite_msg"));
+            let url = context + '/' + this.props.searchUid + '/favorites/count';
+            let count = 0;
+            var ref = this;
+            $.ajax({
+                url: url,
+                cache: false,
+                type: 'GET',
+                success: function(response) {
+                    //obj = JSON.parse(response);
+                    count = parseInt(response); //obj["@graph"].length;
+                    ref.setState({count:count, result: null});
+                },
+                error: function(xhr) {
+                }
+            });
+            this.setState({count:count});
+        }
     },
     componentWillMount: function(){
         let url = context + '/' + this.props.searchUid + '/favorites/count';
