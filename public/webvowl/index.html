@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Webvowl test app</title>
+    <title>FuhSen Graph View</title>
     <link rel="stylesheet" type="text/css" href="app/style.css"/>
     <style>
         .ecc-component-webvowl__canvas {
@@ -15,100 +15,121 @@
 <div id="react"></div>
 
 <script src="app/app.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 <script>
-    var test = {
-        "namespace": [],
-        "metrics": {
-            "classCount": 1,
-            "objectPropertyCount": 1,
-            "datatypePropertyCount": 1,
-            "individualCount": 0
-        },
-        "class": [
-            {
-                "id": "1",
-                "type": "owl:Class"
+
+    $(document).ready(function(){
+        var test = {
+            "namespace": [],
+            "metrics": {
+                "classCount": 1,
+                "objectPropertyCount": 1,
+                "datatypePropertyCount": 1,
+                "individualCount": 0
             },
-            {
-                "id": "2",
-                "type": "owl:Class"
-            },
-            {
-                "id": "21",
-                "type": "rdfs:Literal"
-            },
-            {
-                "id": "22",
-                "type": "rdfs:Literal"
-            }
-        ],
-        "classAttribute": [
-            {
-                "id": "1",
-                "label": {
-                    "undefined": "Some person"
-                }
-            },
-            {
-                "id": "2",
-                "label": {
-                    "undefined": "Some company"
-                }
-            },
-            {
-                "id": "21",
-                "label": {
-                    "undefined": "Some",
-                    "IRI-based": "Litera2l"
-                }
-            },
-            {
-                "id": "22",
-                "label": {
-                    "undefined": "person"
-                }
-            }
-        ],
-        "property": [
-            {
-                "id": "11",
-                "type": "owl:objectProperty"
-            },
-            {
-                "id": "12",
-                "type": "owl:datatypeProperty"
-            },
-            {
-                "id": "13",
-                "type": "owl:datatypeProperty"
-            }
-        ],
-        "propertyAttribute": [
-            {
-                "id": "11",
-                "label": {
-                    "undefined": "works in"
+            "class": [
+                {
+                    "id": "1",
+                    "type": "owl:Class"
                 },
-                "domain": "1",
-                "range": "2"
+                {
+                    "id": "2",
+                    "type": "owl:Class"
+                },
+                {
+                    "id": "21",
+                    "type": "rdfs:Literal"
+                },
+                {
+                    "id": "22",
+                    "type": "rdfs:Literal"
+                }
+            ],
+            "classAttribute": [
+                {
+                    "id": "1",
+                    "label": {
+                        "undefined": "Some person"
+                    }
+                },
+                {
+                    "id": "2",
+                    "label": {
+                        "undefined": "Some company"
+                    }
+                },
+                {
+                    "id": "21",
+                    "label": {
+                        "undefined": "Some",
+                        "IRI-based": "Litera2l"
+                    }
+                },
+                {
+                    "id": "22",
+                    "label": {
+                        "undefined": "person"
+                    }
+                }
+            ],
+            "property": [
+                {
+                    "id": "11",
+                    "type": "owl:objectProperty"
+                },
+                {
+                    "id": "12",
+                    "type": "owl:datatypeProperty"
+                },
+                {
+                    "id": "13",
+                    "type": "owl:datatypeProperty"
+                }
+            ],
+            "propertyAttribute": [
+                {
+                    "id": "11",
+                    "label": {
+                        "undefined": "works in"
+                    },
+                    "domain": "1",
+                    "range": "2"
+                },
+                {
+                    "id": "12",
+                    "domain": "1",
+                    "range": "21",
+                    "label": {"undefined": "last name"}
+                },
+                {
+                    "id": "13",
+                    "domain": "1",
+                    "range": "22",
+                    "label": {"undefined": "last name"}
+                }
+            ]
+        };
+
+        var query = window.location.search.substring(1);
+        var pair = query.split("=");
+        var uid = pair[1];
+
+        $.ajax({
+            url: "/fuhsen/graphVowlJSON?graphUid="+uid,
+            dataType: 'json',
+            cache: true,
+            success: function (data) {
+                //alert("Method Success");
+                window.RenderWebVOWLDATA('react', data);
             },
-            {
-                "id": "12",
-                "domain": "1",
-                "range": "21",
-                "label": {"undefined": "last name"}
-            },
-            {
-                "id": "13",
-                "domain": "1",
-                "range": "22",
-                "label": {"undefined": "last name"}
+            error: function (xhr, status, err) {
+                alert("An error happened during graph view construction, displaying demo data.");
+                window.RenderWebVOWLDATA('react', test);
             }
-        ]
-    };
+        });
 
-    window.RenderWebVOWLDATA('react', test);
-
+    });
 </script>
 </body>
 </html>
