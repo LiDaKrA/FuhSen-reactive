@@ -237,10 +237,18 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
+        if(type !== this.state.entityType){
+            this.mergeClear();
+        }
         this.setState({entityType: type, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
     },
     setEntityType: function (type) {
         this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
+    },
+    mergeClear: function() {
+        this.setState({
+            mergeData: {1: null, 2: null}
+        });
     },
     onMergeChange: function(data, cancel){
         let link = this.state.mergeData;
