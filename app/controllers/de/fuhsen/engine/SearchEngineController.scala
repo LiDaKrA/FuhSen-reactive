@@ -142,6 +142,7 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
   def calculateSearchStat(uid: String) = Action {
     GraphResultsCache.getModel(uid) match {
       case Some(model) =>
+        //Logger.info("Model Stat: "+RDFUtil.modelToTripleString(model, Lang.N3))
         val query = QueryFactory.create(
           s"""
              |PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -152,41 +153,37 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |SELECT (SAMPLE(?type) AS ?entity_type) (SAMPLE(?key) AS ?entity_key) (COUNT(?type) AS ?count)
              |WHERE {
              |  {
+             |    ?s a fs:SearchableEntity .
              |    ?s rdf:type ?type .
              |    ?type fs:key ?key .
-             |    ?s fs:name ?name .
-             |    ?s fs:source ?source .
-             |    ?s fs:rank ?rank .
              |    FILTER(?key = "person") .
              |  }
              |  UNION
              |  {
+             |    ?s a fs:SearchableEntity .
              |    ?s rdf:type ?type .
              |    ?type fs:key ?key .
-             |    ?s fs:name ?name .
-             |    ?s fs:source ?source .
              |    FILTER(?key = "organization") .
              |  }
              |  UNION
              |  {
+             |    ?s a fs:SearchableEntity .
              |    ?s rdf:type ?type .
              |    ?type fs:key ?key .
-             |    ?s fs:description ?description .
-             |    ?s fs:source ?source .
              |    FILTER(?key = "product") .
              |  }
              |  UNION
              |  {
+             |    ?s a fs:SearchableEntity .
              |    ?s rdf:type ?type .
              |    ?type fs:key ?key .
-             |    ?s fs:source ?source .
              |    FILTER(?key = "website") .
              |  }
              |   UNION
              |  {
+             |    ?s a fs:SearchableEntity .
              |    ?s rdf:type ?type .
              |    ?type fs:key ?key .
-             |    ?s fs:label ?label .
              |    FILTER(?key = "document") .
              |  }
              |}
