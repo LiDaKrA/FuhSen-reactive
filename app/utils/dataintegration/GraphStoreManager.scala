@@ -21,7 +21,7 @@ object GraphStoreManager {
   }
 
   def postModelToStore(model: String, graph: String, contentType: String = "application/n-triples", ws: WSClient): Future[String] = {
-    Logger.info(s"Pushing ${model.size} triples to favorits to graph: $graph ")
+    Logger.info(s"Pushing ${model.size} triples to graph: $graph ")
     //returning store response
     ws.url(ConfigFactory.load.getString("store.endpoint.service.url"))
         .withQueryString("graph"-> graph)

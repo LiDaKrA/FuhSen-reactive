@@ -32,7 +32,7 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
           case error: MergeError => InternalServerError(error.errorMessage)
           case success: MergeSuccess =>
             GraphResultsCache.updateModel(graphUid, success.model)
-            GraphStoreManager.postModelToStore(getSameAsLinkGraph(uri1, uri2), ConfigFactory.load.getString("store.same.graph.uri"), "application/n-triples", ws)
+            //GraphStoreManager.postModelToStore(getSameAsLinkGraph(uri1, uri2), ConfigFactory.load.getString("store.same.graph.uri"), "application/n-triples", ws)
             Ok
           case _: NothingToMerge => Ok
         }
@@ -78,10 +78,12 @@ class RdfGraphController @Inject()(ws: WSClient) extends Controller {
     val favGraphUri = ConfigFactory.load.getString("store.favorites.graph.uri") + "/" + favouriteUid
 
     Logger.info(s"GraphUid: $favGraphUri")
-    ws.url(ConfigFactory.load.getString("store.endpoint.sparql.url"))
-      .withQueryString("query"-> s"""DELETE { ?s ?p ?o } WHERE { GRAPH <$favGraphUri> {?s ?p ?o . } }""")
-      .withHeaders("Accept"->"application/n-triples")
-      .get.map( r => Ok(r.body) )
+    ws.url(ConfigFactory.load.getString("store.endpoint.service.url"))
+      .withQueryString("graph" -> favGraphUri)
+      .delete.map { r =>
+      Logger.info("Response Delete Graph: "+r.body)
+      Ok(r.body)
+    }
   }
 
   def countFavorites(graphUid: String) = Action.async { implicit request =>

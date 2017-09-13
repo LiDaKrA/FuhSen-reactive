@@ -1,3 +1,11 @@
+function getValue(property) {
+    if(Array.isArray(property)){
+        return property[0];
+    }
+    else
+        return property;
+}
+
 var FavoritesContainer = React.createClass({
     getInitialState: function () {
         return {data: undefined};
@@ -11,24 +19,24 @@ var FavoritesContainer = React.createClass({
         $.ajax({
             url: url,
             cache: false,
+            dataType: 'json',
             type: 'GET',
             success: function(response) {
-                var obj = JSON.parse(response);
-                console.log(obj);
+                var obj = response;
+                //console.log(obj);
                 var objGraph = undefined;
                 if (obj["@graph"] !== undefined) {
-                    //alert("It contains Graph");
                     objGraph = obj["@graph"];
                 }
                 else {
-                    //alert("Looking for id");
-                    //if (obj["@id"] !== undefined) {
-                        //alert("Id was found");
-                        var obj2 = JSON.parse("{ \"@graph\": [" + JSON.stringify(response) + "]}");
-                        objGraph = obj2["@graph"];
-                    //}
+                    if (obj["@id"] !== undefined) {
+                        var data_to_handle = JSON.parse("{ \"@graph\": [" + JSON.stringify(obj) + "]}");
+                        objGraph = data_to_handle["@graph"];
+                    }
+                    else
+                        objGraph = obj["@graph"];
                 }
-                console.log("Graph: "+obj);
+                //console.log("Graph: "+obj);
                 ref.setState({searchUid: searchUid, data: objGraph});
             },
             error: function(xhr) {
