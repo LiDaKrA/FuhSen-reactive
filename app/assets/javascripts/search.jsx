@@ -400,7 +400,7 @@ var FilterCheckList = React.createClass({
             cache: false,
             success: function (list_data) {
                 var processed_data = [];
-                console.log(list_data);
+                //console.log(list_data);
                 for(var k in list_data["@graph"]){
                     var current_label = list_data["@graph"][k]["rdfs:label"]
                     var current_key = list_data["@graph"][k]["fs:key"]
