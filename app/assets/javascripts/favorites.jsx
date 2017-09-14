@@ -164,7 +164,7 @@ var FavoritesContainer = React.createClass({
         return (
             <div className="favContainer">
                 <div>
-                    <h1>List of Favourites</h1>
+                    <h1>{getTranslation("favorites_head")}</h1>
                     {results}
                 </div>
                 <div>
@@ -319,5 +319,4 @@ var LinkElement = React.createClass({
     }
 });
 
-React.render(
-    <FavoritesContainer/>, document.getElementById('skeleton'));
+React.render(<FavoritesContainer/>, document.getElementById('skeleton'));
