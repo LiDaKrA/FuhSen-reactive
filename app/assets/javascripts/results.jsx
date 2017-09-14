@@ -277,7 +277,7 @@ var Container = React.createClass({
             state = false;
         }
         this.setState({
-            mergeData: link
+            mergeData: link, loadMoreResults: false
         });
         return state;
     },
@@ -2229,12 +2229,19 @@ var ThumbnailElement = React.createClass({
             if (Array.isArray(this.props.webpage)) {
                 //definitely merged entity
                 var imgArr = this.props.img;
-                var imgList = imgArr.map(function (img, index) {
-                    var imgVal = getValue(img);
+                if (Array.isArray(imgArr)) {
+                    var imgList = imgArr.map(function (img, index) {
+                        var imgVal = getValue(img);
+                        if(this.props.isDoc !== undefined && this.props.isDoc == true) imgVal = context + "/assets/images/icons/" + imgVal + ".png";
+                        return (<li><img src={imgVal} height="60px" width="75px"/></li>)
+                    }.bind(this));
+                    return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
+                }
+                else {
+                    var imgVal = getValue(imgArr);
                     if(this.props.isDoc !== undefined && this.props.isDoc == true) imgVal = context + "/assets/images/icons/" + imgVal + ".png";
-                    return (<li><img src={imgVal} height="60px" width="75px"/></li>)
-                }.bind(this));
-                return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
+                    return <img src={imgVal} height="60px" width="75px"></img>
+                }
             }
             else {
                 //single result
