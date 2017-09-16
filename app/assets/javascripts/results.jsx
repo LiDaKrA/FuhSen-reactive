@@ -53,13 +53,13 @@ var ContainerResults = React.createClass({
                 window.globalDict = dictGer;
                 window.localStorage.lang = "de";
                 this.setState({dictionary: "de", newFavouriteAdded: false});
-                globalFlushFilters();
+                //globalFlushFilters();
                 break;
             case "en":
                 window.globalDict = dictEng;
                 window.localStorage.lang = "en";
                 this.setState({dictionary: "en", newFavouriteAdded: false});
-                globalFlushFilters();
+                //globalFlushFilters();
                 break;
         }
     },
@@ -241,18 +241,10 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        if(type !== this.state.entityType){
-            this.mergeClear();
-        }
         this.setState({entityType: type, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
     },
     setEntityType: function (type) {
         this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
-    },
-    mergeClear: function() {
-        this.setState({
-            mergeData: {1: null, 2: null}
-        });
     },
     onMergeChange: function(data, cancel){
         let link = this.state.mergeData;
@@ -977,8 +969,7 @@ var ResultsContainer = React.createClass({
             cache: false,
             type: 'GET',
             success: function() {
-                console.log("success");
-                alert("The data was merged");
+                alert(getTranslation("merge_success_message"));
                 this.setState({entityType: this.state.entityType, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: true, mergeData: {1: null, 2: null}});
             }.bind(this),
             error: function(xhr) {

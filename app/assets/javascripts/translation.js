@@ -140,7 +140,8 @@ var dictEng = {
     "merge_icon" : "Merge Automatically",
     "clean_favorites": "Clean Favorites",
     "add_favorite_msg": "New favourite item added",
-    "favorites_head": "List of Favourites"
+    "favorites_head": "List of Favourites",
+    "merge_success_message": "The items were merged"
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -291,7 +292,8 @@ var dictGer = {
     "merge_icon" : "Automatisch zusammenführen",
     "clean_favorites": "Entferne Favoriten",
     "add_favorite_msg": "Neues Favorite hinzugefügt",
-    "favorites_head": "Liste der Favoriten"
+    "favorites_head": "Liste der Favoriten",
+    "merge_success_message": "Die Ergebnisse wurden zusammengeführt"
 };
 
 window.dictGer = dictGer;
