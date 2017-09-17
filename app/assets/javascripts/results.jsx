@@ -241,7 +241,11 @@ var Container = React.createClass({
         } else if (optionSelected === "5") {
             type = "document"
         }
-        this.setState({entityType: type, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
+        if(type !== this.state.entityType){
+            this.setState({entityType: type, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false, mergeData: {1: null, 2: null}});
+        }
+        else
+            this.setState({entityType: type, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
     },
     setEntityType: function (type) {
         this.setState({entityType: type,facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: false});
@@ -287,7 +291,7 @@ var Container = React.createClass({
             type: 'GET',
             success: function() {
                 console.log("success");
-                alert("The data was merged");
+                alert(getTranslation("merge_success_message"));
                 this.setState({entityType: this.state.entityType, facetsDict: {}, orgFacetsDict: {}, loadMoreResults: false, exactMatching: false, loadMergedData: true, mergeData: {1: null, 2: null}});
             }.bind(this),
             error: function(xhr) {
@@ -1680,6 +1684,10 @@ var SnapshotLink = React.createClass({
                 window.open(url);
             });
         }
+        else {
+            var url = context + "/screenshot?url=" + this.props.webpage;
+            window.open(url);
+        }
     },
     render: function () {
         return (
@@ -1696,7 +1704,7 @@ var ProductResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.source} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1715,7 +1723,10 @@ var ProductResultElement = React.createClass({
                                     <p>{getTranslation("price")}: {this.props.price}</p> : null }
                                 { this.props.condition !== undefined ?
                                     <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
-                                <LinkElement webpage={this.props.webpage} />
+                                { this.props.webpage !== undefined ?
+                                    <p><b>{getTranslation("link")}: </b>
+                                        <a href={getValue(this.props.webpage)} target="_blank">{getValue(this.props.webpage)}</a></p>
+                                    : null }
                             </div>
                         </div>
                     </div>
@@ -2242,17 +2253,7 @@ var ThumbnailElement = React.createClass({
             }
         }
         else {
-            var imgList = {};
-            if (Array.isArray(this.props.webpage)) {
-                var arr = this.props.webpage;
-                imgList = arr.map(function(){
-                    return <li><img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/></li>;
-                });
-                return (<div className="flexslider"><ul className="slides">{imgList}</ul></div>)
-            }
-            else{
-                return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>
-            }
+            return <img src={context + "/assets/images/datasources/Unknown.png"} height="60px" width="75px"/>
         }
     }
 });
