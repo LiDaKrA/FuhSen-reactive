@@ -2076,6 +2076,7 @@ a[href^="http"]:not(.no-external-link-icon):not([href^="http://localhost"]):not(
     background-size: 100%;
     opacity: 0.5;
     background-image: url("../images/LiDaKrA_Logo.jpg");
+    z-index: 99 !important;
 }
 
 #contact-mini {
