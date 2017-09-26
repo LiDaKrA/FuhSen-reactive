@@ -141,7 +141,8 @@ var dictEng = {
     "clean_favorites": "Clean Favorites",
     "add_favorite_msg": "New favourite item added",
     "favorites_head": "List of Favourites",
-    "merge_success_message": "The items were merged"
+    "merge_success_message": "The items were merged",
+    "xls_icon" : "Export results to Excel."
 };
 var dictGer = {
     "resultsfor": "Ergebnisse für",
@@ -293,7 +294,8 @@ var dictGer = {
     "clean_favorites": "Entferne Favoriten",
     "add_favorite_msg": "Neues Favorite hinzugefügt",
     "favorites_head": "Liste der Favoriten",
-    "merge_success_message": "Die Ergebnisse wurden zusammengeführt"
+    "merge_success_message": "Die Ergebnisse wurden zusammengeführt",
+    "xls_icon": "Exportiere die Ergebnisse als Excel-Datei."
 };
 
 window.dictGer = dictGer;
