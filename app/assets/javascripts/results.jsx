@@ -1804,7 +1804,7 @@ var ProductResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.source} isDoc={false}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1823,10 +1823,7 @@ var ProductResultElement = React.createClass({
                                     <p>{getTranslation("price")}: {this.props.price}</p> : null }
                                 { this.props.condition !== undefined ?
                                     <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b>
-                                        <a href={getValue(this.props.webpage)} target="_blank">{getValue(this.props.webpage)}</a></p>
-                                    : null }
+                                <LinkElement webpage={this.props.webpage} />
                             </div>
                         </div>
                     </div>
@@ -2364,9 +2361,9 @@ var LinkElement = React.createClass({
             if(Array.isArray(this.props.webpage)){
                 var webpages = this.props.webpage;
                 var list = webpages.map(function(webpage){
-                    return (<li><a href={webpage} target="_blank">{webpage}</a></li>);
+                    return (<li><a key={webpage} href={webpage} target="_blank">{webpage}</a></li>);
                 });
-                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
+                return <div><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></div>;
             }
             else
                 return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>;
@@ -2376,9 +2373,9 @@ var LinkElement = React.createClass({
                 var webpages = this.props.onion_url;
                 var ref = this;
                 var list = webpages.map(function(webpage){
-                    return (<li><a href={webpage} target="_blank" onClick={ref.props.onOnionClick.bind(ref,webpage)}>{webpage}</a></li>);
+                    return (<li><a key={webpage} href={webpage} target="_blank" onClick={ref.props.onOnionClick.bind(ref,webpage)}>{webpage}</a></li>);
                 });
-                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
+                return <div><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></div>;
             }
             else
                 return <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url} target="_blank">{this.props.onion_url}</a></p>;
