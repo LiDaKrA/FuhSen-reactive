@@ -20,7 +20,7 @@
   display:inline-block;
 }
 
-.csv_icon {
+.csv_icon, .xls_icon {
   background-image: url("../images/icons/csv-icon2.png");
   width: 24px;
   height: 24px;
@@ -36,7 +36,7 @@
   background-position: center !important;
 }
 
-.csv_icon:hover{
+.csv_icon:hover, .xls_icon:hover{
   padding:1px;
 }
 

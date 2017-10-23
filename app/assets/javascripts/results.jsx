@@ -4,6 +4,7 @@ var context = $('body').data('context');
 var mergeEnabled = $('body').data('merge');
 var autoMergeEnabled = $('body').data('automerge');
 var graphViewEnabled = $('body').data('graphview');
+var exportType = $('body').data('export');
 
 function extractQuery(key) {
     var query = window.location.search.substring(1);
@@ -966,6 +967,95 @@ var ResultsContainer = React.createClass({
             view: this.state.view
         });
     },
+    fileDownload: function(url, data){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function () {
+            if (this.status === 200) {
+                var filename = "";
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    var matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                }
+                var type = xhr.getResponseHeader('Content-Type');
+
+                var blob = new Blob([this.response], { type: type });
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+                } else {
+                    var URL = window.URL || window.webkitURL;
+                    var downloadUrl = URL.createObjectURL(blob);
+
+                    if (filename) {
+                        // use HTML5 a[download] attribute to specify filename
+                        var a = document.createElement("a");
+                        // safari doesn't support this yet
+                        if (typeof a.download === 'undefined') {
+                            window.location = downloadUrl;
+                        } else {
+                            a.href = downloadUrl;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                        }
+                    } else {
+                        window.location = downloadUrl;
+                    }
+
+                    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                }
+            }
+        };
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(data);
+    },
+    excelFunction: function () {
+        var JSONData = JSON.stringify(this.state.resultsData);
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+        var ReportTitle = "Current results in XLSX format"
+        var headers_set = new Set();
+        for (var i = 0; i < arrData.length; i++) {
+            if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
+                for (var header in arrData[i]) {
+                    headers_set.add(header)
+                }
+            }
+        }
+        let headers = Array.from(headers_set);
+        let jsonObject = {
+            sheets: [
+                {
+                    name: ReportTitle,
+                    rows: [headers]
+                }
+            ]
+        };
+        for (var i = 0; i < arrData.length; i++) {
+            var len = headers.length
+            if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
+                var values = [];
+                var count = 0;
+                for (var index in headers) {
+                    var value = arrData[i][headers[index]]
+                    if( value === undefined || value === 'null' || typeof value === 'object') value=''
+                    values.push(value.toString());
+                    count++;
+                    if(count > len - 1){
+                        jsonObject.sheets[0].rows.push(values);
+                        values = [];
+                        count = 0;
+                    }
+                }
+            }
+        }
+        var url = context + '/conversion/exportToExcel';
+        var data = JSON.stringify(jsonObject);
+        this.fileDownload(url, data);
+    },
     mergeAll: function(){
         let mergeUrl = context + '/' + this.props.searchUid + '/merge';
         $.ajax({
@@ -1320,6 +1410,16 @@ var ResultsContainer = React.createClass({
             graphView = <CustomForm id="btn_graph" class_identifier="graph_icon" func={this.graphView}/>
         }
 
+        var exp = {
+          icon : 'csv_icon',
+          func : this.csvFunction
+        };
+
+        if(exportType === 'xlsx'){
+            exp.icon = 'xls_icon';
+            exp.func = this.excelFunction
+        }
+
         return <div className="col-md-9">
             <div id="results-paginator-options" className="results-paginator-options">
                 <div class="off result-pages-count"></div>
@@ -1352,7 +1452,7 @@ var ResultsContainer = React.createClass({
     class_identifier={(this.state.view == "list" ? "table" : "list") + "_icon"}
     func={this.toggleResultsView}/>
                         <div className="divider"/>
-                        <CustomForm id="btn_csv" class_identifier="csv_icon" func={this.csvFunction}/>
+                        <CustomForm id="btn_csv" class_identifier={exp.icon} func={exp.func}/>
                     </div>
                 </div>
             </div>
@@ -1704,7 +1804,7 @@ var ProductResultElement = React.createClass({
                 <div className="summary row">
                     <div className="thumbnail-wrapper col-md-2">
                         <div className="thumbnail">
-                            <ThumbnailElement img={this.props.img} webpage={this.props.source} isDoc={false}/>
+                            <ThumbnailElement img={this.props.img} webpage={this.props.webpage} isDoc={false}/>
                         </div>
                     </div>
                     <div className="summary-main-wrapper col-md-8">
@@ -1723,10 +1823,7 @@ var ProductResultElement = React.createClass({
                                     <p>{getTranslation("price")}: {this.props.price}</p> : null }
                                 { this.props.condition !== undefined ?
                                     <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
-                                { this.props.webpage !== undefined ?
-                                    <p><b>{getTranslation("link")}: </b>
-                                        <a href={getValue(this.props.webpage)} target="_blank">{getValue(this.props.webpage)}</a></p>
-                                    : null }
+                                <LinkElement webpage={this.props.webpage} />
                             </div>
                         </div>
                     </div>
@@ -2264,9 +2361,9 @@ var LinkElement = React.createClass({
             if(Array.isArray(this.props.webpage)){
                 var webpages = this.props.webpage;
                 var list = webpages.map(function(webpage){
-                    return (<li><a href={webpage} target="_blank">{webpage}</a></li>);
+                    return (<li><a key={webpage} href={webpage} target="_blank">{webpage}</a></li>);
                 });
-                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
+                return <div><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></div>;
             }
             else
                 return <p><b>{getTranslation("link")}: </b><a href={this.props.webpage} target="_blank">{this.props.webpage}</a></p>;
@@ -2276,9 +2373,9 @@ var LinkElement = React.createClass({
                 var webpages = this.props.onion_url;
                 var ref = this;
                 var list = webpages.map(function(webpage){
-                    return (<li><a href={webpage} target="_blank" onClick={ref.props.onOnionClick.bind(ref,webpage)}>{webpage}</a></li>);
+                    return (<li><a key={webpage} href={webpage} target="_blank" onClick={ref.props.onOnionClick.bind(ref,webpage)}>{webpage}</a></li>);
                 });
-                return <p><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></p>;
+                return <div><b>{getTranslation("link")}: <ul className="links-list">{list}</ul></b></div>;
             }
             else
                 return <p><b>{getTranslation("link")}: </b><a href={this.props.onion_url} target="_blank">{this.props.onion_url}</a></p>;
