@@ -27,6 +27,8 @@ if(query.match("^\"") && query.match("\"$")){
 }
 
 function compareRank(a, b) {
+    if(Array.isArray(a.url)) return -1;
+    if(Array.isArray(b.url)) return 1;
     if (a["fs:rank"] < b["fs:rank"])
         return -1;
     if (a["fs:rank"] > b["fs:rank"])
@@ -259,10 +261,20 @@ var Container = React.createClass({
                 link[1]= data;
             }
             else if(link[1] && !link[2]){
-                link[2]= data;
+                if(link[1].uri === data.uri){
+                    alert(getTranslation("merge_error_self"));
+                }
+                else{
+                    link[2]= data;
+                }
             }
             else if(link[2] && !link[1]){
-                link[1]= data;
+                if(link[2].uri === data.uri){
+                    alert(getTranslation("merge_error_self"));
+                }
+                else{
+                    link[1]= data;
+                }
             }
             else{
                 alert(getTranslation("merge_error"));
