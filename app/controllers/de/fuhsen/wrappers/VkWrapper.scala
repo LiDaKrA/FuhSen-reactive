@@ -17,18 +17,18 @@ package controllers.de.fuhsen.wrappers
 
 import com.typesafe.config.ConfigFactory
 import controllers.de.fuhsen.wrappers.dataintegration.{SilkTransformableTrait, SilkTransformationTask}
+import controllers.de.fuhsen.wrappers.security.{RestApiOAuth2Trait, TokenManager}
 
 /**
   * Wrapper for the VK REST API.
   */
-class VkWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
+class VkWrapper extends RestApiWrapperTrait with SilkTransformableTrait with RestApiOAuth2Trait {
 
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map(
     "count" -> "5",
     "fields" -> ConfigFactory.load.getString("vk.search.fields"),
-    "v" -> "5.8",
-    "access_token" -> ConfigFactory.load.getString("vk.search.api_key"))
+    "v" -> "5.8")
 
   /** Headers that should be added to the request. */
   override def headersParams: Map[String, String] = Map()
@@ -45,6 +45,12 @@ class VkWrapper extends RestApiWrapperTrait with SilkTransformableTrait {
     * Returns the globally unique URI String of the source that is wrapped. This is used to track provenance.
     */
   override def sourceLocalName: String = "vk"
+
+  //RestApiOAuth2Trait implementation:
+  override def oAuth2ClientKey : String =  ConfigFactory.load.getString("vk.app.key")
+  override def oAuth2ClientSecret : String =  ConfigFactory.load.getString("vk.app.key")
+  override def oAuth2AccessToken : String = {if (!TokenManager.getAccessTokenByProvider("vk").isEmpty) TokenManager.getAccessTokenByProvider("vk").get.access_token else ""}
+
 
   /** SILK Transformation Trait **/
   override def silkTransformationRequestTasks = Seq(
