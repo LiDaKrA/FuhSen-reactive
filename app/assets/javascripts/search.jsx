@@ -45,10 +45,13 @@ var ContainerSearch = React.createClass({
                         </div>
                     </link>
                     <div className="row">
-                        <div className="col-md-6 text-center">
+                        <div className="col-md-4 text-center">
                             <AccessTokenForm social_network="facebook" />
                         </div>
-                        <div className="col-md-6 text-center">
+                        <div className="col-md-4 text-center">
+                            <AccessTokenForm social_network="vk" />
+                        </div>
+                        <div className="col-md-4 text-center">
                             <AccessTokenForm social_network="xing" />
                         </div>
                     </div>
@@ -259,6 +262,7 @@ var SearchForm = React.createClass({
         typesForSource["occrp"] = ["document"];
         typesForSource["tor2web"]  = ["website"];
         typesForSource["elasticsearch"]  = ["website"];
+        typesForSource["vk"] = ["person"];
         //typesForSource["pipl"] = ["person"];
 
         return { showSourcesTypesDiv: false, sources: [] , types: [],typesForSource: typesForSource,allowed_types: []};
@@ -595,7 +599,25 @@ var AccessTokenForm = React.createClass({
         return {token_life_length: null};
     },
     componentDidMount: function () {
+        this.checkHash();
         this.loadTokenLifeLength();
+    },
+    checkHash: function () {
+        if (window.location.hash) {
+            var hash = window.location.hash.substring(1);
+            if(hash.includes("access_token") && this.props.social_network === "vk"){
+                $.ajax({
+                    url: context + "/" + this.props.social_network + "/code2tokenV?" + hash,
+                    success: function (lifelength) {
+                        this.setState({token_life_length: lifelength["life_length"]});
+                    }.bind(this),
+                    error: function (xhr, status, err) {
+                        console.error(this.props.url, status, err.toString());
+                    }.bind(this)
+                });
+
+            }
+        }
     },
     render: function() {
 
@@ -625,6 +647,13 @@ var AccessTokenForm = React.createClass({
                 return (
                     <div align="center">
                         <p>{social_net_upper_case+getTranslation("validtkfound")} {this.state.token_life_length} {getTranslation("hours")}.
+                        </p>
+                    </div> )
+            }
+            else if(this.state.token_life_length >= 1.2e15) {
+                return (
+                    <div align="center">
+                        <p>{social_net_upper_case+getTranslation("validtkforever")} .
                         </p>
                     </div> )
             }

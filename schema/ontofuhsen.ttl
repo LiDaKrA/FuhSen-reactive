@@ -152,6 +152,13 @@ fs:ElasticSearch	rdf:type	fs:InformationSource;
 			        fs:finds "website";
 			        fs:key "elasticsearch" .
 
+fs:Vk rdf:type fs:InformationSource;
+                    rdfs:label 	"Vk";
+                    fs:help_url "https://en.wikipedia.org/wiki/VK_(social_networking)"@en,
+                                "https://de.wikipedia.org/wiki/Vk.com"@de;
+                    fs:finds "person";
+                    fs:key "vk" .
+
 #fs:Pipl         	rdf:type	fs:InformationSource;
 #			        rdfs:label 	"pipl";
 #			        fs:help_url "http://pipl.org"@en,

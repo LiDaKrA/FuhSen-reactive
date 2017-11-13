@@ -27,6 +27,7 @@ import play.api.mvc.{Action, Controller}
 import views.html.index
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
 import play.api.libs.oauth.ConsumerKey
 import play.api.libs.oauth.ServiceInfo
 import play.api.libs.oauth.OAuth
@@ -51,6 +52,14 @@ class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
           +"&redirect_uri="+ConfigFactory.load.getString("facebook.login.redirect.uri")
           +"&response_type=code"
           +"&scope="+ConfigFactory.load.getString("facebook.scope"))
+      case "vk" =>
+        Redirect(ConfigFactory.load.getString("vk.request_code.url")
+          +"?client_id="+ConfigFactory.load.getString("vk.app.key")
+          +"&redirect_uri="+ConfigFactory.load.getString("vk.login.redirect.uri")
+          +"&display=popup"
+          +"&response_type=token"
+          +"&scope=offline"
+          +"&v="+ConfigFactory.load.getString("vk.api.version"))
       case "xing" =>
         XING.retrieveRequestToken(ConfigFactory.load.getString("xing.login.redirect.uri")) match {
           case Right(t) => {
@@ -59,6 +68,12 @@ class TokenRetrievalController @Inject() (ws: WSClient) extends Controller{
           case Left(e) => throw e
         }
     }
+  }
+
+  def code2tokenV(wrapperId: String, access_token: String, expires_in: Long, user_id: String) = Action.async{ request =>
+    val token = Token(wrapperId, access_token, "token", Long.MaxValue, System.currentTimeMillis()/1000)
+    TokenManager.addToken(token)
+    Future{Ok(index.render())}
   }
 
   def code2token(code:String, wrapperId:String) = Action.async{ request =>
