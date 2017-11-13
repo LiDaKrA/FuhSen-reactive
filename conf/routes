@@ -39,6 +39,7 @@ GET     /ldw/restApiWrapper                                 controllers.de.fuhse
 
 GET     /:wrapperId/getToken                                controllers.de.fuhsen.wrappers.security.TokenRetrievalController.getToken(wrapperId: String)
 GET     /:wrapperId/code2token                              controllers.de.fuhsen.wrappers.security.TokenRetrievalController.code2token(code:String, wrapperId: String)
+GET     /:wrapperId/code2tokenV                             controllers.de.fuhsen.wrappers.security.TokenRetrievalController.code2tokenV(wrapperId: String, access_token: String, expires_in: Long, user_id: String)
 GET     /:wrapperId/code2tokenX                             controllers.de.fuhsen.wrappers.security.TokenRetrievalController.code2tokenX(wrapperId: String, oauth_token:String, oauth_verifier:String)
 GET     /:wrapperId/getTokenLifeLength                      controllers.Application.TokenLifeLength(wrapperId: String)
 
