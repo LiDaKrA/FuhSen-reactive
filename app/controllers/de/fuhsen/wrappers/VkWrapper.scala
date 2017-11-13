@@ -26,7 +26,7 @@ class VkWrapper extends RestApiWrapperTrait with SilkTransformableTrait with Res
 
   /** Query parameters that should be added to the request. */
   override def queryParams: Map[String, String] = Map(
-    "count" -> "5",
+    "count" -> "100",
     "fields" -> ConfigFactory.load.getString("vk.search.fields"),
     "v" -> "5.8")
 
