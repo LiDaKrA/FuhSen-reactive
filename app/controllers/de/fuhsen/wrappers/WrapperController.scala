@@ -501,7 +501,9 @@ object WrapperController {
     //pipl
     new PiplWrapper(),
     //vk
-    new VkWrapper()
+    new VkWrapper(),
+    //darknetmarkets
+    new DarknetMarketsWrapper()
   )
   val wrapperMap: Map[String, RestApiWrapperTrait] = wrappers.map { wrapper =>
     (wrapper.sourceLocalName, wrapper)

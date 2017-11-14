@@ -340,6 +340,10 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |?p fs:priceLabel ?price .
              |?p fs:condition ?condition .
              |?p fs:source ?source .
+             |?p fs:category ?category .
+             |?p fs:marketplace ?marketplace .
+             |?p fs:vendor ?vendor .
+             |?p fs:totalRevenue ?totalRevenue .
              |}
              |WHERE {
              |?p rdf:type gr:ProductOrService .
@@ -349,6 +353,10 @@ class SearchEngineController @Inject()(ws: WSClient) extends Controller {
              |OPTIONAL { ?p fs:url ?url } .
              |OPTIONAL { ?p fs:location ?location } .
              |OPTIONAL { ?p fs:country ?country } .
+             |OPTIONAL { ?p fs:category ?category } .
+             |OPTIONAL { ?p fs:marketplace ?marketplace } .
+             |OPTIONAL { ?p fs:vendor ?vendor } .
+             |OPTIONAL { ?p fs:totalRevenue ?totalRevenue } .
              |OPTIONAL { ?p fs:priceLabel ?price } .
              |OPTIONAL { ?p fs:condition ?condition } .
              ${if (exact) {s"""|?p rdfs:label ?exact_name .
