@@ -290,6 +290,52 @@ var Container = React.createClass({
         });
         return state;
     },
+    fileDownload: function(url, data, customFileName){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function () {
+            if (this.status === 200) {
+                var filename = "";
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    var matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+                }
+                var type = xhr.getResponseHeader('Content-Type');
+
+                var blob = new Blob([this.response], { type: type });
+                if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                    window.navigator.msSaveBlob(blob, filename);
+                } else {
+                    var URL = window.URL || window.webkitURL;
+                    var downloadUrl = URL.createObjectURL(blob);
+
+                    if (filename) {
+                        // use HTML5 a[download] attribute to specify filename
+                        var a = document.createElement("a");
+                        // safari doesn't support this yet
+                        if (typeof a.download === 'undefined') {
+                            window.location = downloadUrl;
+                        } else {
+                            a.href = downloadUrl;
+                            a.download = customFileName;
+                            document.body.appendChild(a);
+                            a.click();
+                        }
+                    } else {
+                        window.location = downloadUrl;
+                    }
+
+                    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+                }
+            }
+        };
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(data);
+    },
     onMerge: function(){
       let data = this.state.mergeData;
       console.log(data);
@@ -343,7 +389,8 @@ var Container = React.createClass({
                                    orgFacetsDict = {this.state.orgFacetsDict}
                                    onExactMatchingChange = {this.onExactMatchingChange}
                                    exactMatching={this.state.exactMatching}
-                                   loadMoreResults={this.state.loadMoreResults}/>
+                                   loadMoreResults={this.state.loadMoreResults}
+                                   fileDownload={this.fileDownload}/>
                     </div>
                     <div className="row">
                         <LinkResults data={this.state.mergeData} onLinkCancel={this.onMergeChange} merge={this.onMerge}/>
@@ -364,7 +411,8 @@ var Container = React.createClass({
                                       setEntityType = {this.setEntityType}
                                       onAddLink = {this.onMergeChange}
                                       onFavourite = {this.onFavourite}
-                                      loadMergedData={this.state.loadMergedData}/>
+                                      loadMergedData={this.state.loadMergedData}
+                                      fileDownload={this.fileDownload}/>
                 </div>
             </div>);
         }
@@ -504,6 +552,90 @@ var FacetList = React.createClass({
             view: this.state.view
         });
     },
+    facets2Excel: function () {
+        var JSONData = JSON.stringify(this.state.data);
+        var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
+        var ReportTitle = "Facets Summary";
+        var FacetTitle = "Facets Values";
+        var CSV = '';
+        var headers_set = new Set();
+
+        //Results Header
+        for (var i = 0; i < arrData.length; i++) {
+            if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
+                for (var header in arrData[i]) {
+                    headers_set.add(header)
+                }
+            }
+        }
+        headers_set.delete("http://vocab.lidakra.de/fuhsen/hasFacet");
+        let headers = Array.from(headers_set);
+        let jsonObject = {
+            sheets: [
+                {
+                    name: ReportTitle,
+                    rows: [headers]
+                },
+                {
+                    name: FacetTitle,
+                    rows: [['@facet_name', '@facet_value', '@count']]
+                }
+            ]
+        };
+
+
+        //Inserting Results and Facets Rows
+        for (var i = 0; i < arrData.length; i++) {
+            var len = headers.length
+            if (this.state.selectedChecks === undefined || this.state.selectedChecks === null || this.state.selectedChecks.length == 0 || this.state.selectedChecks.indexOf(i) > -1) {
+                var values = [];
+                var count = 0;
+
+                //Results Rows
+                for (var index in headers) {
+                    var value = arrData[i][headers[index]]
+                    if( value === undefined || value === 'null' || typeof value === 'object') value=''
+                    values.push(value.toString());
+                    count++;
+                    if(count > len - 1){
+                        jsonObject.sheets[0].rows.push(values);
+                        values = [];
+                        count = 0;
+                    }
+                }
+
+
+                //Facets Rows
+                var facet_values = arrData[i]["http://vocab.lidakra.de/fuhsen/hasFacet"];
+                var facet_name = arrData[i]["http://vocab.lidakra.de/fuhsen#facetLabel"];
+
+                if (Object.prototype.toString.call(facet_values) === '[object Array]') {
+                    for (var j = 0; j < facet_values.length; j++) {
+                        var value_number_pair = facet_values[j].split("^")
+                        for (var k = 0; k < value_number_pair.length; k=k+2) {
+                            jsonObject.sheets[1].rows.push([facet_name, value_number_pair[k], value_number_pair[k+1]]);
+                        }
+                    }
+                } else {
+                    var value_number_pair = facet_values.split("^")
+                    for (var k = 0; k < value_number_pair.length; k=k+2) {
+                        jsonObject.sheets[1].rows.push([facet_name, value_number_pair[k], value_number_pair[k+1]]);
+                    }
+                }
+            }
+        }
+
+        var url = context + '/conversion/exportToExcel';
+        var resultFile = this.props.fileDownload(url, JSON.stringify(jsonObject), 'Facets_Data.xlsx');
+
+        this.setState({
+            resultsData: this.state.resultsData,
+            selected: this.state.selected,
+            loading: this.state.loading,
+            underDev: false,
+            view: this.state.view
+        });
+    },
     render: function () {
         if (this.state.data && this.state.data !== undefined) {
             var _searchUid = this.props.searchUid;
@@ -547,11 +679,16 @@ var FacetList = React.createClass({
 
             const tooltipStyle = { display: this.state.hover ? 'block' : 'none'}
 
+            var facetExportFunction = this.facets2CSV;
+            if(exportType === 'xlsx'){
+                facetExportFunction = this.facets2Excel;
+            }
+
             return (
                 <div id="facetsDiv" className="facets-container hidden-phone">
                     <div className="facets-head">
                         <h3>{getTranslation("resultfilters")}
-                            <span className="export-facets-btn">(<a href="#" title={getTranslation("export_facets")} onClick={this.facets2CSV} className="no-external-link-icon">{getTranslation("export")}</a>)</span>
+                            <span className="export-facets-btn">(<a href="#" title={getTranslation("export_facets")} onClick={facetExportFunction} className="no-external-link-icon">{getTranslation("export")}</a>)</span>
                         </h3>
                         <ContextualHelp type="contextual-help help" message={getTranslation("facets_help")}/>
                     </div>
@@ -979,52 +1116,6 @@ var ResultsContainer = React.createClass({
             view: this.state.view
         });
     },
-    fileDownload: function(url, data){
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', url, true);
-        xhr.responseType = 'arraybuffer';
-        xhr.onload = function () {
-            if (this.status === 200) {
-                var filename = "";
-                var disposition = xhr.getResponseHeader('Content-Disposition');
-                if (disposition && disposition.indexOf('attachment') !== -1) {
-                    var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                    var matches = filenameRegex.exec(disposition);
-                    if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
-                }
-                var type = xhr.getResponseHeader('Content-Type');
-
-                var blob = new Blob([this.response], { type: type });
-                if (typeof window.navigator.msSaveBlob !== 'undefined') {
-                    // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
-                    window.navigator.msSaveBlob(blob, filename);
-                } else {
-                    var URL = window.URL || window.webkitURL;
-                    var downloadUrl = URL.createObjectURL(blob);
-
-                    if (filename) {
-                        // use HTML5 a[download] attribute to specify filename
-                        var a = document.createElement("a");
-                        // safari doesn't support this yet
-                        if (typeof a.download === 'undefined') {
-                            window.location = downloadUrl;
-                        } else {
-                            a.href = downloadUrl;
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                        }
-                    } else {
-                        window.location = downloadUrl;
-                    }
-
-                    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
-                }
-            }
-        };
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(data);
-    },
     excelFunction: function () {
         var JSONData = JSON.stringify(this.state.resultsData);
         var arrData = typeof JSONData != 'object' ? JSON.parse(JSONData) : JSONData;
@@ -1066,7 +1157,7 @@ var ResultsContainer = React.createClass({
         }
         var url = context + '/conversion/exportToExcel';
         var data = JSON.stringify(jsonObject);
-        this.fileDownload(url, data);
+        this.props.fileDownload(url, data, "Results.xlsx");
     },
     mergeAll: function(){
         let mergeUrl = context + '/' + this.props.searchUid + '/merge';
