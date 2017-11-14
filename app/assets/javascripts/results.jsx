@@ -1664,7 +1664,7 @@ var ResultsList = React.createClass({
                     <ProductResultElement
                         uri = {result["@id"]}
                         id = {result["fs:id"]}
-                        img={result["fs:image"]}
+                        img={result.image !== undefined ? result.image : result["fs:image"]}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
                         location={result["fs:location"]}

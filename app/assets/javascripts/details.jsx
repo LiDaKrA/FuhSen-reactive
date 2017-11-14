@@ -38,7 +38,7 @@ var ProfileContainer = React.createClass({
             <div className="container">
                 <div className="row" id="header-main-row">
                  <div id ="profile_container">
-                            <ProfileHeader image={this.state.data !== undefined ? this.state.data["image"] : undefined} name={this.state.data !== undefined ? this.state.data["fs:title"] : undefined}/>
+                            <ProfileHeader image={this.state.data !== undefined ? (this.state.data["image"] !== undefined ? this.state.data["image"] : this.state.data["fs:image"]) : undefined} name={this.state.data !== undefined ? this.state.data["fs:title"] : undefined}/>
                             <ProfileBody data = {this.state.data}/>
                     </div>
                 </div>
