@@ -499,7 +499,9 @@ object WrapperController {
     //Elastic Search
     new ElasticSearchWrapper(),
     //pipl
-    new PiplWrapper()
+    new PiplWrapper(),
+    //vk
+    new VkWrapper()
   )
   val wrapperMap: Map[String, RestApiWrapperTrait] = wrappers.map { wrapper =>
     (wrapper.sourceLocalName, wrapper)
