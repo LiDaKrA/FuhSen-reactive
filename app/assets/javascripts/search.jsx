@@ -263,6 +263,7 @@ var SearchForm = React.createClass({
         typesForSource["tor2web"]  = ["website"];
         typesForSource["elasticsearch"]  = ["website"];
         typesForSource["vk"] = ["person"];
+        typesForSource["darknetmarkets"] = ["product"];
         //typesForSource["pipl"] = ["person"];
 
         return { showSourcesTypesDiv: false, sources: [] , types: [],typesForSource: typesForSource,allowed_types: []};

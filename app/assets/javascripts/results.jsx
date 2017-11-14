@@ -1611,6 +1611,7 @@ var ResultsList = React.createClass({
 
         var already_crawled = this.props.crawled;
         var resultsNodes = resultsNodesSorted.map(function (result,idx) {
+            console.log(result);
             if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultElement
@@ -1663,13 +1664,17 @@ var ResultsList = React.createClass({
                     <ProductResultElement
                         uri = {result["@id"]}
                         id = {result["fs:id"]}
-                        img={result.image}
+                        img={result["fs:image"]}
                         title={result["fs:title"]}
                         source={result["fs:source"]}
                         location={result["fs:location"]}
                         country={result["fs:country"]}
                         price={result["fs:priceLabel"]}
                         condition={result["fs:condition"]}
+                        marketplace={result["fs:marketplace"]}
+                        category={result["fs:category"]}
+                        vendor={result["fs:vendor"]}
+                        totalRevenue={result["totalRevenue"]}
                         webpage={result.url}
                         jsonResult = {result}
                         uid = {this.props.searchUid}
@@ -1926,6 +1931,14 @@ var ProductResultElement = React.createClass({
                                     <p>{getTranslation("price")}: {this.props.price}</p> : null }
                                 { this.props.condition !== undefined ?
                                     <p>{getTranslation("condition")}: {this.props.condition}</p> : null }
+                                { this.props.marketplace !== undefined ?
+                                    <p>{getTranslation("marketplace")}: {this.props.marketplace}</p> : null }
+                                { this.props.category !== undefined ?
+                                    <p>{getTranslation("category")}: {this.props.category}</p> : null }
+                                { this.props.vendor !== undefined ?
+                                    <p>{getTranslation("vendor")}: {this.props.vendor}</p> : null }
+                                { this.props.totalRevenue !== undefined ?
+                                    <p>{getTranslation("totalRevenue")}: {this.props.totalRevenue}</p> : null }
                                 <LinkElement webpage={this.props.webpage} />
                             </div>
                         </div>

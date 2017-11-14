@@ -158,6 +158,12 @@ fs:Vk rdf:type fs:InformationSource;
                                 "https://de.wikipedia.org/wiki/Vk.com"@de;
                     fs:finds "person";
                     fs:key "vk" .
+fs:DarknetMarkets rdf:type fs:InformationSource;
+                    rdfs:label 	"Darknet Market Products";
+                    fs:help_url "https://en.wikipedia.org/wiki/Darknet_market"@en,
+                                "https://de.wikipedia.org/wiki/Darknet-Markt"@de;
+                    fs:finds "product";
+                    fs:key "darknetmarkets" .
 
 #fs:Pipl         	rdf:type	fs:InformationSource;
 #			        rdfs:label 	"pipl";
