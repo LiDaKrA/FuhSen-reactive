@@ -2248,9 +2248,13 @@ var LoadingResults = React.createClass({
                         {getTranslation("searching_too_long")}<button>{getTranslation("cancel_search_btn")}</button>
                     </div>
                     <div>
-                    <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoading.gif"}
-                         alt="Loading results"/>
-                    <h2><img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}</h2>
+                        <br/>
+                        <br/>
+                        <br/>
+                        { /* <img className="img-responsive center-block" src={context + "/assets/images/ajaxLoader.gif"} alt="Loading results"/> */ }
+                        <h2>
+                            <img src={context + "/assets/images/ajaxLoader.gif"}/>{getTranslation("bittewarten")}
+                        </h2>
                     </div>
                 </div>
             </div>
