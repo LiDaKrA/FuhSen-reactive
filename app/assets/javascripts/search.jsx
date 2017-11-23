@@ -45,13 +45,13 @@ var ContainerSearch = React.createClass({
                         </div>
                     </link>
                     <div className="row">
-                        <div className="col-md-4 text-center">
+                        <div className="col-md-6 text-center">
                             <AccessTokenForm social_network="facebook" />
                         </div>
-                        <div className="col-md-4 text-center">
+                        {/*<div className="col-md-4 text-center">
                             <AccessTokenForm social_network="vk" />
-                        </div>
-                        <div className="col-md-4 text-center">
+                        </div>*/}
+                        <div className="col-md-6 text-center">
                             <AccessTokenForm social_network="xing" />
                         </div>
                     </div>
@@ -262,8 +262,8 @@ var SearchForm = React.createClass({
         typesForSource["occrp"] = ["document"];
         typesForSource["tor2web"]  = ["website"];
         typesForSource["elasticsearch"]  = ["website"];
-        typesForSource["vk"] = ["person"];
-        typesForSource["darknetmarkets"] = ["product"];
+        //typesForSource["vk"] = ["person"];
+        //typesForSource["darknetmarkets"] = ["product"];
         //typesForSource["pipl"] = ["person"];
 
         return { showSourcesTypesDiv: false, sources: [] , types: [],typesForSource: typesForSource,allowed_types: []};
