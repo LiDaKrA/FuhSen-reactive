@@ -503,7 +503,9 @@ object WrapperController {
     //vk
     new VkWrapper(),
     //darknetmarkets
-    new DarknetMarketsWrapper()
+    new DarknetMarketsWrapper(),
+    //Google Custom Search
+    new GoogleCustomSearchWrapper()
   )
   val wrapperMap: Map[String, RestApiWrapperTrait] = wrappers.map { wrapper =>
     (wrapper.sourceLocalName, wrapper)

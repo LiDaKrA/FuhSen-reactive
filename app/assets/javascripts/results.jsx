@@ -338,7 +338,6 @@ var Container = React.createClass({
     },
     onMerge: function(){
       let data = this.state.mergeData;
-      console.log(data);
       let mergeUrl = context + '/' + this.props.searchUid + '/merge';
         $.ajax({
             url: mergeUrl,
@@ -1187,8 +1186,9 @@ var ResultsContainer = React.createClass({
         if (loadmore)
             loadMore = "&loadMoreResults=true";
 
-        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + eType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + exactMatching + loadMore;
 
+
+        var searchUrl = context + "/engine/api/searches/" + this.props.searchUid + "/results?entityType=" + eType + "&sources=" + sourcesDirty + "&types=" + typesDirty + "&exact=" + exactMatching + loadMore;
         $.ajax({
             url: searchUrl,
             dataType: 'json',
@@ -1611,7 +1611,6 @@ var ResultsList = React.createClass({
 
         var already_crawled = this.props.crawled;
         var resultsNodes = resultsNodesSorted.map(function (result,idx) {
-            console.log(result);
             if (result["@type"] === "foaf:Person") {
                 return (
                     <PersonResultElement
@@ -1703,8 +1702,9 @@ var ResultsList = React.createClass({
                     return (
                         <WebResultElement
                             uri = {result["@id"]}
-                            img={context + "/assets/images/datasources/TorLogo.png"}
+                            img={context + "/assets/images/datasources/" + result["fs:source"] + ".png"}
                             onion_url={result["url"]}
+                            title = {result["fs:label"]}
                             comment={result["fs:comment"]}
                             source={result["fs:source"]}
                             onion_label={result["rdfs:label"]}
@@ -1851,7 +1851,7 @@ var WebResultElement = React.createClass({
                     <div className="summary-main-wrapper col-md-8">
                         <div className="summary-main">
                             <h2 className="title">
-                                {this.props.onion_url}
+                                {this.props.title || this.props.onion_url}
                             </h2>
                             <div className="subtitle">
                                 <p><b>Web title</b>: {this.props.onion_label}</p>
