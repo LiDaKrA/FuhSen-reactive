@@ -101,7 +101,7 @@ var dictEng = {
     "interests": "Interests",
     "server_error": "There was an error during search or no active tokens where available... Please try again!",
     "no_results": "No results found.",
-    "tor_websites": "Onion web sites",
+    "tor_websites": "Onion / Web sites",
     "select_file": "Select file",
     "tor_invalid_websites": "The web site you are trying to crawl seems to be not online anymore. Crawling Job not started.",
     "invalid_website": "The website is offline",
