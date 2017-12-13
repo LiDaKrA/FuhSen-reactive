@@ -15,9 +15,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 object GraphStoreManager {
 
   def postModelToStore(model: Model, graph: String, ws: WSClient): Future[String] = {
-
-    val n3Model = RDFUtil.modelToTripleString(model, Lang.N3)
-    postModelToStore(n3Model, graph, "text/rdf+n3", ws)
+    val n3Model = RDFUtil.modelToTripleString(model, Lang.NTRIPLES)
+    postModelToStore(n3Model, graph, "application/n-triples", ws)
   }
 
   def postModelToStore(model: String, graph: String, contentType: String = "application/n-triples", ws: WSClient): Future[String] = {
