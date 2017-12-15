@@ -150,13 +150,15 @@ class WrapperController @Inject()(ws: WSClient) extends Controller {
       wrapper match {
         case oAuthWrapper: RestApiOAuthTrait =>
           Logger.info("Using JAVA impl to call the rest api")
-          val bodyJava = new Application().javaRequest(oAuthWrapper, request.url)
-          if (bodyJava.startsWith("NOT OK")) {
-            val erroDetails = bodyJava.split("-")
-            Future(ApiError(erroDetails(1).toInt,erroDetails(2)))
+          val bodyJava = Future(new Application().javaRequest(oAuthWrapper, request.url))
+          bodyJava.map{ b =>
+            if (b.startsWith("NOT OK")) {
+              val erroDetails = b.split("-")
+              ApiError(erroDetails(1).toInt,erroDetails(2))
+            }
+            else
+              ApiSuccess(b)
           }
-          else
-            Future(ApiSuccess(bodyJava))
         case _ => Future(ApiError(INTERNAL_SERVER_ERROR, "Not correct wrapper definition"))
       }
     }
