@@ -1,3 +1,5 @@
+var context = $('body').data('context');
+
 function getValue(property) {
     if(Array.isArray(property)){
         return property[0];

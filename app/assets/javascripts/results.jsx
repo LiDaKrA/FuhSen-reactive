@@ -1871,7 +1871,7 @@ var WebResultElement = React.createClass({
                             <div>
                                 <div className="crawl_thumbnail">
                                     {this.state.validTORSite ? this.props.crawled == true || this.state.crawlJobCreated === true || this.state.jobStatus !== null ?
-                                        {labels} : <button
+                                        labels : <button
                                             className="crawl_icon" onClick={this.onCreateCrawlJobClick} title={getTranslation("createCrawlJob")}></button> : <span> {getTranslation("invalid_website")} </span> }
                                 </div>
                             </div>
@@ -2266,7 +2266,7 @@ var LinkResults = React.createClass({
     getInitialState: function(){
       return {link: null}
     },
-    getThumbnail(data){
+    getThumbnail: function(data){
       if(data.img)
           return data.img;
       if(data.extension){
