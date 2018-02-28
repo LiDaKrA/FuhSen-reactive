@@ -484,8 +484,12 @@ var FacetList = React.createClass({
         }
 
         headers_set.delete("http://vocab.lidakra.de/fuhsen/hasFacet")
-
-        let headers = Array.from(headers_set);
+        //convert set to array
+        let headers = [];
+        headers_set.forEach(function(value) {
+            headers.push(value);
+        });
+        //build csv
         for (var i = 0; i < headers.length; i++) CSV += headers[i] + ',';
         CSV = CSV.slice(0, -1);
         CSV += '\r\n';
@@ -569,7 +573,11 @@ var FacetList = React.createClass({
             }
         }
         headers_set.delete("http://vocab.lidakra.de/fuhsen/hasFacet");
-        let headers = Array.from(headers_set);
+        //convert set to array
+        let headers = [];
+        headers_set.forEach(function(value) {
+            headers.push(value);
+        });
         let jsonObject = {
             sheets: [
                 {
@@ -1054,7 +1062,12 @@ var ResultsContainer = React.createClass({
             }
         }
 
-        let headers = Array.from(headers_set);
+        //convert set to array
+        let headers = [];
+        headers_set.forEach(function(value) {
+            headers.push(value);
+        });
+        //build csv
         for (var i = 0; i < headers.length; i++) CSV += headers[i] + ',';
         CSV = CSV.slice(0, -1);
         CSV += '\r\n';
@@ -1087,27 +1100,20 @@ var ResultsContainer = React.createClass({
         //this will remove the blank-spaces from the title and replace it with an underscore
         fileName += ReportTitle.replace(/ /g, "_");
 
-        //Initialize file format you want csv or xls
-        var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
-
-        // Now the little tricky part.
-        // you can use either>> window.open(uri);
-        // but this will not work in some browsers
-        // or you will not get the correct file extension
-
-        //this trick will generate a temp <a /> tag
-        var link = document.createElement("a");
-        link.href = uri;
-
-        //set the visibility hidden so it will not effect on your web-layout
-        link.style = "visibility:hidden";
-        link.download = fileName + ".csv";
-
-        //this part will append the anchor tag and remove it after automatic click
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(new Blob([CSV], { type: 'text/csv;charset=utf-8;' }), fileName + ".csv");
+        }
+        else{
+            //Initialize file format you want csv or xls
+            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+            var link = document.createElement("a");
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = fileName + ".csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
         this.setState({
             resultsData: this.state.resultsData,
             selected: this.state.selected,
@@ -1128,7 +1134,11 @@ var ResultsContainer = React.createClass({
                 }
             }
         }
-        let headers = Array.from(headers_set);
+        //convert set to array
+        let headers = [];
+        headers_set.forEach(function(value) {
+            headers.push(value);
+        });
         let jsonObject = {
             sheets: [
                 {
